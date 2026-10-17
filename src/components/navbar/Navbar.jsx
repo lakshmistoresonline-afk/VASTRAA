@@ -1,36 +1,175 @@
-import React, { Fragment, useContext, useState } from 'react'
-import {BsFillCloudSunFill} from 'react-icons/bs'
-import {FiSun} from 'react-icons/fi'
-import { Link } from 'react-router-dom'
-import MyContext from '../../context/data/myContext'
-import { Dialog, Transition } from '@headlessui/react'
-import { RxCross2 } from 'react-icons/rx'
-import { useSelector } from 'react-redux'
-import cardImage from './myPic.jpg';
-
-
-
-
+import React, { Fragment, useContext, useState } from 'react';
+import { BsFillCloudSunFill } from 'react-icons/bs';
+import { FiSun, FiShoppingBag, FiSearch, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import myContext from '../../context/data/myContext';
+import { Dialog, Transition } from '@headlessui/react';
+import { useSelector } from 'react-redux';
 
 const Navbar = () => {
-  const context = useContext(MyContext);
-  const {mode,toggleMode} = context;
+  const context = useContext(myContext);
+  const { mode, toggleMode, storeInfo, searchKey, setSearchKey } = context;
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem('user'));
-  // console.log(user.user.email);
+  const cartItems = useSelector((state) => state.cart);
 
-  const cartItems = useSelector((state) => state.cart)
-
-  const logout = ()=>{
-    localStorage.clear('user');
-    window.location.href = '/signup';
-}
+  const logout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   return (
-    <div className='bg-white sticky top-0 z-50'>
+    <div className="sticky top-0 z-50">
+      {/* Top Announcement Bar */}
+      <div className="maroon-gradient text-[#E5C158] text-xs py-2 px-4 border-b border-[#C5A46D]/30">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2 font-medium">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>📍 {storeInfo?.location || "Round West, Thrissur, Kerala"}</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-6 text-xs">
+            <span className="flex items-center gap-1">
+              <FiCheckCircle className="text-emerald-400" /> Live Google Photos Silk Catalogue Sync
+            </span>
+            <a
+              href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#E5C158] hover:underline flex items-center gap-1 font-bold"
+            >
+              📞 Enquiry: {storeInfo?.phone || "+91 97469 98785"}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Glassmorphic Navbar */}
+      <header className="glass-card shadow-lg transition-colors">
+        <nav className="container mx-auto px-4 lg:px-8">
+          <div className="flex h-20 items-center justify-between gap-4">
+
+            {/* Mobile Menu Button */}
+            <button
+              type="button"
+              className="p-2.5 rounded-xl text-gray-700 dark:text-gray-200 lg:hidden hover:bg-gray-100 dark:hover:bg-gray-800"
+              onClick={() => setOpen(true)}
+            >
+              <FiMenu className="w-6 h-6" />
+            </button>
+
+            {/* Store Brand Logo */}
+            <Link to="/" className="flex items-center gap-3.5 group">
+              <div className="bg-gradient-to-br from-[#800020] to-[#4A0012] text-[#E5C158] w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-serif font-black shadow-md border-2 border-[#C5A46D] group-hover:scale-105 transition-transform">
+                V
+              </div>
+              <div>
+                <h1 className="text-2xl font-serif font-extrabold text-[#24211F] dark:text-white leading-tight tracking-tight">
+                  {storeInfo?.name || "Vastraa"}
+                </h1>
+                <p className="text-[10px] font-sans uppercase tracking-widest text-[#800020] dark:text-[#E5C158] font-bold">
+                  {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Round West, Thrissur
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation Category Pills */}
+            <div className="hidden lg:flex items-center space-x-1 bg-[#FAF7F0] dark:bg-gray-800/80 p-1.5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700/50">
+              <Link
+                to="/"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+              >
+                Home
+              </Link>
+              <Link
+                to="/allproducts"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+              >
+                Silk Sarees
+              </Link>
+              <Link
+                to="/allproducts"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+              >
+                Catalogues A–I
+              </Link>
+              <Link
+                to="/order"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+              >
+                Enquiries & Orders
+              </Link>
+
+              {user?.user?.email === "admin@vastraa.com" || user?.user?.email === "admin@lakshmistores.com" || user?.user?.email === "aliali@gmail.com" ? (
+                <Link
+                  to="/dashboard"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#800020] text-amber-100 shadow-md hover:bg-[#67001a] transition-all"
+                >
+                  Admin Portal
+                </Link>
+              ) : null}
+            </div>
+
+            {/* Right Actions */}
+            <div className="flex items-center space-x-3">
+              {/* Quick Search Trigger */}
+              <div className="hidden md:flex items-center bg-[#FAF7F0] dark:bg-gray-800 rounded-xl px-3 py-2 border border-[#E9E1D5] dark:border-gray-700">
+                <FiSearch className="text-gray-400 w-4 h-4 mr-2" />
+                <input
+                  type="text"
+                  value={searchKey}
+                  onChange={(e) => setSearchKey(e.target.value)}
+                  placeholder="Search 3,250+ silk sarees..."
+                  className="bg-transparent text-xs outline-none text-[#24211F] dark:text-white placeholder:text-gray-400 w-36 focus:w-48 transition-all"
+                />
+              </div>
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleMode}
+                className="p-2.5 text-gray-600 dark:text-gray-300 hover:text-[#800020] dark:hover:text-[#E5C158] transition-colors rounded-xl bg-[#FAF7F0] dark:bg-gray-800 border border-[#E9E1D5] dark:border-gray-700"
+                title="Toggle Dark/Light Mode"
+              >
+                {mode === 'light' ? <FiSun className="w-4 h-4" /> : <BsFillCloudSunFill className="w-4 h-4 text-amber-400" />}
+              </button>
+
+              {/* Shopping Bag */}
+              <Link
+                to="/cart"
+                className="relative flex items-center gap-2 bg-[#800020] hover:bg-[#67001a] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
+              >
+                <FiShoppingBag className="w-4 h-4 text-[#C5A46D]" />
+                <span className="hidden sm:inline">Bag</span>
+                <span className="bg-[#C5A46D] text-gray-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                  {cartItems.length}
+                </span>
+              </Link>
+
+              {user ? (
+                <button
+                  onClick={logout}
+                  className="hidden sm:inline-block text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-rose-600 px-3 py-2"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="hidden sm:inline-block border border-[#800020] text-[#800020] dark:border-[#E5C158] dark:text-[#E5C158] hover:bg-[#800020] hover:text-white text-xs font-bold px-4 py-2 rounded-xl transition-all"
+                >
+                  Admin
+                </Link>
+              )}
+            </div>
+
+          </div>
+        </nav>
+      </header>
+
+      {/* Mobile Drawer */}
       <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="relative z-40 lg:hidden" onClose={setOpen}>
+        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setOpen}>
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -40,10 +179,10 @@ const Navbar = () => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
           </Transition.Child>
 
-          <div className="fixed inset-0 z-40 flex">
+          <div className="fixed inset-0 z-50 flex">
             <Transition.Child
               as={Fragment}
               enter="transition ease-in-out duration-300 transform"
@@ -53,177 +192,59 @@ const Navbar = () => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-12 shadow-xl" style={{ backgroundColor: mode === 'dark' ? 'rgb(40, 44, 52)' : '', color: mode === 'dark' ? 'white' : '', }}>
-                <div className="flex px-4 pb-2 pt-28">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-[#FAF7F0] dark:bg-gray-900 pb-12 shadow-2xl">
+                <div className="flex px-5 pb-4 pt-6 justify-between items-center border-b border-[#E9E1D5] dark:border-gray-800">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-[#800020] text-[#E5C158] w-10 h-10 rounded-lg flex items-center justify-center font-serif font-bold border border-[#C5A46D]">
+                      V
+                    </div>
+                    <div>
+                      <span className="text-lg font-serif font-bold text-[#24211F] dark:text-white block leading-tight">Vastraa</span>
+                      <span className="text-[10px] text-[#77716A]">A Co-Brand of Lakshmi Stores</span>
+                    </div>
+                  </div>
                   <button
                     type="button"
-                    className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
+                    className="p-2 text-gray-500 hover:text-gray-700"
                     onClick={() => setOpen(false)}
                   >
-                    <span className="sr-only">Close menu</span>
-                    <RxCross2 />
+                    <FiX className="w-6 h-6" />
                   </button>
                 </div>
-                <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-                  
-                  <Link to={'/allproducts'} className="text-sm font-medium text-gray-900 " style={{ color: mode === 'dark' ? 'white' : '', }}>
-                    All Products
-                  </Link>
-                  {user?
-                  <div className="flow-root">
-                  <Link to={'/order'} style={{ color: mode === 'dark' ? 'white' : '', }} className="-m-2 block p-2 font-medium text-gray-900">
-                    Order
-                  </Link>
-                </div>:""}
 
-                 {user?.user?.email === "aliali@gmail.com" ?
-                  <div className="flow-root">
-                  <Link to={'/dashboard'} className="-m-2 block p-2 font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '', }}>
-                    admin
+                <div className="space-y-3 px-5 py-6 text-sm font-semibold">
+                  <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-[#24211F] dark:text-white">
+                    🏠 Home
                   </Link>
-                </div>:""}
+                  <Link to="/allproducts" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-[#24211F] dark:text-white">
+                    👗 Silk Sarees
+                  </Link>
+                  <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-[#24211F] dark:text-white">
+                    📩 Enquiries & Orders
+                  </Link>
+                  {user?.user?.email === "admin@vastraa.com" || user?.user?.email === "admin@lakshmistores.com" || user?.user?.email === "aliali@gmail.com" ? (
+                    <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#800020] text-amber-100 font-bold">
+                      🔑 Admin Dashboard
+                    </Link>
+                  ) : null}
 
-                  {user? 
-                  <div className="flow-root" >
-                  <a onClick={logout} className="-m-2 block p-2 font-medium text-gray-900 cursor-pointer" style={{ color: mode === 'dark' ? 'white' : '', }}>
-                    Logout
-                  </a>
-                </div>:""}
-                  <div className="flow-root">
-                    <Link to={'/'} className="-m-2 block p-2 font-medium text-gray-900 cursor-pointer">
-                      <img
-                        className="inline-block w-10 h-10 rounded-full"
-                        src="https://overreacted.io/static/profile-pic-c715447ce38098828758e525a1128b87.jpg"
-                        alt="Dan_Abromov" />                                        </Link>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 px-4 py-6">
-                  <a href="#" className="-m-2 flex items-center p-2">
-                    <img
-                      src="img/indiaflag.png"
-                      alt=""
-                      className="block h-auto w-5 flex-shrink-0"
-                    />
-                    <span className="ml-3 block text-base font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '', }}>INDIA</span>
-                    <span className="sr-only">, change currency</span>
-                  </a>
+                  {user ? (
+                    <button onClick={logout} className="block w-full text-left py-2.5 px-3 text-rose-600 font-bold">
+                      🚪 Logout
+                    </button>
+                  ) : (
+                    <Link to="/login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl text-[#800020] font-bold border border-[#800020] text-center mt-4">
+                      Admin Sign In
+                    </Link>
+                  )}
                 </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
         </Dialog>
       </Transition.Root>
-
-      <header className="relative bg-white">
-        <p className="flex h-10 items-center justify-center bg-pink-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8" style={{ backgroundColor: mode === 'dark' ? 'rgb(62 64 66)' : '', color: mode === 'dark' ? 'white' : '', }}>
-          Get free delivery on orders over ₹300
-        </p>
-
-        <nav aria-label="Top" className="bg-gray-100 px-4 sm:px-6 lg:px-8 shadow-xl " style={{ backgroundColor: mode === 'dark' ? '#282c34' : '', color: mode === 'dark' ? 'white' : '', }}>
-          <div className="">
-            <div className="flex h-16 items-center">
-              <button
-                type="button"
-                className="rounded-md bg-white p-2 text-gray-400 lg:hidden"
-                onClick={() => setOpen(true)} style={{ backgroundColor: mode === 'dark' ? 'rgb(80 82 87)' : '', color: mode === 'dark' ? 'white' : '', }}
-              >
-                <span className="sr-only">Open menu</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-
-              </button>
-
-              {/* Logo */}
-              <div className="ml-4 flex lg:ml-0">
-                <Link to={'/'} className='flex'>
-                  <div className="flex ">
-                    <h1 className=' text-2xl font-bold text-black  px-2 py-1 rounded' style={{ color: mode === 'dark' ? 'white' : '', }}>E-Pak</h1>
-                    
-                  </div>
-                </Link>
-              </div>
-
-              <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-
-                  <Link to={'/allproducts'} className="text-sm font-medium text-gray-700 " style={{ color: mode === 'dark' ? 'white' : '', }}>
-                    All Products
-                  </Link>
-                  {user ? "":<Link to={'/login'} className="text-sm font-medium text-gray-700 " style={{ color: mode === 'dark' ? 'white' : '', }}>
-                    sign in
-                  </Link>}
-                  {user?.user?.email === "aliali@gmail.com"  ? "":
-                  <Link to={'/order'} className="text-sm font-medium text-gray-700 " style={{ color: mode === 'dark' ? 'white' : '', }}>
-                  Order
-                </Link>}
-
-                  
-                  {user?.user?.email === "aliali@gmail.com" ? 
-                  <Link to={'/dashboard'} className="text-sm font-medium text-gray-700 " style={{ color: mode === 'dark' ? 'white' : '', }}>
-                  Admin
-                </Link>:""}
-                  
-
-                  {user ?
-                  <a onClick={logout} className="text-sm font-medium text-gray-700 cursor-pointer  " style={{ color: mode === 'dark' ? 'white' : '', }}>
-                    Logout
-                </a>: ""}
-                </div>
-
-                <div className="hidden lg:ml-8 lg:flex">
-                  <a href="#" className="flex items-center text-gray-700 ">
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg"
-                      alt=""
-                      className="block h-auto w-5 flex-shrink-0"
-                    />
-                    <span className="ml-3 block text-sm font-medium" style={{ color: mode === 'dark' ? 'white' : '', }}>PAK</span>
-                  </a>
-                </div>
-                <div className="hidden lg:ml-8 lg:flex">
-                  <a href="#" className="flex items-center text-gray-700 ">
-                    <img
-                      className="inline-block w-10 h-10 rounded-full"
-                      src={cardImage}
-                      alt="Ali" />
-                  </a>
-                </div>
-
-                {/* Search */}
-                <div className="flex lg:ml-6">
-                  <button className='' onClick={toggleMode}>
-                    {/* <MdDarkMode size={35} style={{ color: mode === 'dark' ? 'white' : '' }} /> */}
-                    {mode === 'light' ?
-                      (<FiSun className='' size={30} />
-                      ) : 'dark' ?
-                        (<BsFillCloudSunFill size={30} />
-                        ) : ''}
-                  </button>
-                </div>
-
-                {/* Cart */}
-                <div className="ml-4 flow-root lg:ml-6">
-                  {user?.user?.email === "aliali@gmail.com" ? "" :
-                  <Link to={'/cart'} className="group -m-2 flex items-center p-2" style={{ color: mode === 'dark' ? 'white' : '', }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                  </svg>
-
-                  <span className="ml-2 text-sm font-medium text-gray-700 group-" style={{ color: mode === 'dark' ? 'white' : '', }}>{cartItems.length}</span>
-                  <span className="sr-only">items in cart, view bag</span>
-                </Link>}
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
-      </header>
     </div>
-  
-  )
-}
+  );
+};
 
-
-export default Navbar
+export default Navbar;

@@ -1,50 +1,37 @@
-import React, { useContext } from 'react'
-import Layout from '../../components/layout/Layout'
-import MyContext from '../../context/data/myContext'
-import HeroSection from '../../components/heroSection/HeroSection'
-import Filter from '../../components/filter/Filter'
-import ProductCard from '../../components/productCard/ProductCard'
-import Testimonial from '../../components/testimonial/Testimonial'
-import Track from '../../components/track/Track'
-import Footer from '../../components/footer/Footer'
-import { useDispatch, useSelector } from 'react-redux'
-import { addToCart, deleteFromCart } from '../../redux/cartSlice'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import Layout from '../../components/layout/Layout';
+import HeroSection from '../../components/heroSection/HeroSection';
+import CategoryExplorer from '../../components/categoryExplorer/CategoryExplorer';
+import Filter from '../../components/filter/Filter';
+import ProductCard from '../../components/productCard/ProductCard';
+import Track from '../../components/track/Track';
+import Testimonial from '../../components/testimonial/Testimonial';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
-  const dispatch = useDispatch();
-  const cartItem = useSelector((state) => state.cart);
-  console.log(cartItem);
-
-  const addCart = ()=>{
-    dispatch(addToCart("Shirt"));
-  }
-
-  const deleteCart = ()=>{
-    dispatch(deleteFromCart("shirt"));
-  }
-
   return (
-    <Layout >
-      
+    <Layout>
       <HeroSection />
+
+      <CategoryExplorer />
 
       <Filter />
 
-      <ProductCard />
-      <div className='flex justify-center -mt-10 mb-4' >
-        <Link to={'/allproducts'} >
-        <button className='bg-gray-300 px-5 py-2 rounded-xl' >See More</button>
+      <ProductCard limit={8} />
+
+      <div className="flex justify-center -mt-6 mb-12">
+        <Link to="/allproducts">
+          <button className="bg-[#800020] hover:bg-[#67001a] text-white font-bold px-8 py-3 rounded-xl shadow-lg transition-all text-xs uppercase tracking-wider">
+            Explore All Live Saree Catalogues →
+          </button>
         </Link>
       </div>
 
       <Track />
 
       <Testimonial />
-
-      {/* <Footer /> */}
     </Layout>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

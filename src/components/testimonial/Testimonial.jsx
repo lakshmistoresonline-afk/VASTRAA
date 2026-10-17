@@ -1,48 +1,53 @@
-import React, { useContext } from 'react'
-import myContext from '../../context/data/myContext'
+import React from 'react';
 
 function Testimonial() {
-    const context = useContext(myContext)
-    const { mode } = context
-    return (
-        <div style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }}>
-            <section className="text-gray-600 body-font mb-10">
-                <div className="container px-5 py-10 mx-auto">
-                    <h1 className=' text-center text-3xl font-bold text-black' style={{color: mode === 'dark' ? 'white' : ''}}>Testimonial</h1>
-                    <h2 className=' text-center text-2xl font-semibold mb-10' style={{color: mode === 'dark' ? 'white' : ''}}>What our <span className=' text-pink-500'>customers</span> are saying</h2>
-                    <div className="flex flex-wrap -m-4">
-                        <div className="lg:w-1/3 lg:mb-0 mb-6 p-4">
-                            <div className="h-full text-center">
-                                <img alt="testimonial" className="w-20 h-20 mb-8 object-cover object-top rounded-full inline-block border-2 border-gray-200 bg-gray-100" src="../../../public/user-3.jpeg" />
-                                <p style={{color: mode === 'dark' ? 'white' : ''}} className="leading-relaxed">Edison bulb retro cloud bread echo park, helvetica stumptown taiyaki taxidermy 90's cronut +1 kinfolk. Single-origin coffee ennui shaman taiyaki vape DIY tote bag drinking vinegar cronut adaptogen squid fanny pack vaporware.</p>
-                                <span className="inline-block h-1 w-10 rounded bg-pink-500 mt-6 mb-4" />
-                                <h2 style={{color: mode === 'dark' ? '#ff4162' : ''}} className="text-gray-900 font-medium title-font tracking-wider text-sm uppercase">Mehtab Ali</h2>
-                                <p style={{color: mode === 'dark' ? 'white' : ''}} className="text-gray-500">React Developer</p>
-                            </div>
-                        </div>
-                        <div className="lg:w-1/3 lg:mb-0 mb-6 p-4">
-                            <div className="h-full text-center">
-                                <img alt="testimonial" className="w-20 h-20 mb-8 object-cover object-center rounded-full inline-block border-2 border-gray-200 bg-gray-100" src="../../../public/user-1.png" />
-                                <p  style={{color: mode === 'dark' ? 'white' : ''}}className="leading-relaxed">Edison bulb retro cloud bread echo park, helvetica stumptown taiyaki taxidermy 90's cronut +1 kinfolk. Single-origin coffee ennui shaman taiyaki vape DIY tote bag drinking vinegar cronut adaptogen squid fanny pack vaporware.</p>
-                                <span className="inline-block h-1 w-10 rounded bg-pink-500 mt-6 mb-4" />
-                                <h2 style={{color: mode === 'dark' ? '#ff4162' : ''}} className="text-gray-900 font-medium title-font tracking-wider text-sm uppercase">Ayat Ali</h2>
-                                <p style={{color: mode === 'dark' ? 'white' : ''}} className="text-gray-500">UI Develeoper</p>
-                            </div>
-                        </div>
-                        <div className="lg:w-1/3 lg:mb-0 p-4">
-                            <div className="h-full text-center">
-                                <img alt="testimonial" className="w-20 h-20 mb-8 object-cover object-center rounded-full inline-block border-2 border-gray-200 bg-gray-100" src="../../../public/user-2.png" />
-                                <p style={{color: mode === 'dark' ? 'white' : ''}} className="leading-relaxed">Edison bulb retro cloud bread echo park, helvetica stumptown taiyaki taxidermy 90's cronut +1 kinfolk. Single-origin coffee ennui shaman taiyaki vape DIY tote bag drinking vinegar cronut adaptogen squid fanny pack vaporware.</p>
-                                <span className="inline-block h-1 w-10 rounded bg-pink-500 mt-6 mb-4" />
-                                <h2 style={{color: mode === 'dark' ? '#ff4162' : ''}} className="text-gray-900 font-medium title-font tracking-wider text-sm uppercase">John</h2>
-                                <p  style={{color: mode === 'dark' ? 'white' : ''}}className="text-gray-500">Web developer</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+  return (
+    <section className="py-12 bg-gray-50 dark:bg-gray-900 transition-colors">
+      <div className="container px-5 mx-auto max-w-5xl">
+        <div className="text-center mb-10">
+          <span className="text-[#800020] dark:text-[#E5C158] font-semibold text-xs uppercase tracking-widest block mb-1">
+            Customer Appreciation
+          </span>
+          <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">
+            Trusted Across Thrissur & Beyond
+          </h2>
+          <div className="w-16 h-1 bg-[#800020] mx-auto my-3 rounded"></div>
         </div>
-    )
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 text-center flex flex-col justify-between">
+            <p className="text-xs text-gray-600 dark:text-gray-300 italic mb-4 leading-relaxed">
+              "We bought our daughter's bridal Kanchipuram wedding silk saree from Lakshmi Stores Round West. The weave purity, rich gold zari, and live Google Photos catalogue preview made our shopping effortless!"
+            </p>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900 dark:text-white">Lakshmi Menon</h3>
+              <p className="text-[10px] text-gray-500">Thrissur, Kerala</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 text-center flex flex-col justify-between">
+            <p className="text-xs text-gray-600 dark:text-gray-300 italic mb-4 leading-relaxed">
+              "Outstanding collection of soft silks and fancy Kanchipuram sarees! Being able to enquire on WhatsApp directly for exact prices with saree photos made international ordering so smooth."
+            </p>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900 dark:text-white">Dr. Radhika Pillai</h3>
+              <p className="text-[10px] text-gray-500">Kochi & Dubai</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 text-center flex flex-col justify-between">
+            <p className="text-xs text-gray-600 dark:text-gray-300 italic mb-4 leading-relaxed">
+              "Best saree store in Round West Thrissur! Their Gift Butta and Art Silk collection is amazing for wedding gifting. Highly recommend Lakshmi Stores for authentic Kerala silk shopping."
+            </p>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900 dark:text-white">Anitha Varrier</h3>
+              <p className="text-[10px] text-gray-500">Guruvayur, Kerala</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
-export default Testimonial
+export default Testimonial;

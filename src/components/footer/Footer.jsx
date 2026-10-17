@@ -1,99 +1,102 @@
-// import { CalendarDaysIcon, HandRaisedIcon } from '@heroicons/react/24/outline'
-import { useContext } from 'react'
-import { Link } from 'react-router-dom'
-import myContext from '../../context/data/myContext'
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import myContext from '../../context/data/myContext';
+import { FiMapPin, FiPhone, FiMessageCircle, FiCheckCircle } from 'react-icons/fi';
 
 export default function Footer() {
-    const context = useContext(myContext);
-    const {mode } = context;
-    return (
-        <footer className="text-gray-600 body-font bg-gray-300" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }}>
-            <div className="container px-5 py-24 mx-auto" >
-                <div className="flex flex-wrap md:text-left text-center order-first">
-                    <div className="lg:w-1/4 md:w-1/2 w-full px-4">
-                        <h2 className="title-font font-medium text-gray-900 tracking-widest text-sm mb-3" style={{ color: mode === 'dark' ? 'white' : '' }}>CATEGORIES</h2>
-                        <nav className="list-none mb-10">
-                            <li>
-                                <a className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>Home</a>
-                            </li>
-                            <li>
-                                <a className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>Order</a>
-                            </li>
-                            <li>
-                                <a className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>Local For Vocal</a>
-                            </li>
-                            <li>
-                                <a className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>Cart</a>
-                            </li>
-                        </nav>
-                    </div>
-                    <div className="lg:w-1/4 md:w-1/2 w-full px-4">
-                        <h2 className="title-font font-medium text-gray-900 tracking-widest text-sm mb-3 uppercase" style={{ color: mode === 'dark' ? 'white' : '' }}>Customer Service</h2>
-                        <nav className="list-none mb-10">
-                            <li>
-                                <Link to={'/returnpolicy'} className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>Return Policy</Link>
-                            </li>
-                            <li>
-                                <Link to={'/about'} className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>About</Link>
-                            </li>
-                            <li>
-                                <Link to={'/contact'} className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>Contact Us</Link>
-                            </li>
-                        </nav>
-                    </div>
+  const context = useContext(myContext);
+  const { storeInfo, catalogues, setFilterType } = context;
 
-                    <div className="lg:w-1/4 md:w-1/2 w-full px-4">
-                        <h2 className="title-font font-medium text-gray-900 tracking-widest text-sm mb-3" style={{ color: mode === 'dark' ? 'white' : '' }}>Services</h2>
-                        <nav className="list-none mb-10">
-                            <li>
-                                <Link to={'/privacypolicy'} className="text-gray-600 hover:text-gray-800" style={{ color: mode === 'dark' ? 'white' : '' }}>Privacy</Link>
-                            </li>
+  return (
+    <footer className="bg-slate-950 text-gray-300 body-font border-t-4 border-[#D4AF37]">
+      <div className="container px-5 py-16 mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
 
-                        </nav>
-                    </div>
-                    <div className="lg:w-1/4 md:w-1/2 w-full px-4">
-                        <img src="https://ecommerce-sk.vercel.app/pay.png" alt="" />
-                    </div>
-                </div>
-
+          {/* Col 1: Store Brand & Address */}
+          <div className="lg:col-span-4 space-y-4">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-[#800020] text-[#D4AF37] w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-serif font-black shadow-md border-2 border-[#D4AF37]">
+                V
+              </div>
+              <div>
+                <h2 className="text-2xl font-serif font-bold text-white leading-tight">
+                  {storeInfo?.name || "Vastraa"}
+                </h2>
+                <p className="text-xs text-[#D4AF37] font-semibold">
+                  {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Round West, Thrissur
+                </p>
+              </div>
             </div>
 
-            <div className="bg-gray-200" style={{ backgroundColor: mode === 'dark' ? 'rgb(55 57 61)' : '', color: mode === 'dark' ? 'white' : '', }}>
-                <div className="container px-5 py-3 mx-auto flex items-center sm:flex-row flex-col">
-                    <Link to={'/'} className='flex'>
-                        <div className="flex ">
-                            <h1 className=' text-2xl font-bold text-black  px-2 py-1 rounded' style={{ color: mode === 'dark' ? 'white' : '', }}>E-Pak</h1>
-                        </div>
-                    </Link>
-                    <p className="text-sm text-gray-500 sm:ml-6 sm:mt-0 mt-4" style={{ color: mode === 'dark' ? 'white' : '' }}>© 2023 E-Pak —
-                        <a href="https://twitter.com/knyttneve" rel="noopener noreferrer" className="text-gray-600 ml-1" target="_blank" style={{ color: mode === 'dark' ? 'white' : '' }}>www.epak.com</a>
-                    </p>
-                    <span className="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                        <a className="text-gray-500">
-                            <svg fill="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} className="w-5 h-5" viewBox="0 0 24 24">
-                                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-                            </svg>
-                        </a>
-                        <a className="ml-3 text-gray-500">
-                            <svg fill="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} className="w-5 h-5" viewBox="0 0 24 24">
-                                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
-                            </svg>
-                        </a>
-                        <a className="ml-3 text-gray-500">
-                            <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} className="w-5 h-5" viewBox="0 0 24 24">
-                                <rect width={20} height={20} x={2} y={2} rx={5} ry={5} />
-                                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01" />
-                            </svg>
-                        </a>
-                        <a className="ml-3 text-gray-500">
-                            <svg fill="currentColor" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={0} className="w-5 h-5" viewBox="0 0 24 24">
-                                <path stroke="none" d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" />
-                                <circle cx={4} cy={4} r={2} stroke="none" />
-                            </svg>
-                        </a>
-                    </span>
-                </div>
+            <p className="text-xs text-amber-200/80 font-serif italic max-w-sm">
+              "{storeInfo?.tagline || "Tradition. Elegance. Trust."}"
+            </p>
+
+            <div className="text-xs text-gray-400 space-y-2 pt-2">
+              <p className="flex items-center gap-2">
+                <FiMapPin className="text-[#D4AF37] w-4 h-4 flex-shrink-0" />
+                <span>{storeInfo?.location || "Round West, Thrissur, Kerala, India - 680001"}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <FiPhone className="text-[#D4AF37] w-4 h-4 flex-shrink-0" />
+                <span>Hotline: {storeInfo?.phone || "+91 97469 98785"}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <FiMessageCircle className="text-[#D4AF37] w-4 h-4 flex-shrink-0" />
+                <span>WhatsApp: {storeInfo?.whatsapp || "+91 97469 98785"}</span>
+              </p>
             </div>
-        </footer>
-    )
+          </div>
+
+          {/* Col 2: Catalogues Directory (A through I) */}
+          <div className="lg:col-span-5 space-y-3">
+            <h3 className="title-font font-bold text-[#D4AF37] tracking-wider text-xs uppercase mb-4">
+              All 9 Showroom Catalogues (A through I)
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs">
+              {catalogues.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to="/allproducts"
+                  onClick={() => setFilterType(cat.name)}
+                  className="hover:text-[#E5C158] transition-colors flex items-center gap-2 text-gray-300 truncate"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] flex-shrink-0"></span>
+                  <span className="truncate">Cat {cat.code}: {cat.name} ({cat.indicativePriceRange})</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Col 3: Live Sync Box */}
+          <div className="lg:col-span-3 space-y-3 bg-slate-900 p-6 rounded-3xl border border-slate-800 text-xs">
+            <h3 className="font-bold text-white flex items-center gap-2 text-sm">
+              <FiCheckCircle className="text-emerald-400 w-5 h-5 flex-shrink-0" />
+              Live Google Sync Active
+            </h3>
+            <p className="text-gray-400 text-xs leading-relaxed">
+              Our website inventory is synced directly with official Google Photos shared albums managed by Vastraa & Lakshmi Stores owners in Thrissur.
+            </p>
+            <div className="pt-3 border-t border-slate-800 space-y-1">
+              <span className="text-[#D4AF37] font-bold block">100% Handloom Assurance</span>
+              <span className="text-gray-400 text-[11px]">Silk Mark Certified Handloom Weaves</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Copyright Bar */}
+      <div className="bg-slate-900/90 py-5 border-t border-slate-800">
+        <div className="container mx-auto px-5 max-w-7xl flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 gap-3">
+          <p>© {new Date().getFullYear()} Vastraa — A Co-Brand of Lakshmi Stores, Round West, Thrissur, Kerala. All rights reserved.</p>
+          <div className="flex gap-6 font-semibold">
+            <Link to="/allproducts" className="hover:text-white transition-colors">All Catalogues</Link>
+            <Link to="/order" className="hover:text-white transition-colors">Enquiries</Link>
+            <Link to="/dashboard" className="text-[#D4AF37] hover:underline">Admin Portal</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

@@ -1,1 +1,69 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  color-scheme: light dark;
+  --bg-warm-ivory: #FAF7F0;
+  --surface-white: #FFFFFF;
+  --primary-maroon: #800020;
+  --secondary-gold: #C5A46D;
+  --text-charcoal: #24211F;
+  --text-muted: #77716A;
+  --border-beige: #E9E1D5;
+}
+
+body {
+  background-color: var(--bg-warm-ivory);
+  color: var(--text-charcoal);
+}
+
+.font-serif {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF7F0;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #800020;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #67001a;
+}
+
+/* Glassmorphism Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid #E9E1D5;
+}
+
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(197, 164, 109, 0.25);
+}
+
+/* Gold Gradient Glow */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #D4B276 0%, #C5A46D 50%, #9E7D42 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.maroon-gradient {
+  background: linear-gradient(135deg, #4A0012 0%, #800020 50%, #67001A 100%);
+}

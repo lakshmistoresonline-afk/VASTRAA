@@ -1,195 +1,275 @@
-import React, { useContext, useEffect, useState } from 'react'
-import Layout from '../../components/layout/Layout'
-import MyContext from '../../context/data/myContext'
+import React, { useContext, useEffect, useState } from 'react';
+import Layout from '../../components/layout/Layout';
+import MyContext from '../../context/data/myContext';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { fireDB } from '../../firebase/FirebaseConfig';
-import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
+import { FiMessageCircle, FiSend, FiMaximize2, FiX, FiCheckCircle } from 'react-icons/fi';
 
 function ProductInfo() {
-    const context = useContext(MyContext);
-    const {mode,loading,setLoading} = context;
+  const context = useContext(MyContext);
+  const { product, storeInfo, lastVerifiedAt, addEnquiry } = context;
+  const params = useParams();
 
-    const [products,setProducts] = useState('');
-    const params = useParams();
+  const [saree, setSaree] = useState(null);
+  const [isZoomed, setIsZoomed] = useState(false);
 
-    const getProductData = async ()=>{
-        setLoading(true);
-        try{
-            const productTemp = await getDoc(doc(fireDB,"products",params.id));
-            setProducts(productTemp.data());
-            setLoading(false);
-        }catch(err){
-            console.log(err);
-            setLoading(false);
-        }
-    }    
-        useEffect(()=>{
-            getProductData();
-        },[]);
+  const [enquiryForm, setEnquiryForm] = useState({
+    customerName: '',
+    phone: '',
+    address: '',
+    message: ''
+  });
 
-        const dispatch = useDispatch();
-        const cartItems = useSelector((state)=> state.cart);
+  useEffect(() => {
+    if (product && product.length > 0) {
+      const found = product.find((item) => item.id === params.id);
+      if (found) {
+        setSaree(found);
+      }
+    }
+  }, [product, params.id]);
 
-        const addCart = (products)=>{
-            dispatch(addToCart(products))
-            toast.success("add to cart");
-        }
+  const handleEnquirySubmit = async (e) => {
+    e.preventDefault();
+    if (!enquiryForm.customerName || !enquiryForm.phone) {
+      toast.error("Please fill in your name and phone number.");
+      return;
+    }
 
+    const res = await addEnquiry({
+      sareeId: saree.id,
+      sareeTitle: saree.title,
+      categoryName: saree.categoryName,
+      imageUrl: saree.imageUrl,
+      customerName: enquiryForm.customerName,
+      phone: enquiryForm.phone,
+      address: enquiryForm.address,
+      message: enquiryForm.message
+    });
 
-        useEffect(()=>{
-            localStorage.setItem('cart',JSON.stringify(cartItems));
-        },[cartItems]);
-    
+    if (res.success) {
+      setEnquiryForm({ customerName: '', phone: '', address: '', message: '' });
+    }
+  };
+
+  if (!saree) {
     return (
-        <Layout>
-            <section className="text-gray-600 body-font overflow-hidden">
-                <div className="container px-5 py-10 mx-auto">
-                   {products && 
-                    <div className="lg:w-3/5 mx-auto flex flex-wrap">
-                    <img
-                        alt="ecommerce"
-                        className="lg:w-1/2 w-full h-48 lg:h-90 object-contain object-center rounded"
-                        src={products.imageUrl}
-                    />
-                    <div className="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
-                        <h2 className="text-sm title-font text-gray-500 tracking-widest">
-                            BRAND NAME
-                        </h2>
-                        <h1 className="text-gray-900 text-3xl title-font font-medium mb-1">
-                            {products.title}
-                        </h1>
-                        <div className="flex mb-4">
-                            <span className="flex items-center">
-                                <svg
-                                    fill="currentColor"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    className="w-4 h-4 text-indigo-500"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                                <svg
-                                    fill="currentColor"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    className="w-4 h-4 text-indigo-500"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                                <svg
-                                    fill="currentColor"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    className="w-4 h-4 text-indigo-500"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                                <svg
-                                    fill="currentColor"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    className="w-4 h-4 text-indigo-500"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                                <svg
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    className="w-4 h-4 text-indigo-500"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                                <span className="text-gray-600 ml-3">4 Reviews</span>
-                            </span>
-                            <span className="flex ml-3 pl-3 py-2 border-l-2 border-gray-200 space-x-2s">
-                                <a className="text-gray-500">
-                                    <svg
-                                        fill="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        className="w-5 h-5"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-                                    </svg>
-                                </a>
-                                <a className="text-gray-500">
-                                    <svg
-                                        fill="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        className="w-5 h-5"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
-                                    </svg>
-                                </a>
-                                <a className="text-gray-500">
-                                    <svg
-                                        fill="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        className="w-5 h-5"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
-                                    </svg>
-                                </a>
-                            </span>
-                        </div>
-                        <p className="leading-relaxed border-b-2 mb-5 pb-5">
-                            {products.description}
-                        </p>
-                     
-                        <div className="flex">
-                            <span className="title-font font-medium text-2xl text-gray-900">
-                                ${products.price}
-                            </span>
-                            <button onClick={() => addCart(products)} className="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">
-                                Add To Cart
-                            </button>
-                            <button className="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
-                                <svg
-                                    fill="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    className="w-5 h-5"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>}
-                </div>
-            </section>
+      <Layout>
+        <div className="container mx-auto px-4 py-20 text-center space-y-3">
+          <div className="w-12 h-12 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-500 font-medium">Loading saree details from Google Photos live catalogue...</p>
+        </div>
+      </Layout>
+    );
+  }
 
-        </Layout>
-    )
+  const isAvailable = saree.stockStatus === 'CONFIRMED_AVAILABLE';
+  const isUnknown = saree.stockStatus === 'UNKNOWN';
+
+  return (
+    <Layout>
+      <section className="py-12 bg-gray-50 dark:bg-gray-950 transition-colors min-h-screen">
+        <div className="container px-5 mx-auto max-w-6xl">
+
+          <div className="glass-card rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 p-6 sm:p-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+              {/* Left Column: Image Viewer */}
+              <div className="lg:col-span-6 space-y-4">
+                <div className="relative aspect-[3/4] bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden shadow-inner group border border-gray-200 dark:border-gray-700">
+                  <img
+                    alt={saree.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+                    src={saree.imageUrl}
+                    onClick={() => setIsZoomed(true)}
+                  />
+
+                  <button
+                    onClick={() => setIsZoomed(true)}
+                    className="absolute bottom-4 right-4 bg-black/70 hover:bg-black text-white px-4 py-2 rounded-xl text-xs font-bold backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-all"
+                  >
+                    <FiMaximize2 className="w-4 h-4 text-[#D4AF37]" />
+                    <span>Click to Enlarge</span>
+                  </button>
+
+                  <div className="absolute top-4 left-4 bg-[#800020] text-[#D4AF37] border border-[#D4AF37] text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
+                    Catalogue {saree.catalogueCode}
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 dark:bg-gray-800/80 p-3.5 rounded-2xl text-xs text-gray-600 dark:text-gray-300 flex justify-between items-center border border-amber-200/50 dark:border-gray-700">
+                  <span className="flex items-center gap-1 font-semibold">
+                    <FiCheckCircle className="text-emerald-500" /> Google Photos Album Verified
+                  </span>
+                  <span className="font-mono text-gray-500 dark:text-gray-400">
+                    Synced: {lastVerifiedAt ? new Date(lastVerifiedAt).toLocaleTimeString() : 'Live'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Column: Saree Details & Enquiry Form */}
+              <div className="lg:col-span-6 space-y-6">
+
+                <div>
+                  <div className="inline-flex items-center gap-2 mb-3">
+                    <span className="text-[#800020] dark:text-[#E5C158] font-bold text-xs uppercase tracking-wider">
+                      {saree.categoryName}
+                    </span>
+                    {isAvailable ? (
+                      <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                        ✓ Live In Stock
+                      </span>
+                    ) : isUnknown ? (
+                      <span className="bg-amber-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                        Confirm Availability
+                      </span>
+                    ) : (
+                      <span className="bg-rose-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                        Unavailable
+                      </span>
+                    )}
+                  </div>
+
+                  <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 dark:text-white leading-snug">
+                    {saree.title}
+                  </h1>
+
+                  <p className="text-xs text-gray-400 font-mono mt-1">
+                    Saree Code: <span className="font-bold text-gray-700 dark:text-gray-300">{saree.id}</span>
+                  </p>
+                </div>
+
+                {/* Price Information */}
+                <div className="bg-amber-50/90 dark:bg-gray-800/90 p-5 rounded-2xl border border-amber-200/60 dark:border-gray-700 space-y-2">
+                  <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300">
+                    <span>Category Range:</span>
+                    <span className="font-bold text-gray-900 dark:text-white">{saree.indicativePriceRange}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-amber-200/50 dark:border-gray-700">
+                    <span className="text-xs font-bold text-gray-800 dark:text-gray-200">Individual Saree Price:</span>
+                    <span className="text-xl font-extrabold text-[#800020] dark:text-[#E5C158]">
+                      {saree.price ? `₹${saree.price}` : "Price on Enquiry"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Specs */}
+                <div className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                  <p className="font-bold text-gray-900 dark:text-white uppercase tracking-wider">Showroom Guarantee:</p>
+                  <ul className="list-disc pl-5 space-y-1 text-gray-600 dark:text-gray-300">
+                    <li>Brand: Vastraa (A Co-Brand of Lakshmi Stores)</li>
+                    <li>Origin: Round West, Thrissur, Kerala</li>
+                    <li>Silk Mark Certified Handloom Pure Weave</li>
+                    <li>Unstitched matching silk blouse piece included</li>
+                    <li>Dry Clean Only</li>
+                  </ul>
+                </div>
+
+                {/* Direct Enquiry Form */}
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-6 space-y-4">
+                  <h3 className="font-serif font-bold text-base text-gray-900 dark:text-white">
+                    Send Direct Showroom Enquiry
+                  </h3>
+
+                  <form onSubmit={handleEnquirySubmit} className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                          Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={enquiryForm.customerName}
+                          onChange={(e) => setEnquiryForm({ ...enquiryForm, customerName: e.target.value })}
+                          className="w-full text-xs px-3.5 py-2.5 border rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
+                          placeholder="Ananya Nair"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                          WhatsApp / Phone *
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={enquiryForm.phone}
+                          onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
+                          className="w-full text-xs px-3.5 py-2.5 border rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
+                          placeholder="+91 97469 98785"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Delivery Address / Location
+                      </label>
+                      <input
+                        type="text"
+                        value={enquiryForm.address}
+                        onChange={(e) => setEnquiryForm({ ...enquiryForm, address: e.target.value })}
+                        className="w-full text-xs px-3.5 py-2.5 border rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
+                        placeholder="Thrissur, Kochi, Ernakulam, or International"
+                      />
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-[#800020] hover:bg-[#67001a] text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                      >
+                        <FiSend className="w-4 h-4 text-[#D4AF37]" />
+                        <span>Submit Enquiry</span>
+                      </button>
+
+                      <a
+                        href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
+                          `Hello Vastraa (Co-Brand of Lakshmi Stores), I am interested in saree ID: ${saree.id} (${saree.categoryName}). Photo: ${saree.imageUrl}`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition-all"
+                      >
+                        <FiMessageCircle className="w-4 h-4" />
+                        <span>WhatsApp Now</span>
+                      </a>
+                    </div>
+                  </form>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* High Res Zoom Modal */}
+      {isZoomed && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+            <button
+              onClick={() => setIsZoomed(false)}
+              className="absolute top-2 right-2 bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+            <img
+              src={saree.imageUrl}
+              alt={saree.title}
+              className="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/20"
+            />
+            <p className="text-white text-xs mt-3 font-serif font-bold text-center">
+              {saree.title} — Vastraa High Resolution View
+            </p>
+          </div>
+        </div>
+      )}
+    </Layout>
+  );
 }
 
-export default ProductInfo
+export default ProductInfo;

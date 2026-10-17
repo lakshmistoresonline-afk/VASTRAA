@@ -1,63 +1,149 @@
-import React, { useContext } from 'react'
-import myContext from '../../context/data/myContext'
+import React, { useContext, useState } from 'react';
+import myContext from '../../context/data/myContext';
+import { FiSearch, FiRotateCcw, FiFilter, FiLayers } from 'react-icons/fi';
 
 function Filter() {
-    const context = useContext(myContext)
-    const { mode,searchKey,setSearchKey,filterType,setFilterType,filterPrice,setFilterPrice,product } = context
+  const context = useContext(myContext);
+  const {
+    searchKey,
+    setSearchKey,
+    filterType,
+    setFilterType,
+    catalogues
+  } = context;
 
-    return (
-        <div>
-           <div className=' container mx-auto px-4 mt-5 '>
-                <div className="p-5 rounded-lg bg-gray-100 drop-shadow-xl border border-gray-200"
-                    style={{
-                        backgroundColor: mode === 'dark' ? '#282c34' : '',
-                        color: mode === 'dark' ? 'white' : '',
-                    }}>
-                    <div className="relative">
-                        <div className="absolute flex items-center ml-2 h-full">
-                            <svg className="w-4 h-4 fill-current text-primary-gray-dark" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15.8898 15.0493L11.8588 11.0182C11.7869 10.9463 11.6932 10.9088 11.5932 10.9088H11.2713C12.3431 9.74952 12.9994 8.20272 12.9994 6.49968C12.9994 2.90923 10.0901 0 6.49968 0C2.90923 0 0 2.90923 0 6.49968C0 10.0901 2.90923 12.9994 6.49968 12.9994C8.20272 12.9994 9.74952 12.3431 10.9088 11.2744V11.5932C10.9088 11.6932 10.9495 11.7869 11.0182 11.8588L15.0493 15.8898C15.1961 16.0367 15.4336 16.0367 15.5805 15.8898L15.8898 15.5805C16.0367 15.4336 16.0367 15.1961 15.8898 15.0493ZM6.49968 11.9994C3.45921 11.9994 0.999951 9.54016 0.999951 6.49968C0.999951 3.45921 3.45921 0.999951 6.49968 0.999951C9.54016 0.999951 11.9994 3.45921 11.9994 6.49968C11.9994 9.54016 9.54016 11.9994 6.49968 11.9994Z" />
-                            </svg>
-                        </div>
-                        <input
-                            type="text"
-                            value={searchKey}
-                            onChange={(e) => setSearchKey(e.target.value)}
-                            name="searchKey"
-                            id="searchKey"
-                            placeholder="Search here"
-                            className="px-8 py-3 w-full rounded-md bg-violet-0 border-transparent outline-0 text-sm" style={{ backgroundColor: mode === 'dark' ? 'rgb(64 66 70)' : '', color: mode === 'dark' ? 'white' : '', }} />
-                    </div>
-                    <div className="flex items-center justify-between mt-4">
-                        <p className="font-medium">
-                            Filters
-                        </p>
-                        <button className="px-4 py-2 bg-gray-50hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md" style={{ color: mode === 'dark' ? 'white' : '' }}>
-                            Reset Filter
-                        </button>
-                    </div>
-                    <div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
-                            <select value={filterType} onChange={(e)=> setFilterType(e.target.value)} className="px-4 py-3 w-full rounded-md bg-gray-50 border-transparent outline-0 focus:border-gray-500 focus:bg-white focus:ring-0 text-sm" style={{ backgroundColor: mode === 'dark' ? 'rgb(64 66 70)' : '', color: mode === 'dark' ? 'white' : '', }}>
-                                
-                            {[...new Set(product.map(item => item.category))].map((category, index) => (
-                                <option key={index} value={category}>{category}</option>
-                            ))}
+  const [groupFilter, setGroupFilter] = useState('ALL');
 
-                            </select>
-                            <select value={filterPrice} onChange={(e)=> setFilterPrice(e.target.value)} className="px-4 py-3 w-full rounded-md bg-gray-50 border-transparent outline-0  focus:border-gray-500 focus:bg-white focus:ring-0 text-sm" style={{ backgroundColor: mode === 'dark' ? 'rgb(64 66 70)' : '', color: mode === 'dark' ? 'white' : '', }}>
-                            {[...new Set(product.map(item => item.price))].map((price, index) => (
-                                <option key={index} value={price}>{price}</option>
-                            ))}
+  const resetFilters = () => {
+    setSearchKey('');
+    setFilterType('');
+    setGroupFilter('ALL');
+  };
 
-                            </select>
+  const handleGroupSelect = (group) => {
+    setGroupFilter(group);
+    if (group === 'ALL') {
+      setFilterType('');
+    } else if (group === 'PURE') {
+      setFilterType('Pure');
+    } else if (group === 'SEMI_ART') {
+      setFilterType('Semi');
+    }
+  };
 
-                        </div>
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="container mx-auto px-4 max-w-7xl mt-8">
+      <div className="glass-card p-6 sm:p-8 rounded-3xl shadow-xl border border-gray-200/80 dark:border-gray-800 space-y-5">
+
+        {/* Level 1: Collection Group Pills */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-gray-200/60 dark:border-gray-800">
+          <div className="flex items-center gap-2">
+            <FiLayers className="text-[#800020] dark:text-[#E5C158] w-5 h-5" />
+            <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+              Browse Collections:
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => handleGroupSelect('ALL')}
+              className={`px-5 py-2.5 rounded-2xl text-xs font-extrabold transition-all duration-300 shadow-sm ${
+                groupFilter === 'ALL' && filterType === ''
+                  ? 'bg-[#800020] text-amber-100 shadow-md scale-105'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              All 9 Collections (3,252 Sarees)
+            </button>
+
+            <button
+              onClick={() => handleGroupSelect('PURE')}
+              className={`px-5 py-2.5 rounded-2xl text-xs font-extrabold transition-all duration-300 shadow-sm ${
+                groupFilter === 'PURE' || filterType.includes('Pure')
+                  ? 'bg-[#800020] text-amber-100 shadow-md scale-105'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              ✨ Pure Kanchipuram Silks (Cat A, B, C)
+            </button>
+
+            <button
+              onClick={() => handleGroupSelect('SEMI_ART')}
+              className={`px-5 py-2.5 rounded-2xl text-xs font-extrabold transition-all duration-300 shadow-sm ${
+                groupFilter === 'SEMI_ART' || filterType.includes('Semi') || filterType.includes('Art')
+                  ? 'bg-[#800020] text-amber-100 shadow-md scale-105'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              🌸 Semi & Art Silk Sarees (Cat D–I)
+            </button>
+          </div>
         </div>
-    )
+
+        {/* Level 2: Specific Catalogue Selector & Search Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+
+          {/* Specific Catalogue Dropdown */}
+          <div className="lg:col-span-5 relative">
+            <div className="flex items-center gap-2 mb-1.5">
+              <FiFilter className="text-[#800020] dark:text-[#E5C158] w-3.5 h-3.5" />
+              <label className="text-[11px] font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                Filter By Catalogue:
+              </label>
+            </div>
+            <select
+              value={filterType}
+              onChange={(e) => {
+                setFilterType(e.target.value);
+                setGroupFilter('CUSTOM');
+              }}
+              className="w-full text-xs font-bold px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020] shadow-sm cursor-pointer"
+            >
+              <option value="">All 9 Catalogues (A through I)</option>
+              {catalogues.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  Catalogue {cat.code}: {cat.name} ({cat.indicativePriceRange})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Search Input */}
+          <div className="lg:col-span-5 relative">
+            <div className="flex items-center gap-2 mb-1.5">
+              <FiSearch className="text-[#800020] dark:text-[#E5C158] w-3.5 h-3.5" />
+              <label className="text-[11px] font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                Search Saree Code / Color:
+              </label>
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchKey}
+                onChange={(e) => setSearchKey(e.target.value)}
+                placeholder="Search code (e.g., A-001, B-050, D-100) or color..."
+                className="w-full pl-10 pr-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-[#800020] outline-none shadow-sm"
+              />
+              <FiSearch className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+            </div>
+          </div>
+
+          {/* Reset Button */}
+          <div className="lg:col-span-2 flex items-end pt-5 lg:pt-0">
+            <button
+              onClick={resetFilters}
+              className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white text-xs font-bold py-3 px-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm border border-gray-200 dark:border-gray-700"
+            >
+              <FiRotateCcw className="w-4 h-4 text-[#800020] dark:text-[#E5C158]" />
+              <span>Reset</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
 }
 
-export default Filter
+export default Filter;

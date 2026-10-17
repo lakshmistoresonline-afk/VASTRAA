@@ -1,335 +1,340 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import Layout from '../../../components/layout/Layout';
 import myContext from '../../../context/data/myContext';
-import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
-import { FaUser, FaCartPlus } from 'react-icons/fa';
-import { AiFillShopping, AiFillPlusCircle, AiFillDelete } from 'react-icons/ai';
-import {Link,Navigate} from 'react-router-dom'
+import { toast } from 'react-toastify';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink } from 'react-icons/fi';
 
 function DashboardTab() {
-    const context = useContext(myContext)
-    const { mode,product,editHandle,deleteProduct,deleteOrder,order,user } = context
-    let [isOpen, setIsOpen] = useState(false);
+  const context = useContext(myContext);
+  const {
+    product,
+    catalogues,
+    syncStats,
+    lastVerifiedAt,
+    triggerSync,
+    enquiries,
+    updateEnquiryStatus,
+    deleteEnquiry,
+    storeInfo,
+    loading
+  } = context;
 
-    // console.log(product);
+  const [searchTerm, setSearchTerm] = useState('');
 
-    function closeModal() {
-        setIsOpen(false)
-    }
+  const handleSyncClick = async () => {
+    toast.info("Syncing Google Photos albums...");
+    await triggerSync();
+    toast.success("Google Photos catalogue sync complete!");
+  };
 
-    function openModal() {
-        setIsOpen(true)
-    }
+  const filteredInventory = product ? product.filter((p) =>
+    p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.id.toLowerCase().includes(searchTerm.toLowerCase())
+  ) : [];
 
-    const add = () =>{
-        window.location.href = "/addproduct";
-    }
-    return (
-        <>
-            <div className="container mx-auto">
-                <div className="tab container mx-auto ">
-                    <Tabs defaultIndex={0} className=" " >
-                        <TabList className="md:flex md:space-x-8 bg-  grid grid-cols-2 text-center gap-4   md:justify-center mb-10 ">
-                            <Tab>
-                                <button type="button" className="font-medium border-b-2 hover:shadow-purple-700 border-purple-500 text-purple-500 rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]  px-5 py-1.5 text-center bg-[#605d5d12] ">
-                                    <div className="flex gap-2 items-center">
-                                        <MdOutlineProductionQuantityLimits />Products</div> </button>
-                            </Tab>
-                            <Tab>
-                                <button type="button" className="font-medium border-b-2 border-pink-500 bg-[#605d5d12] text-pink-500  hover:shadow-pink-700  rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]    px-5 py-1.5 text-center ">
-                                    <div className="flex gap-2 items-center">
-                                    <AiFillShopping /> Order
-                                    </div>
-                                </button>
-                            </Tab>
-                            <Tab>
-                                <button type="button" className="font-medium border-b-2 border-green-500 bg-[#605d5d12] text-green-500 rounded-lg text-xl  hover:shadow-green-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]   px-5 py-1.5 text-center ">
-                                    <div className="flex gap-2 items-center">
-                                        <FaUser /> Users
-                                    </div>
-                                </button>
-                            </Tab>
-                        </TabList>
-                        {/* product  */}
-                        <TabPanel>
-                            <div className='  px-4 md:px-0 mb-16'>
-                                <h1 className=' text-center mb-5 text-3xl font-semibold underline' style={{ color: mode === 'dark' ? 'white' : '' }}>Product Details</h1>
-                                <div className=" flex justify-end">
-                                    <button
-                                        onClick={add}
-                                        type="button"
-                                        className="focus:outline-none text-white bg-pink-600 shadow-[inset_0_0_10px_rgba(0,0,0,0.6)] border hover:bg-pink-700 outline-0 font-medium rounded-lg text-sm px-5 py-2.5 mb-2" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }} > <div className="flex gap-2 items-center">
-                                            Add Product <FaCartPlus size={20} />
-                                        </div></button>
-                                </div>
-                                <div className="relative overflow-x-auto ">
-                                    <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400  ">
-                                        <thead className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }} >
-                                            <tr>
-                                                <th scope="col" className="px-6 py-3">
-                                                    S.No
-                                                </th>
-                                                <th scope="col" className="px-6 py-3">
-                                                    Image
-                                                </th>
-                                                <th scope="col" className="px-6 py-3">
-                                                    Title
-                                                </th>
-                                                <th scope="col" className="px-6 py-3">
-                                                    Price
-                                                </th>
-                                                <th scope="col" className="px-6 py-3">
-                                                    Category
-                                                </th>
-                                                <th scope="col" className="px-6 py-3">
-                                                    Description
-                                                </th>
-                                                <th scope="col" className="px-6 py-3">
-                                                    Date
-                                                </th>
-                                                <th scope="col" className="px-6 py-3">
-                                                    Action
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                       {product.map((item,index) =>{
-                                        const {title,price,imageUrl,category,description,date} = item
-                                        return(
-                                            <tbody className=''>
-                                            <tr className="bg-gray-50 border-b  dark:border-gray-700" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }} >
-                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                   {index+1}
-                                                </td>
-                                                <th scope="row" className="px-6 py-4 font-medium text-black whitespace-nowrap">
-                                                    <img className='w-16' src={imageUrl} alt="img" />
-                                                </th>
-                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                    {title}
-                                                </td>
-                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                    ₹{price}
-                                                </td>
-                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                    {category}
-                                                </td>
-                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                    {description}
-                                                </td>
-                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                    {date}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className=" flex gap-2">
-                                                        <div className=" flex gap-2 cursor-pointer text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                            <div onClick={() => deleteProduct(item)} >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                                </svg>
-                                                            </div>
-                                                            <Link to={'/updateproduct'}>
-                                                                <div onClick={()=> editHandle(item)} >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                                                    </svg>
-                                                                </div>
-                                                            </Link>
-                                                            
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <Tabs defaultIndex={0}>
 
-                                        </tbody>
-                                        );
-                                       })}
-                                    </table>
+        {/* Tab Headers */}
+        <div className="bg-gray-100/80 dark:bg-gray-950 p-4 border-b border-gray-200 dark:border-gray-800">
+          <TabList className="flex flex-wrap gap-2 text-xs font-extrabold">
+            <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
+              📸 Google Photos Albums ({catalogues.length})
+            </Tab>
+            <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
+              👗 Live Inventory ({product ? product.length : 0})
+            </Tab>
+            <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
+              📩 Customer Enquiries ({enquiries ? enquiries.length : 0})
+            </Tab>
+            <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
+              ⚙️ Store Settings
+            </Tab>
+          </TabList>
+        </div>
 
-                                </div>
-                            </div>
-                        </TabPanel>
-                        <TabPanel>
-                            {/* <Order order={order} setOrder={setOrder} setLoading={setLoading} /> */}
-                            <div className="relative overflow-x-auto mb-16">
-                                <h1 className=' text-center mb-5 text-3xl font-semibold underline' style={{ color: mode === 'dark' ? 'white' : '' }}>Order Details</h1>
-                                        
-                                             
-                                            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" >
-                                                <thead className="text-xs text-black uppercase bg-gray-200 " style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }} >
-                                                    <tr>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            S.No.
-                                                        </th>
-                                                        {/* <th scope="col" className="px-6 py-3">
-                                                            Order delivered
-                                                        </th> */}
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Image
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Title
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Price
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Category
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Name
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Address
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            PinCode
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Phone Number
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Email
-                                                        </th>
-                                                        <th scope="col" className="px-6 py-3">
-                                                            Date
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                
-                                               
-                                                    {order.map((allOrder,index)=>{
-                                                        return (
-                                                        allOrder.cartItems.map((item,index)=>{
-                                                        const {title,description,category,imageUrl,price} = item;
-                                                        
-                                                        return(
-                                                        <tbody>   
-                                                    
-                                                            <tr key={index} className="bg-gray-50 border-b  dark:border-gray-700" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }} >
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                {index +1}
-                                                                </td>
-                                                                {/* <td className="px-6 py-4">
-                                                                    <div className=" flex gap-2">
-                                                                        <div className=" flex gap-2 cursor-pointer text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                            <div onClick={() => deleteOrder(item)} >
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                                                </svg>
-                                                                            </div>
-                                                                        
-                                                                            
-                                                                        </div>
-                                                                    </div>
-                                                                </td> */}
-                                                                <th scope="row" className="px-6 py-4 font-medium text-black whitespace-nowrap">
-                                                                    <img className='w-16' src={imageUrl} alt="img" />
-                                                                </th>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                    {title}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                    ₹{price}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                    {category}
-                                                                </td>
-                                                            
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                    {allOrder.addressInfo.name}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                    {allOrder.addressInfo.address}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                {allOrder.addressInfo.pinCode}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                {allOrder.addressInfo.phoneNumber}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                    {allOrder.email}
-                                                                </td>
-                                                                <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                                {allOrder.date}
-                                                                </td>
-        
-                                                            </tr>
-                                                            </tbody>    
-                                                    );
-                                                    })
-                                                    );
-                                                    })}
-                                                         
-                                                   
-                                            </table>     
-                            </div>
-                        </TabPanel>
-                        
-                        <TabPanel>
-                            {/* <User addressInfo={addressInfo} setAddressInfo={setAddressInfo} setLoading={setLoading} /> */}
-                            <div className="relative overflow-x-auto mb-10">
-                                <h1 className=' text-center mb-5 text-3xl font-semibold underline' style={{ color: mode === 'dark' ? 'white' : '' }}>User Details</h1>
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs text-black uppercase bg-gray-200 " style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }} >
-                                        <tr>
-                                            <th scope="col" className="px-6 py-3">
-                                                S.No
-                                            </th>
-
-                                            <th scope="col" className="px-6 py-3">
-                                                Name
-                                            </th>
-                                            {/* <th scope="col" className="px-6 py-3">
-                                                Address
-                                            </th>
-                                            <th scope="col" className="px-6 py-3">
-                                                Pincode
-                                            </th>
-                                            <th scope="col" className="px-6 py-3">
-                                                Phone Number
-                                            </th> */}
-                                            <th scope="col" className="px-6 py-3">
-                                                Email
-                                            </th>
-                                            <th scope="col" className="px-6 py-3">
-                                                UId
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    {user.map((item,index)=>{
-                                        const {name,uid,email,date} = item;
-                                        return (
-                                            <tbody>
-
-                                        <tr className="bg-gray-50 border-b  dark:border-gray-700" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '', }} >
-                                            <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                {index+1}
-                                            </td>
-                                            <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                               {name}
-                                            </td>
-                                           
-                                            <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                {email}
-                                            </td>
-                                            <td className="px-6 py-4 text-black " style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                {uid}
-                                            </td>
-
-                                        </tr>
-                                    </tbody>
-                                        );
-                                    })}
-                                </table>
-                            </div>
-                        </TabPanel> 
-                    </Tabs>
-                </div>
+        {/* Tab 1: Google Photos Catalogues */}
+        <TabPanel className="p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+                Google Photos Album Sources
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Last Verified Sync: {lastVerifiedAt ? new Date(lastVerifiedAt).toLocaleString() : 'Just now'}
+              </p>
             </div>
-        </>
-    )
+
+            <button
+              onClick={handleSyncClick}
+              disabled={loading}
+              className="bg-[#800020] hover:bg-[#67001a] text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+            >
+              <FiRefreshCw className={`w-4 h-4 text-[#D4AF37] ${loading ? 'animate-spin' : ''}`} />
+              <span>{loading ? "Syncing Cloud..." : "Trigger Google Photos Refresh"}</span>
+            </button>
+          </div>
+
+          {/* Sync Stats Summary Box */}
+          {syncStats && (
+            <div className="bg-amber-50/80 dark:bg-gray-800/80 border border-amber-200 dark:border-gray-700 rounded-2xl p-5 text-xs text-gray-700 dark:text-gray-200 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <span className="text-gray-500 block">Total Catalogues:</span>
+                <span className="font-bold text-gray-900 dark:text-white text-lg">{syncStats.totalCatalogues}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Confirmed In-Stock:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">{syncStats.confirmedAvailable}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Detected Removals:</span>
+                <span className="font-bold text-rose-600 dark:text-rose-400 text-lg">{syncStats.unavailable}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Unknown / Failed:</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400 text-lg">{syncStats.unknown}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Catalogues Table */}
+          <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800">
+            <table className="w-full text-xs text-left text-gray-600 dark:text-gray-300">
+              <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white uppercase text-[10px] tracking-wider font-extrabold">
+                <tr>
+                  <th className="px-5 py-4">Code</th>
+                  <th className="px-5 py-4">Catalogue Category</th>
+                  <th className="px-5 py-4">Price Range</th>
+                  <th className="px-5 py-4">Album Source URLs</th>
+                  <th className="px-5 py-4 text-right">Items Synced</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
+                {catalogues.map((cat) => {
+                  const catItemsCount = product ? product.filter(p => p.catalogueCode === cat.code).length : 0;
+                  return (
+                    <tr key={cat.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-4 font-extrabold text-[#800020] dark:text-[#E5C158]">
+                        Cat {cat.code}
+                      </td>
+                      <td className="px-5 py-4 font-bold text-gray-900 dark:text-white">
+                        {cat.name}
+                      </td>
+                      <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300">
+                        {cat.indicativePriceRange}
+                      </td>
+                      <td className="px-5 py-4 max-w-xs truncate">
+                        {cat.albums.map((url, i) => (
+                          <a
+                            key={i}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 truncate"
+                          >
+                            <span>Album {i + 1}</span>
+                            <FiExternalLink className="w-3 h-3" />
+                          </a>
+                        ))}
+                      </td>
+                      <td className="px-5 py-4 text-right font-extrabold text-gray-900 dark:text-white text-sm">
+                        {catItemsCount} Sarees
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </TabPanel>
+
+        {/* Tab 2: Live Inventory */}
+        <TabPanel className="p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+              Live Synced Saree Inventory ({filteredInventory.length} Sarees)
+            </h2>
+
+            <div className="relative w-full sm:w-72">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Filter by Saree ID or Category..."
+                className="w-full pl-9 pr-4 py-2.5 border rounded-2xl text-xs dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
+              />
+              <FiSearch className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800 max-h-[70vh] overflow-y-auto">
+            <table className="w-full text-xs text-left text-gray-600 dark:text-gray-300">
+              <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white uppercase text-[10px] tracking-wider font-extrabold sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th className="px-5 py-4">Saree Photo</th>
+                  <th className="px-5 py-4">Saree ID / Title</th>
+                  <th className="px-5 py-4">Catalogue Category</th>
+                  <th className="px-5 py-4">Indicative Range</th>
+                  <th className="px-5 py-4">Stock Verification</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
+                {filteredInventory.map((item) => {
+                  const isAvailable = item.stockStatus === 'CONFIRMED_AVAILABLE';
+                  const isUnknown = item.stockStatus === 'UNKNOWN';
+
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-12 h-16 object-cover rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                          loading="lazy"
+                        />
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="font-bold text-gray-900 dark:text-white block">{item.title}</span>
+                        <span className="text-[10px] font-mono text-gray-400">ID: {item.id}</span>
+                      </td>
+                      <td className="px-5 py-3 font-bold text-[#800020] dark:text-[#E5C158]">
+                        Cat {item.catalogueCode} - {item.categoryName}
+                      </td>
+                      <td className="px-5 py-3">
+                        {item.indicativePriceRange}
+                      </td>
+                      <td className="px-5 py-3">
+                        {isAvailable ? (
+                          <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 font-bold px-3 py-1 rounded-full text-[10px]">
+                            ✓ Live In Stock
+                          </span>
+                        ) : isUnknown ? (
+                          <span className="bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 font-bold px-3 py-1 rounded-full text-[10px]">
+                            ? Confirm Stock
+                          </span>
+                        ) : (
+                          <span className="bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300 font-bold px-3 py-1 rounded-full text-[10px]">
+                            ✕ Removed / Sold Out
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </TabPanel>
+
+        {/* Tab 3: Customer Enquiries */}
+        <TabPanel className="p-6 sm:p-8 space-y-6">
+          <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+            Customer Availability & Price Enquiries
+          </h2>
+
+          {!enquiries || enquiries.length === 0 ? (
+            <div className="text-center py-16 text-gray-500 text-xs font-medium">
+              No customer availability enquiries received yet.
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800">
+              <table className="w-full text-xs text-left text-gray-600 dark:text-gray-300">
+                <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white uppercase text-[10px] tracking-wider font-extrabold">
+                  <tr>
+                    <th className="px-5 py-4">Date</th>
+                    <th className="px-5 py-4">Customer Info</th>
+                    <th className="px-5 py-4">Requested Saree</th>
+                    <th className="px-5 py-4">Message</th>
+                    <th className="px-5 py-4">Status</th>
+                    <th className="px-5 py-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
+                  {enquiries.map((enq) => (
+                    <tr key={enq.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-4 whitespace-nowrap text-gray-500">
+                        {enq.createdAt ? new Date(enq.createdAt).toLocaleDateString() : 'Recent'}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="font-bold text-gray-900 dark:text-white block">{enq.customerName}</span>
+                        <span className="text-[11px] text-blue-600 dark:text-blue-400 block font-semibold">📞 {enq.phone}</span>
+                        {enq.address && <span className="text-[10px] text-gray-400 block">{enq.address}</span>}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          {enq.imageUrl && (
+                            <img src={enq.imageUrl} alt="" className="w-10 h-12 object-cover rounded-lg border shadow-sm" />
+                          )}
+                          <div>
+                            <span className="font-bold text-gray-900 dark:text-white block">{enq.sareeTitle}</span>
+                            <span className="text-[10px] text-gray-400 font-mono">ID: {enq.sareeId}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 max-w-xs truncate">
+                        {enq.message || "—"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <select
+                          value={enq.status || "Pending"}
+                          onChange={(e) => updateEnquiryStatus(enq.id, e.target.value)}
+                          className="text-xs px-3 py-1.5 rounded-xl border font-bold dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Contacted">Contacted</option>
+                          <option value="Fulfilled">Fulfilled</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <button
+                          onClick={() => deleteEnquiry(enq.id)}
+                          className="p-2 text-rose-600 hover:text-rose-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-colors"
+                          title="Delete Enquiry"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabPanel>
+
+        {/* Tab 4: Store Info */}
+        <TabPanel className="p-6 sm:p-8 space-y-6">
+          <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+            Lakshmi Stores Settings
+          </h2>
+
+          <div className="glass-card p-8 rounded-3xl border border-gray-200 dark:border-gray-800 max-w-2xl space-y-5 text-xs">
+            <div>
+              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Store Name:</span>
+              <p className="text-base font-bold text-gray-900 dark:text-white">{storeInfo?.name}</p>
+            </div>
+            <div>
+              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Showroom Location:</span>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">{storeInfo?.location}</p>
+            </div>
+            <div>
+              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">WhatsApp Hotline:</span>
+              <p className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">{storeInfo?.whatsapp}</p>
+            </div>
+            <div>
+              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Integration Status:</span>
+              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                Live Google Photos album sync active. Every photo displayed reflects genuine showroom stock managed by Lakshmi Stores.
+              </p>
+            </div>
+          </div>
+        </TabPanel>
+      </Tabs>
+    </div>
+  );
 }
 
-
-export default DashboardTab
+export default DashboardTab;

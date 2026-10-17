@@ -4,9 +4,9 @@ import Order from './pages/order/Order';
 import Cart from './pages/cart/Cart';
 import Dashboard from './pages/admin/dashborad/Dashboard';
 import Signup from './pages/registration/Signup';
-import Login from './pages/registration/Login'
+import Login from './pages/registration/Login';
 import NoPage from './pages/noPage/NoPage';
-import{
+import {
   BrowserRouter as Router,
   Route,
   Routes,
@@ -20,73 +20,69 @@ import 'react-toastify/ReactToastify.css';
 import ProductInfo from './pages/product/productInfo';
 import AllProducts from './pages/allProducts/AllProducts';
 
-
-
 const App = () => {
   return (
     <MyState>
       <Router>
         <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/order' element={
-            <ProtectedRoute>
-              <Order />
-            </ProtectedRoute>
-          } />
-          <Route path='/cart' element={<Cart />} />
-          <Route path='/allproducts' element={<AllProducts />} />
-          <Route path='/dashboard' element={
-            <ProtectedRouteForAdmin>
-              <Dashboard />
-            </ProtectedRouteForAdmin>
-          } />
-          <Route path='/login' element={<Login />} />
-          <Route path='/signup' element={<Signup />} />
-          <Route path='/productinfo/:id' element={<ProductInfo />} />
-          <Route path='/addproduct' element={
-            <ProtectedRouteForAdmin>
-              <AddProduct />
-            </ProtectedRouteForAdmin>
-          } />
-          <Route path='/updateproduct' element={
-            <ProtectedRouteForAdmin>
-              <UpdateProduct />
-            </ProtectedRouteForAdmin>
-          } />
-          <Route path='/*' element={<NoPage />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/order" element={<Order />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/allproducts" element={<AllProducts />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRouteForAdmin>
+                <Dashboard />
+              </ProtectedRouteForAdmin>
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/productinfo/:id" element={<ProductInfo />} />
+          <Route
+            path="/addproduct"
+            element={
+              <ProtectedRouteForAdmin>
+                <AddProduct />
+              </ProtectedRouteForAdmin>
+            }
+          />
+          <Route
+            path="/updateproduct"
+            element={
+              <ProtectedRouteForAdmin>
+                <UpdateProduct />
+              </ProtectedRouteForAdmin>
+            }
+          />
+          <Route path="/*" element={<NoPage />} />
         </Routes>
-        <ToastContainer />
-    </Router>
+        <ToastContainer position="top-right" autoClose={3000} />
+      </Router>
     </MyState>
-  )
-}
+  );
+};
 
 export default App;
 
-
-// Creating protected Route
-
-export const ProtectedRoute = ({children}) =>{
+export const ProtectedRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user'));
-  if(user){
-    if (user.user.email === "aliali@gmail.com") {
-      // Block admin from accessing
-      return <Navigate to="/login" />;
-    } else {
-      return children;
-    }
-  }else{
-    return <Navigate to="/dashboard" />;
+  if (user) {
+    return children;
+  } else {
+    return <Navigate to="/login" />;
   }
 };
 
-
-export const ProtectedRouteForAdmin = ({children}) =>{
+export const ProtectedRouteForAdmin = ({ children }) => {
   const admin = JSON.parse(localStorage.getItem('user'));
-
-  if( admin && admin.user.email === "aliali@gmail.com"){
+  if (
+    admin &&
+    (admin.user.email === "admin@vastraa.com" || admin.user.email === "admin@lakshmistores.com" || admin.user.email === "aliali@gmail.com")
+  ) {
     return children;
-  }else{
-    return <Navigate to={'/login'} />
+  } else {
+    return <Navigate to="/login" />;
   }
 };
