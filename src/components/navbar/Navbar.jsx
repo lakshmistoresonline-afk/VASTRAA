@@ -30,13 +30,13 @@ const Navbar = () => {
       {/* Top Announcement Bar */}
       <div className="maroon-gradient text-[#E5C158] text-xs py-2 px-4 border-b border-[#C5A46D]/30">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2 font-medium">
+          <div className="flex items-center gap-2 font-medium text-[11px] sm:text-xs">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>📍 {storeInfo?.location || "Round West, Thrissur, Kerala"}</span>
+            <span>Authentic Pure Silk Sarees • Pan India Express Shipping • Easy Returns</span>
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs">
             <span className="flex items-center gap-1">
-              <FiCheckCircle className="text-emerald-400" /> Live Showroom Inventory Synced
+              <FiCheckCircle className="text-emerald-400" /> Verified Live Inventory
             </span>
             <a
               href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}`}
@@ -74,7 +74,7 @@ const Navbar = () => {
                   {storeInfo?.name || "Vastraa"}
                 </h1>
                 <p className="text-[10px] font-sans uppercase tracking-widest text-[#800020] dark:text-[#E5C158] font-bold">
-                  {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Round West, Thrissur
+                  {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Online Silk Store
                 </p>
               </div>
             </Link>

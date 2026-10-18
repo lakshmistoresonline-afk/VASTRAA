@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
-import { FiMapPin, FiPhone, FiMessageCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiPhone, FiMessageCircle, FiCheckCircle } from 'react-icons/fi';
 
 export default function Footer() {
   const context = useContext(myContext);
@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="container px-5 py-16 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
 
-          {/* Col 1: Store Brand & Address */}
+          {/* Col 1: Store Brand & Contact */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3.5">
               <div className="bg-[#800020] text-[#D4AF37] w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-serif font-black shadow-md border-2 border-[#D4AF37]">
@@ -23,7 +23,7 @@ export default function Footer() {
                   {storeInfo?.name || "Vastraa"}
                 </h2>
                 <p className="text-xs text-[#D4AF37] font-semibold">
-                  {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Round West, Thrissur
+                  {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Online Silk Store
                 </p>
               </div>
             </div>
@@ -33,10 +33,6 @@ export default function Footer() {
             </p>
 
             <div className="text-xs text-gray-400 space-y-2 pt-2">
-              <p className="flex items-center gap-2">
-                <FiMapPin className="text-[#D4AF37] w-4 h-4 flex-shrink-0" />
-                <span>{storeInfo?.location || "Round West, Thrissur, Kerala, India - 680001"}</span>
-              </p>
               <p className="flex items-center gap-2">
                 <FiPhone className="text-[#D4AF37] w-4 h-4 flex-shrink-0" />
                 <span>Hotline: {storeInfo?.phone || "+91 97469 98785"}</span>
@@ -51,7 +47,7 @@ export default function Footer() {
           {/* Col 2: Catalogues Directory (A through I) */}
           <div className="lg:col-span-5 space-y-3">
             <h3 className="title-font font-bold text-[#D4AF37] tracking-wider text-xs uppercase mb-4">
-              All 9 Showroom Catalogues (A through I)
+              All 9 Silk Catalogues (A through I)
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs">
               {catalogues.map((cat) => (
@@ -72,14 +68,14 @@ export default function Footer() {
           <div className="lg:col-span-3 space-y-3 bg-slate-900 p-6 rounded-3xl border border-slate-800 text-xs">
             <h3 className="font-bold text-white flex items-center gap-2 text-sm">
               <FiCheckCircle className="text-emerald-400 w-5 h-5 flex-shrink-0" />
-              Live Showroom Sync Active
+              Live Online Sync Active
             </h3>
             <p className="text-gray-400 text-xs leading-relaxed">
-              Our website inventory is synchronized with official Vastraa showroom inventory feeds managed in Thrissur.
+              Our online website inventory is synchronized in real-time with verified Vastraa silk saree feeds.
             </p>
             <div className="pt-3 border-t border-slate-800 space-y-1">
               <span className="text-[#D4AF37] font-bold block">100% Handloom Assurance</span>
-              <span className="text-gray-400 text-[11px]">Handloom Pure Silk Weaves</span>
+              <span className="text-gray-400 text-[11px]">Pure & Fine Silk Weaves</span>
             </div>
           </div>
 
@@ -89,7 +85,7 @@ export default function Footer() {
       {/* Copyright Bar */}
       <div className="bg-slate-900/90 py-5 border-t border-slate-800">
         <div className="container mx-auto px-5 max-w-7xl flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 gap-3">
-          <p>© {new Date().getFullYear()} Vastraa — A Co-Brand of Lakshmi Stores, Round West, Thrissur, Kerala. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Vastraa — A Co-Brand of Lakshmi Stores. All rights reserved.</p>
           <div className="flex gap-6 font-semibold">
             <Link to="/allproducts" className="hover:text-white transition-colors">Silk Sarees</Link>
             <Link to="/order" className="hover:text-white transition-colors">Enquiries</Link>
