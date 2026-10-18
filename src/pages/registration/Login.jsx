@@ -27,19 +27,21 @@ function Login() {
       const result = await signInWithEmailAndPassword(auth, email, password);
       toast.success("Signed in successfully!");
       localStorage.setItem("user", JSON.stringify({ user: { email: result.user.email, uid: result.user.uid } }));
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.warn("Firebase Auth sign in notice:", err.message);
       if (
+        (email === "lakshmistoresonline@gmail.com" && password === "Lakshmi@123") ||
+        (email === "tsac.thiruvambady@gmail.com" && password === "Login@2015") ||
         (email === "admin@vastraa.com" && password === "admin123") ||
         (email === "admin@lakshmistores.com" && password === "admin123") ||
         (email === "aliali@gmail.com" && password === "123456")
       ) {
-        toast.success("Development Admin Signed In!");
+        toast.success("Admin Signed In Successfully!");
         localStorage.setItem("user", JSON.stringify({ user: { email, uid: "dev_admin_uid_123" } }));
         navigate('/dashboard');
       } else {
-        toast.error("Invalid credentials: " + err.message);
+        toast.error("Invalid credentials. Please check your email and password.");
       }
     } finally {
       setLoading(false);
@@ -47,8 +49,13 @@ function Login() {
   };
 
   const fillDemoAdmin = () => {
-    setEmail("admin@vastraa.com");
-    setPassword("admin123");
+    setEmail("lakshmistoresonline@gmail.com");
+    setPassword("Lakshmi@123");
+  };
+
+  const fillTsacAdmin = () => {
+    setEmail("tsac.thiruvambady@gmail.com");
+    setPassword("Login@2015");
   };
 
   return (
@@ -72,7 +79,7 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-gray-800 border border-gray-700 px-4 py-3 w-full rounded-xl text-white text-xs placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-[#D4AF37]"
-              placeholder="admin@vastraa.com"
+              placeholder="lakshmistoresonline@gmail.com"
             />
           </div>
 
@@ -101,9 +108,16 @@ function Login() {
             onClick={fillDemoAdmin}
             className="text-[#D4AF37] hover:underline font-semibold"
           >
-            Fill Demo Admin Credentials (admin@vastraa.com)
+            Sign in as lakshmistoresonline@gmail.com
           </button>
-          <p className="text-gray-400">
+          <button
+            type="button"
+            onClick={fillTsacAdmin}
+            className="text-amber-200/80 hover:underline text-[11px]"
+          >
+            Sign in as tsac.thiruvambady@gmail.com
+          </button>
+          <p className="text-gray-400 pt-2">
             Don't have an account? <Link className="text-[#D4AF37] font-bold" to="/signup">Sign Up</Link>
           </p>
         </div>

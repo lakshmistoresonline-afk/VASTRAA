@@ -77,10 +77,15 @@ export const ProtectedRoute = ({ children }) => {
 
 export const ProtectedRouteForAdmin = ({ children }) => {
   const admin = JSON.parse(localStorage.getItem('user'));
-  if (
-    admin &&
-    (admin.user.email === "admin@vastraa.com" || admin.user.email === "admin@lakshmistores.com" || admin.user.email === "aliali@gmail.com")
-  ) {
+  const allowedAdmins = [
+    "lakshmistoresonline@gmail.com",
+    "tsac.thiruvambady@gmail.com",
+    "admin@vastraa.com",
+    "admin@lakshmistores.com",
+    "aliali@gmail.com"
+  ];
+
+  if (admin && admin.user && allowedAdmins.includes(admin.user.email)) {
     return children;
   } else {
     return <Navigate to="/login" />;

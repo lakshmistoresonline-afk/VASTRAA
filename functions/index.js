@@ -9,7 +9,7 @@ if (getApps().length === 0) {
 
 const db = getFirestore();
 
-// Catalogues A, B & C Album Configuration
+// Master Catalogues A through I Album Configuration
 const ALBUM_CONFIGS = [
   {
     code: "A",
@@ -17,8 +17,8 @@ const ALBUM_CONFIGS = [
     categoryName: "Kanchipuram Pure Wedding Silk Sarees",
     indicativePriceRange: "₹13,500–₹32,500",
     albums: [
-      "https://photos.app.goo.gl/pOvLBxk4N3ojCnmp2",
-      "https://photos.app.goo.gl/7nOr1gWP5mkjwfFu1"
+      "https://photos.google.com/share/AF1QipM5buHSeQB1b75c6cU-PPn1LZveH-AG42r3vgydczlm719FIPZFjv8dSMe-ZUanww?key=RF9SUzQ3ODVSNVNVcjJtV0k3X1V1cFo3b1V0bmpR",
+      "https://photos.google.com/share/AF1QipOUZyYAexal5fGBenQyi5diXX3W0Q3HpRKWWNgn93Uih-Y3qX1KaMPk7dEn5MiFDw?key=dzUtZVM2Zk5KVWhiVU9fN2x4WGhGZXhCQjcyVktn"
     ]
   },
   {
@@ -27,17 +27,71 @@ const ALBUM_CONFIGS = [
     categoryName: "Kanchipuram Pure Fancy Silk Sarees",
     indicativePriceRange: "₹12,500–₹18,500",
     albums: [
-      "https://photos.app.goo.gl/pz6VcrL9fSlxekUu2",
-      "https://photos.app.goo.gl/1CsVnqOHO82n5FZS2"
+      "https://photos.google.com/share/AF1QipPpwz18816TyQUvaLH6NgO-w0GTkyguKUZgZ5HFbaDt1P8qIxHJS_qviVzw3-QsaA?key=ZDBRMS1pdTUzYlZEbnZVcno2a18td1VFVEpJTHZn",
+      "https://photos.google.com/share/AF1QipN4GWZm3N0lV3OgSTHYOQ-Sn7FNoDxgERKxixJJDCcno-QeXvL9eOIBHhZticqiJA?key=TXdpN2NRdlBmTEZjMmpBdW1TOGNSR2Jua1FGdlR3"
     ]
   },
   {
     code: "C",
     catalogueId: "kanchipuram-pure-soft-silk",
     categoryName: "Kanchipuram Pure Soft Silk Sarees",
-    indicativePriceRange: "₹8,000–₹13,000",
+    indicativePriceRange: "₹7,500–₹13,000",
     albums: [
-      "https://photos.app.goo.gl/jcEruUx6uTlPrugM2"
+      "https://photos.google.com/share/AF1QipPxV-MCf5356GxsAEtqby1kEdXSx2Yh_vihtiovSWjMAMugeJ5vXYU8GlIDktr_Eg?key=Y1Z2YTNaVTQ2TzJEb2p5ZmhSQl9PQ3RrOEY4elVR"
+    ]
+  },
+  {
+    code: "D",
+    catalogueId: "semi-silk-sarees",
+    categoryName: "Semi Silk Sarees",
+    indicativePriceRange: "₹4,500–₹6,000",
+    albums: [
+      "https://photos.google.com/share/AF1QipOU0_QV4PhyU1j8g1RenSePPwoVSp_hu0beFdrM8t1nSWGAr-tS_325RxNMPB90EA?key=WVlrNFhtVXVGMTBFd0I3TWt1TG1xT3A1b21XVkJ3"
+    ]
+  },
+  {
+    code: "E",
+    catalogueId: "semi-fancy-silk-sarees",
+    categoryName: "Semi Fancy Silk Sarees",
+    indicativePriceRange: "₹2,500–₹4,000",
+    albums: [
+      "https://photos.google.com/share/AF1QipPpaTrA8zA5d7F5dSfg4tclarHYZEE-B7V_LfZXjqM64zmfpEDSJA3_Kjetk0U7cw?key=bDlHcWhmS0dyWjJNRFV1TWdMbnNHc3JBMkYxNkhn"
+    ]
+  },
+  {
+    code: "F",
+    catalogueId: "semi-kanchipuram-art-silk",
+    categoryName: "Semi Kanchipuram Art Silk Sarees",
+    indicativePriceRange: "₹3,500–₹6,000",
+    albums: [
+      "https://photos.google.com/share/AF1QipNzEH9t3GatRzJk9nQS4VTM78LipiFDN40W62tXfOuoJKVmLSnY8lgZsVeMlc41OA?key=Z1JIUUVLR0RFOURhWjB1THcxX2gtV1MyOUdJRElR"
+    ]
+  },
+  {
+    code: "G",
+    catalogueId: "butta-art-silk-sarees",
+    categoryName: "Butta Art Silk Sarees",
+    indicativePriceRange: "₹2,000–₹3,500",
+    albums: [
+      "https://photos.google.com/share/AF1QipNzudmR-0rGGDlLb5eXy4gaxT5EO3FzmPSZAwwo-4Pu0njqKMt8lBkqiVUhkulZuA?key=dzhCRHgwaHI4S1FtUUZNd2FQcHRwZ0R2V2N6RFln"
+    ]
+  },
+  {
+    code: "H",
+    catalogueId: "semi-art-silk-sarees",
+    categoryName: "Semi Art Silk Sarees",
+    indicativePriceRange: "₹1,500–₹3,000",
+    albums: [
+      "https://photos.google.com/share/AF1QipPGf18s1b4V83e1XUT9Wj6h_2CE7r1HfgCceqCKQTD2GTgvbo_xhOXS5CNiDmiOLg?key=ZkMtODl1blppejBkd0ZzcF9VR2llMjlVR1k4ZUlB"
+    ]
+  },
+  {
+    code: "I",
+    catalogueId: "arts-silk-sarees",
+    categoryName: "Arts Silk Sarees",
+    indicativePriceRange: "₹1,500–₹3,000",
+    albums: [
+      "https://photos.google.com/share/AF1QipM3AE5rmOtboDdT8_mGkU5luAceaRlZUzZsDmG0JulL0-FWD7JoppsWMuKYpuXP4g?key=TlgzUHM0RkF5YlBlMzBZeTM5Rm5HbDlWdDZXa1J3"
     ]
   }
 ];
