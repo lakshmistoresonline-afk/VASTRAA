@@ -72,14 +72,14 @@ export default function Footer() {
           <div className="lg:col-span-3 space-y-3 bg-slate-900 p-6 rounded-3xl border border-slate-800 text-xs">
             <h3 className="font-bold text-white flex items-center gap-2 text-sm">
               <FiCheckCircle className="text-emerald-400 w-5 h-5 flex-shrink-0" />
-              Live Google Sync Active
+              Live Showroom Sync Active
             </h3>
             <p className="text-gray-400 text-xs leading-relaxed">
-              Our website inventory is synced directly with official Google Photos shared albums managed by Vastraa & Lakshmi Stores owners in Thrissur.
+              Our website inventory is synchronized with official Vastraa showroom inventory feeds managed in Thrissur.
             </p>
             <div className="pt-3 border-t border-slate-800 space-y-1">
               <span className="text-[#D4AF37] font-bold block">100% Handloom Assurance</span>
-              <span className="text-gray-400 text-[11px]">Silk Mark Certified Handloom Weaves</span>
+              <span className="text-gray-400 text-[11px]">Handloom Pure Silk Weaves</span>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ export default function Footer() {
         <div className="container mx-auto px-5 max-w-7xl flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 gap-3">
           <p>© {new Date().getFullYear()} Vastraa — A Co-Brand of Lakshmi Stores, Round West, Thrissur, Kerala. All rights reserved.</p>
           <div className="flex gap-6 font-semibold">
-            <Link to="/allproducts" className="hover:text-white transition-colors">All Catalogues</Link>
+            <Link to="/allproducts" className="hover:text-white transition-colors">Silk Sarees</Link>
             <Link to="/order" className="hover:text-white transition-colors">Enquiries</Link>
             <Link to="/dashboard" className="text-[#D4AF37] hover:underline">Admin Portal</Link>
           </div>

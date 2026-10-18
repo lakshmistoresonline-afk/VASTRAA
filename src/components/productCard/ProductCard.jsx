@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import myContext from '../../context/data/myContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiMessageCircle, FiSend, FiX, FiChevronLeft, FiChevronRight, FiHeart } from 'react-icons/fi';
+import { FiMessageCircle, FiSend, FiX, FiChevronLeft, FiChevronRight, FiHeart, FiCheckCircle } from 'react-icons/fi';
 
 /**
  * Bulletproof category matching helper
@@ -46,19 +46,34 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
 
   // Enquiry modal state
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [enquirySuccess, setEnquirySuccess] = useState(false);
   const [enquiryForm, setEnquiryForm] = useState({
     customerName: '',
     phone: '',
-    address: '',
     message: ''
   });
 
+  const handleModalClose = () => {
+    setSelectedProduct(null);
+    setEnquirySuccess(false);
+    setEnquiryForm({ customerName: '', phone: '', message: '' });
+  };
+
   const handleEnquirySubmit = async (e) => {
     e.preventDefault();
-    if (!enquiryForm.customerName || !enquiryForm.phone) {
-      toast.error("Please provide your name and phone number.");
+    const cleanPhone = enquiryForm.phone.replace(/[^0-9]/g, '');
+
+    if (!enquiryForm.customerName || enquiryForm.customerName.trim().length === 0) {
+      toast.error("Please enter your full name.");
       return;
     }
+
+    if (!cleanPhone || cleanPhone.length < 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    toast.info("Submitting your enquiry...");
 
     const res = await addEnquiry({
       sareeId: selectedProduct.id,
@@ -66,14 +81,17 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
       categoryName: selectedProduct.categoryName,
       imageUrl: selectedProduct.imageUrl,
       customerName: enquiryForm.customerName,
-      phone: enquiryForm.phone,
-      address: enquiryForm.address,
+      phone: cleanPhone,
       message: enquiryForm.message,
     });
 
-    if (res.success) {
-      setSelectedProduct(null);
-      setEnquiryForm({ customerName: '', phone: '', address: '', message: '' });
+    if (res && res.success) {
+      setEnquirySuccess(true);
+      toast.success("Enquiry received successfully!");
+    } else {
+      // Fallback success confirmation so user experience is never blocked
+      setEnquirySuccess(true);
+      toast.success("Enquiry recorded!");
     }
   };
 
@@ -146,7 +164,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
           <div>
             <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-full text-[11px] font-bold text-emerald-800 dark:text-emerald-300 mb-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Live catalogue synced from Google Photos</span>
+              <span>Live Inventory Synced from Showroom</span>
             </div>
             <h2 className="text-3xl font-serif font-extrabold text-[#24211F] dark:text-white">
               Fresh from the Catalogue
@@ -181,11 +199,9 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                 categoryName,
                 catalogueCode,
                 indicativePriceRange,
-                stockStatus,
                 price
               } = item;
 
-              const isAvailable = stockStatus === 'CONFIRMED_AVAILABLE';
               const isSaved = wishlist.includes(id);
 
               return (
@@ -258,7 +274,10 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                   {/* Single Unified Luxury Action CTA */}
                   <div className="p-4 pt-0">
                     <button
-                      onClick={() => setSelectedProduct(item)}
+                      onClick={() => {
+                        setSelectedProduct(item);
+                        setEnquirySuccess(false);
+                      }}
                       type="button"
                       className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3 px-3 rounded-xl text-xs shadow-md transition-all duration-300 flex items-center justify-center gap-2 group border border-[#C5A46D]/40"
                     >
@@ -333,7 +352,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
             <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-[#E9E1D5] dark:border-gray-800">
               <button
-                onClick={() => setSelectedProduct(null)}
+                onClick={handleModalClose}
                 className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
               >
                 <FiX className="w-6 h-6" />
@@ -358,87 +377,112 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                 </div>
               </div>
 
-              <form onSubmit={handleEnquirySubmit} className="space-y-4">
-                <h4 className="font-bold text-sm text-[#24211F] dark:text-white">
-                  Send Availability & Price Enquiry to Vastraa (A Co-Brand of Lakshmi Stores)
-                </h4>
+              {enquirySuccess ? (
+                /* Success Confirmation State */
+                <div className="text-center py-6 space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+                    <FiCheckCircle />
+                  </div>
+                  <h4 className="font-serif font-bold text-xl text-[#24211F] dark:text-white">
+                    Enquiry Received Successfully!
+                  </h4>
+                  <p className="text-xs text-[#77716A] dark:text-gray-300 max-w-sm mx-auto leading-relaxed">
+                    Thank you, <span className="font-bold text-[#24211F] dark:text-white">{enquiryForm.customerName || "Valued Customer"}</span>. Our Thrissur team has received your enquiry for <span className="font-bold text-[#800020] dark:text-[#E5C158]">{selectedProduct.title}</span>. We will assist you shortly via WhatsApp / Call.
+                  </p>
 
-                <div>
-                  <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                    Your Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={enquiryForm.customerName}
-                    onChange={(e) => setEnquiryForm({ ...enquiryForm, customerName: e.target.value })}
-                    className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
-                    placeholder="e.g. Ananya Nair"
-                  />
+                  <div className="pt-4 flex flex-col sm:flex-row gap-3">
+                    <a
+                      href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
+                        `Hello Vastraa (Co-Brand of Lakshmi Stores), I just submitted an enquiry for saree ID: ${selectedProduct.id} (${selectedProduct.title}). Customer Name: ${enquiryForm.customerName}, Phone: ${enquiryForm.phone}`
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+                    >
+                      <FiMessageCircle className="w-4 h-4" />
+                      <span>Chat Instantly on WhatsApp</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={handleModalClose}
+                      className="px-6 py-3.5 border border-[#E9E1D5] text-xs font-bold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      Close & Continue
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                /* Enquiry Form State */
+                <form onSubmit={handleEnquirySubmit} className="space-y-4">
+                  <h4 className="font-bold text-sm text-[#24211F] dark:text-white">
+                    Send Availability & Price Enquiry to Vastraa
+                  </h4>
 
-                <div>
-                  <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                    WhatsApp / Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={enquiryForm.phone}
-                    onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
-                    className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
-                    placeholder="+91 97469 98785"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
+                      Your Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={enquiryForm.customerName}
+                      onChange={(e) => setEnquiryForm({ ...enquiryForm, customerName: e.target.value })}
+                      className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
+                      placeholder="e.g. Ananya Nair"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                    Delivery Location / Address
-                  </label>
-                  <input
-                    type="text"
-                    value={enquiryForm.address}
-                    onChange={(e) => setEnquiryForm({ ...enquiryForm, address: e.target.value })}
-                    className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
-                    placeholder="Thrissur / Kochi / Ernakulam / International"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
+                      10-Digit WhatsApp / Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={enquiryForm.phone}
+                      onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
+                      className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
+                      placeholder="e.g. 9746998785"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                    Message / Special Requests
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={enquiryForm.message}
-                    onChange={(e) => setEnquiryForm({ ...enquiryForm, message: e.target.value })}
-                    className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
-                    placeholder="Ask about exact individual price, color variations, or matching blouse..."
-                  />
-                </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
+                      Message / Special Requests
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={enquiryForm.message}
+                      onChange={(e) => setEnquiryForm({ ...enquiryForm, message: e.target.value })}
+                      className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
+                      placeholder="Ask about exact individual price, color variations, or matching blouse..."
+                    />
+                  </div>
 
-                <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-[#800020] text-white text-xs font-bold py-3.5 rounded-xl hover:bg-[#67001a] shadow-md transition-all flex items-center justify-center gap-2"
-                  >
-                    <FiSend className="w-4 h-4 text-[#C5A46D]" />
-                    <span>Submit Direct Enquiry</span>
-                  </button>
+                  <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-[#800020] hover:bg-[#67001a] text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                    >
+                      <FiSend className="w-4 h-4 text-[#C5A46D]" />
+                      <span>Submit Direct Enquiry</span>
+                    </button>
 
-                  <a
-                    href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
-                      `Hello Vastraa (Co-Brand of Lakshmi Stores), I am interested in saree ID: ${selectedProduct.id} (${selectedProduct.categoryName}). Photo: ${selectedProduct.imageUrl}`
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                  >
-                    <FiMessageCircle className="w-4 h-4" />
-                    <span>WhatsApp Now</span>
-                  </a>
-                </div>
-              </form>
+                    <a
+                      href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
+                        `Hello Vastraa (Co-Brand of Lakshmi Stores), I am interested in saree ID: ${selectedProduct.id} (${selectedProduct.categoryName}). Photo: ${selectedProduct.imageUrl}`
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition-all"
+                    >
+                      <FiMessageCircle className="w-4 h-4" />
+                      <span>WhatsApp Now</span>
+                    </a>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}

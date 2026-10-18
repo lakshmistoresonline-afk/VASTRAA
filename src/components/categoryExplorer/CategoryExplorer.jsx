@@ -90,13 +90,13 @@ function CategoryExplorer() {
         <div>
           <div className="text-center max-w-3xl mx-auto mb-8">
             <span className="text-[#800020] dark:text-[#E5C158] font-bold text-xs uppercase tracking-widest block mb-1">
-              Live Showroom Albums
+              Live Showroom Collections
             </span>
             <h2 className="text-2xl sm:text-3xl font-serif font-extrabold text-[#24211F] dark:text-white">
               All 9 Live Silk Saree Catalogues (A through I)
             </h2>
             <p className="text-xs text-[#77716A] dark:text-gray-400 mt-1">
-              Synced live from Google Photos shared albums. Over 3,250 verified silk sarees in stock.
+              Synced live from showroom inventory feeds. Over 3,250 verified silk sarees in stock.
             </p>
           </div>
 

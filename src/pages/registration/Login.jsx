@@ -32,7 +32,6 @@ function Login() {
       console.warn("Firebase Auth sign in notice:", err.message);
       if (
         (email === "lakshmistoresonline@gmail.com" && password === "Lakshmi@123") ||
-        (email === "tsac.thiruvambady@gmail.com" && password === "Login@2015") ||
         (email === "admin@vastraa.com" && password === "admin123") ||
         (email === "admin@lakshmistores.com" && password === "admin123") ||
         (email === "aliali@gmail.com" && password === "123456")
@@ -51,11 +50,6 @@ function Login() {
   const fillDemoAdmin = () => {
     setEmail("lakshmistoresonline@gmail.com");
     setPassword("Lakshmi@123");
-  };
-
-  const fillTsacAdmin = () => {
-    setEmail("tsac.thiruvambady@gmail.com");
-    setPassword("Login@2015");
   };
 
   return (
@@ -109,13 +103,6 @@ function Login() {
             className="text-[#D4AF37] hover:underline font-semibold"
           >
             Sign in as lakshmistoresonline@gmail.com
-          </button>
-          <button
-            type="button"
-            onClick={fillTsacAdmin}
-            className="text-amber-200/80 hover:underline text-[11px]"
-          >
-            Sign in as tsac.thiruvambady@gmail.com
           </button>
           <p className="text-gray-400 pt-2">
             Don't have an account? <Link className="text-[#D4AF37] font-bold" to="/signup">Sign Up</Link>

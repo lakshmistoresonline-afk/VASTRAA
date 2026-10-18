@@ -20,6 +20,11 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  const isAdmin = user?.user?.email === "lakshmistoresonline@gmail.com" ||
+                  user?.user?.email === "admin@vastraa.com" ||
+                  user?.user?.email === "admin@lakshmistores.com" ||
+                  user?.user?.email === "aliali@gmail.com";
+
   return (
     <div className="sticky top-0 z-50">
       {/* Top Announcement Bar */}
@@ -31,7 +36,7 @@ const Navbar = () => {
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs">
             <span className="flex items-center gap-1">
-              <FiCheckCircle className="text-emerald-400" /> Live Google Photos Silk Catalogue Sync
+              <FiCheckCircle className="text-emerald-400" /> Live Showroom Inventory Synced
             </span>
             <a
               href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}`}
@@ -39,7 +44,7 @@ const Navbar = () => {
               rel="noreferrer"
               className="text-[#E5C158] hover:underline flex items-center gap-1 font-bold"
             >
-              📞 Enquiry: {storeInfo?.phone || "+91 97469 98785"}
+              📞 Hotline / Enquiry: {storeInfo?.phone || "+91 97469 98785"}
             </a>
           </div>
         </div>
@@ -74,41 +79,35 @@ const Navbar = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation Category Pills */}
+            {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center space-x-1 bg-[#FAF7F0] dark:bg-gray-800/80 p-1.5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700/50">
               <Link
                 to="/"
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
               >
                 Home
               </Link>
               <Link
                 to="/allproducts"
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
               >
                 Silk Sarees
               </Link>
               <Link
-                to="/allproducts"
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
-              >
-                Catalogues A–I
-              </Link>
-              <Link
                 to="/order"
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
               >
                 Enquiries & Orders
               </Link>
 
-              {user?.user?.email === "admin@vastraa.com" || user?.user?.email === "admin@lakshmistores.com" || user?.user?.email === "aliali@gmail.com" ? (
+              {isAdmin && (
                 <Link
                   to="/dashboard"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#800020] text-amber-100 shadow-md hover:bg-[#67001a] transition-all"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#800020] text-amber-100 shadow-md hover:bg-[#67001a] transition-all"
                 >
                   Admin Portal
                 </Link>
-              ) : null}
+              )}
             </div>
 
             {/* Right Actions */}
@@ -222,11 +221,11 @@ const Navbar = () => {
                   <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-[#24211F] dark:text-white">
                     📩 Enquiries & Orders
                   </Link>
-                  {user?.user?.email === "admin@vastraa.com" || user?.user?.email === "admin@lakshmistores.com" || user?.user?.email === "aliali@gmail.com" ? (
+                  {isAdmin && (
                     <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#800020] text-amber-100 font-bold">
                       🔑 Admin Dashboard
                     </Link>
-                  ) : null}
+                  )}
 
                   {user ? (
                     <button onClick={logout} className="block w-full text-left py-2.5 px-3 text-rose-600 font-bold">
