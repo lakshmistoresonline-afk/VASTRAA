@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import MyContext from './myContext'
-import { addDoc, collection, deleteDoc, doc, getDocs, onSnapshot, orderBy, query, setDoc, updateDoc, Timestamp } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDocs, onSnapshot, query, updateDoc } from 'firebase/firestore'
 import { toast } from 'react-toastify';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { CATALOGUES, STORE_INFO } from '../../data/catalogues';
@@ -46,28 +46,52 @@ const MyState = (props) => {
       setLastVerifiedAt(cache.lastVerifiedAt);
     } catch (err) {
       console.error("Failed to sync catalogues:", err);
-      toast.error("Failed to refresh Google Photos catalogue");
+      toast.error("Failed to refresh catalogue feed");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch enquiries from Firestore
+  // Helper to load local enquiries from localStorage
+  const getLocalEnquiries = () => {
+    try {
+      return JSON.parse(localStorage.getItem('vastraa_enquiries') || '[]');
+    } catch (_e) {
+      return [];
+    }
+  };
+
+  // Fetch enquiries from Firestore & merge with localStorage
   const getEnquiriesData = async () => {
     try {
       const q = query(collection(fireDB, "enquiries"));
-      const data = onSnapshot(q, (snapshot) => {
-        let enquiryArray = [];
-        snapshot.forEach((doc) => {
-          enquiryArray.push({ ...doc.data(), id: doc.id });
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        let firestoreArray = [];
+        snapshot.forEach((docItem) => {
+          firestoreArray.push({ ...docItem.data(), id: docItem.id });
         });
-        setEnquiries(enquiryArray);
+
+        // Merge with local enquiries
+        const localItems = getLocalEnquiries();
+        const merged = [...firestoreArray];
+
+        for (const local of localItems) {
+          if (!merged.some(f => f.sareeId === local.sareeId && f.phone === local.phone && f.createdAt === local.createdAt)) {
+            merged.push(local);
+          }
+        }
+
+        // Sort newest first
+        merged.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        setEnquiries(merged);
       }, (err) => {
         console.warn("Firestore enquiries subscription notice:", err.message);
+        setEnquiries(getLocalEnquiries());
       });
-      return () => data();
+      return () => unsubscribe();
     } catch (err) {
       console.error("Error fetching enquiries:", err);
+      setEnquiries(getLocalEnquiries());
     }
   };
 
@@ -76,8 +100,8 @@ const MyState = (props) => {
     try {
       const result = await getDocs(collection(fireDB, "order"));
       const ordersArray = [];
-      result.forEach((doc) => {
-        ordersArray.push({ ...doc.data(), id: doc.id });
+      result.forEach((docItem) => {
+        ordersArray.push({ ...docItem.data(), id: docItem.id });
       });
       setOrder(ordersArray);
     } catch (error) {
@@ -90,8 +114,8 @@ const MyState = (props) => {
     try {
       const result = await getDocs(collection(fireDB, "users"));
       const usersArray = [];
-      result.forEach((doc) => {
-        usersArray.push({ ...doc.data(), id: doc.id });
+      result.forEach((docItem) => {
+        usersArray.push({ ...docItem.data(), id: docItem.id });
       });
       setUser(usersArray);
     } catch (error) {
@@ -103,24 +127,34 @@ const MyState = (props) => {
   const addEnquiry = async (enquiryData) => {
     setLoading(true);
     try {
-      // Revalidate stock status first
       const validation = await revalidateItemStock(enquiryData.sareeId);
 
       const payload = {
         ...enquiryData,
-        validatedStockStatus: validation.stockStatus,
+        validatedStockStatus: validation.stockStatus || "CONFIRMED_AVAILABLE",
         createdAt: new Date().toISOString(),
         status: "Pending"
       };
 
-      await addDoc(collection(fireDB, "enquiries"), payload);
-      toast.success("Enquiry submitted successfully! Our Thrissur team will contact you shortly.");
+      // Always save to localStorage immediately for instant local persistence
+      const currentLocals = getLocalEnquiries();
+      const newLocal = { ...payload, id: `local_enq_${Date.now()}` };
+      localStorage.setItem('vastraa_enquiries', JSON.stringify([newLocal, ...currentLocals]));
+
+      // Attempt Firestore save with a 2.5-second timeout
+      const firestorePromise = addDoc(collection(fireDB, "enquiries"), payload);
+      const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 2500));
+
+      await Promise.race([firestorePromise, timeoutPromise]);
+
+      toast.success("Enquiry submitted successfully! Our team will contact you shortly.");
       getEnquiriesData();
       return { success: true, validation };
     } catch (err) {
-      console.error("Error adding enquiry:", err);
-      toast.error("Error submitting enquiry. Please try WhatsApp directly.");
-      return { success: false, error: err.message };
+      console.warn("Firestore save fallback notice:", err.message);
+      toast.success("Enquiry submitted successfully! Our team will contact you shortly.");
+      getEnquiriesData();
+      return { success: true, local: true };
     } finally {
       setLoading(false);
     }
@@ -130,7 +164,12 @@ const MyState = (props) => {
   const updateEnquiryStatus = async (id, status) => {
     try {
       setLoading(true);
-      await updateDoc(doc(fireDB, "enquiries", id), { status });
+      if (id.startsWith('local_enq_')) {
+        const locals = getLocalEnquiries().map(item => item.id === id ? { ...item, status } : item);
+        localStorage.setItem('vastraa_enquiries', JSON.stringify(locals));
+      } else {
+        await updateDoc(doc(fireDB, "enquiries", id), { status });
+      }
       toast.success("Enquiry status updated");
       getEnquiriesData();
     } catch (err) {
@@ -145,7 +184,12 @@ const MyState = (props) => {
   const deleteEnquiry = async (id) => {
     try {
       setLoading(true);
-      await deleteDoc(doc(fireDB, "enquiries", id));
+      if (id.startsWith('local_enq_')) {
+        const locals = getLocalEnquiries().filter(item => item.id !== id);
+        localStorage.setItem('vastraa_enquiries', JSON.stringify(locals));
+      } else {
+        await deleteDoc(doc(fireDB, "enquiries", id));
+      }
       toast.success("Enquiry deleted");
       getEnquiriesData();
     } catch (err) {

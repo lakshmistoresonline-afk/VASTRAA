@@ -58,7 +58,7 @@ export const CATALOGUES = [
       "https://photos.google.com/share/AF1QipOU0_QV4PhyU1j8g1RenSePPwoVSp_hu0beFdrM8t1nSWGAr-tS_325RxNMPB90EA?key=WVlrNFhtVXVGMTBFd0I3TWt1TG1xT3A1b21XVkJ3"
     ],
     description: "Rich blended semi silk sarees offering lustre, lightweight comfort, and traditional appeal.",
-    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczMD2X6LgU3yL2qR2Z_9x_Kz5pT9v4M9w2K_1_v2=w1024-h1024"
+    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczOq12j8JAbQw9EXpbSfF7_I0aTwWWsPwmFEZf_TXDReyu6zo3mJHCKt7zkdYaHuf-XQwhWIWf0gJlh71ZIXGJoc0FFLpotksLd24zC2kULXy6_bBWz_=w1024-h1024"
   },
   {
     id: "semi-fancy-silk-sarees",
@@ -71,7 +71,7 @@ export const CATALOGUES = [
       "https://photos.google.com/share/AF1QipPpaTrA8zA5d7F5dSfg4tclarHYZEE-B7V_LfZXjqM64zmfpEDSJA3_Kjetk0U7cw?key=bDlHcWhmS0dyWjJNRFV1TWdMbnNHc3JBMkYxNkhn"
     ],
     description: "Modern fancy borders and vibrant color combinations crafted for festive occasions.",
-    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczN8_X2v_11vM3q5w4x_3m9K12_3v2=w1024-h1024"
+    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczMfz2DVced6gEp48kRDLTM7sPBppzf0rTzc-Lf1vrSzMYCD0ZuhtZ3B7Dhmi6NBO8BCf9DogEjnXXkdnkRo1ZyB7xyXWoQT7KMBtfLg_EgCiwcqvY4V=w1024-h1024"
   },
   {
     id: "semi-kanchipuram-art-silk",
@@ -84,7 +84,7 @@ export const CATALOGUES = [
       "https://photos.google.com/share/AF1QipNzEH9t3GatRzJk9nQS4VTM78LipiFDN40W62tXfOuoJKVmLSnY8lgZsVeMlc41OA?key=Z1JIUUVLR0RFOURhWjB1THcxX2gtV1MyOUdJRElR"
     ],
     description: "Artistic silk saree weaves featuring rich Kanchipuram-style traditional motifs.",
-    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczO2_Y3w_22vN4r6x5y_4n0L23_4w3=w1024-h1024"
+    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczPVIT0M0chcKvg5KUY8ajFCDLJGg_MYIoRVKszBnGtWYdi2yJM93k6IyZkCEoK6quOkp3hr77C2N01yrTQWnzaNqs0-TDjci2Va1huSU8S0J_sIUEZm=w1024-h1024"
   },
   {
     id: "butta-art-silk-sarees",
@@ -97,7 +97,7 @@ export const CATALOGUES = [
       "https://photos.google.com/share/AF1QipNzudmR-0rGGDlLb5eXy4gaxT5EO3FzmPSZAwwo-4Pu0njqKMt8lBkqiVUhkulZuA?key=dzhCRHgwaHI4S1FtUUZNd2FQcHRwZ0R2V2N6RFln"
     ],
     description: "Delicate butta work silk sarees perfect for wedding gifting and festive return gifts.",
-    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczP3_Z4x_33vO5s7y6z_5o1M34_5x4=w1024-h1024"
+    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczPxCMal4IXvX3D6sy75E7AnaW9MEeYbNYfEr-bykywe7ItWWxzJDMPfdOC4up5ijBaGYtgpqeC-68NFD-l2anpEJfqOFMY36sidxEO6SjkZoWiInO4e=w1024-h1024"
   },
   {
     id: "semi-art-silk-sarees",
@@ -110,7 +110,7 @@ export const CATALOGUES = [
       "https://photos.google.com/share/AF1QipPGf18s1b4V83e1XUT9Wj6h_2CE7r1HfgCceqCKQTD2GTgvbo_xhOXS5CNiDmiOLg?key=ZkMtODl1blppejBkd0ZzcF9VR2llMjlVR1k4ZUlB"
     ],
     description: "Classy plain and contrast pallu semi art silk sarees for everyday elegance.",
-    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczQ4_a5y_44vP6t8z7a_6p2N45_6y5=w1024-h1024"
+    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczPDJ1JSBYBkNmKXrrnpmQs0CED8PAQV1JRVaa6yrRyydYemaQP9u8hzfqmrXy-2uRPM0gsXP0PYpRKkaWpL4ZpU2xVJNFz5Dk9WbrgcMmFiBSzwMjca=w1024-h1024"
   },
   {
     id: "arts-silk-sarees",
@@ -123,7 +123,7 @@ export const CATALOGUES = [
       "https://photos.google.com/share/AF1QipM3AE5rmOtboDdT8_mGkU5luAceaRlZUzZsDmG0JulL0-FWD7JoppsWMuKYpuXP4g?key=TlgzUHM0RkF5YlBlMzBZeTM5Rm5HbDlWdDZXa1J3"
     ],
     description: "Rich pallu art silk sarees combining lightweight comfort with traditional Kerala grace.",
-    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczR5_b6z_55vQ7u9a8b_7q3O56_7z6=w1024-h1024"
+    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczOzpM4YrcMNfE0b70g2UhcB78pVTTduFLzLvLUHAUhT9NGwJ5efsDjr_AY7Dr5asfjtCsjUu3ZPbj7d0oItriuOB40DJlnvuW8RmgIOKPA9gv4XBV8u=w1024-h1024"
   }
 ];
 
