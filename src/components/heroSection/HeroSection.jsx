@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiShield, FiTruck, FiRefreshCw } from 'react-icons/fi';
+import { FiArrowRight, FiShield, FiTruck, FiAward } from 'react-icons/fi';
 
 const HeroSection = () => {
   return (
@@ -74,10 +74,10 @@ const HeroSection = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <FiRefreshCw className="text-[#800020] dark:text-[#E5C158] w-4 h-4 flex-shrink-0" />
+                <FiAward className="text-[#800020] dark:text-[#E5C158] w-4 h-4 flex-shrink-0" />
                 <div>
-                  <p className="font-bold text-[#24211F] dark:text-white text-[11px]">Easy Returns</p>
-                  <p className="text-[10px]">Hassle-free online orders</p>
+                  <p className="font-bold text-[#24211F] dark:text-white text-[11px]">Handloom Guarantee</p>
+                  <p className="text-[10px]">100% Pure Silk Weaves</p>
                 </div>
               </div>
             </div>

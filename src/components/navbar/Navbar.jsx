@@ -32,7 +32,7 @@ const Navbar = () => {
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2 font-medium text-[11px] sm:text-xs">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Authentic Pure Silk Sarees • Pan India Express Shipping • Easy Returns</span>
+            <span>Authentic Pure Silk Sarees • Pan India Express Shipping • Handloom Guarantee</span>
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs">
             <span className="flex items-center gap-1">
