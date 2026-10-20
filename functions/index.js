@@ -205,6 +205,77 @@ export const syncGooglePhotos = onRequest({ cors: true }, async (req, res) => {
 });
 
 /**
+ * HTTP Endpoint: /sendOwnerWhatsAppNotification
+ * Secure serverless notification handler for store owners
+ */
+export const sendOwnerWhatsAppNotification = onRequest({ cors: true }, async (req, res) => {
+  try {
+    const { enquiryId, customerName, phone, sareeId, sareeTitle, categoryName } = req.body || {};
+
+    if (!customerName || !phone) {
+      return res.status(400).json({ success: false, error: "Missing required enquiry details." });
+    }
+
+    const token = process.env.WHATSAPP_API_TOKEN;
+    const phoneId = process.env.WHATSAPP_PHONE_ID;
+    const recipientPhone = process.env.STORE_RECIPIENT_PHONE || "919746998785";
+
+    if (!token || !phoneId) {
+      // Record job as pending setup if tokens are not yet configured in environment secrets
+      await db.collection("notification_jobs").add({
+        enquiryId,
+        customerName,
+        phone,
+        sareeId,
+        sareeTitle,
+        categoryName,
+        status: "PENDING_SECRETS_SETUP",
+        createdAt: new Date().toISOString()
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Enquiry notification recorded in job queue. Configure WHATSAPP_API_TOKEN secrets in Firebase console for live Meta Cloud API delivery."
+      });
+    }
+
+    // Call Meta Cloud API when secrets are configured
+    const metaResponse = await fetch(`https://graph.facebook.com/v18.0/${phoneId}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: recipientPhone,
+        type: "text",
+        text: {
+          body: `*NEW SAREE ENQUIRY — VASTRAA*\n\n*CUSTOMER*\nName: ${customerName}\nPhone: ${phone}\n\n*SAREE*\nTitle: ${sareeTitle}\nCode: ${sareeId}\nCategory: ${categoryName}\n\nEnquiry Ref: ${enquiryId || 'NEW'}`
+        }
+      })
+    });
+
+    const metaData = await metaResponse.json();
+
+    await db.collection("notification_jobs").add({
+      enquiryId,
+      customerName,
+      phone,
+      sareeId,
+      status: metaResponse.ok ? "SENT" : "FAILED",
+      metaResponse: metaData,
+      createdAt: new Date().toISOString()
+    });
+
+    res.status(200).json({ success: true, metaResponse: metaData });
+  } catch (err) {
+    console.error("WhatsApp Notification Error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
  * Scheduled Cron Job: Runs automatically every 30 minutes in the cloud
  */
 export const scheduledGooglePhotosSync = onSchedule("every 30 minutes", async () => {
