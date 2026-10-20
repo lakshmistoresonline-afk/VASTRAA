@@ -5,6 +5,7 @@ service cloud.firestore {
     // Helper function to check if request is from an authorized admin user
     function isAdmin() {
       return request.auth != null && (
+        request.auth.token.email == "admin@gmail.com" ||
         request.auth.token.email == "lakshmistoresonline@gmail.com" ||
         request.auth.token.email == "admin@vastraa.com" ||
         request.auth.token.email == "admin@lakshmistores.com" ||

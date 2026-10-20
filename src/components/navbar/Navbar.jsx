@@ -20,7 +20,8 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const isAdmin = user?.user?.email === "lakshmistoresonline@gmail.com" ||
+  const isAdmin = user?.user?.email === "admin@gmail.com" ||
+                  user?.user?.email === "lakshmistoresonline@gmail.com" ||
                   user?.user?.email === "admin@vastraa.com" ||
                   user?.user?.email === "admin@lakshmistores.com" ||
                   user?.user?.email === "aliali@gmail.com";

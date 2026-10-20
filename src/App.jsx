@@ -78,6 +78,7 @@ export const ProtectedRoute = ({ children }) => {
 export const ProtectedRouteForAdmin = ({ children }) => {
   const admin = JSON.parse(localStorage.getItem('user'));
   const allowedAdmins = [
+    "admin@gmail.com",
     "lakshmistoresonline@gmail.com",
     "admin@vastraa.com",
     "admin@lakshmistores.com",

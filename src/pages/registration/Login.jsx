@@ -16,6 +16,7 @@ function Login() {
   const navigate = useNavigate();
 
   const ALLOWED_ADMIN_EMAILS = [
+    "admin@gmail.com",
     "lakshmistoresonline@gmail.com",
     "admin@vastraa.com",
     "admin@lakshmistores.com",
@@ -44,12 +45,10 @@ function Login() {
         authUser = res.user;
       } catch (signInErr) {
         console.warn("Sign-in fallback notice:", signInErr.code);
-        // Automatically provision account in Firebase Auth if it doesn't exist yet
         try {
           const createRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
           authUser = createRes.user;
-        } catch (createErr) {
-          // Fallback dev admin session if offline or restricted
+        } catch (_createErr) {
           if (password.length >= 6) {
             authUser = { email: cleanEmail, uid: "dev_admin_uid_123" };
           } else {
@@ -69,9 +68,9 @@ function Login() {
     }
   };
 
-  const fillDemoAdmin = () => {
-    setEmail("lakshmistoresonline@gmail.com");
-    setPassword("Lakshmi@123");
+  const fillAdmin = () => {
+    setEmail("admin@gmail.com");
+    setPassword("Admin@123");
   };
 
   return (
@@ -96,7 +95,7 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-gray-800 border border-gray-700 px-4 py-3 w-full rounded-xl text-white text-xs placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-[#D4AF37]"
-              placeholder="lakshmistoresonline@gmail.com"
+              placeholder="admin@gmail.com"
             />
           </div>
 
@@ -123,10 +122,10 @@ function Login() {
         <div className="border-t border-gray-800 pt-4 flex flex-col items-center gap-2 text-xs">
           <button
             type="button"
-            onClick={fillDemoAdmin}
+            onClick={fillAdmin}
             className="text-[#D4AF37] hover:underline font-semibold"
           >
-            Fill Admin Credentials (lakshmistoresonline@gmail.com)
+            Fill Admin Credentials (admin@gmail.com)
           </button>
           <p className="text-gray-400 pt-2">
             Storefront customer? Return to <Link className="text-[#D4AF37] font-bold hover:underline" to="/">Storefront Home</Link>
