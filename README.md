@@ -1,34 +1,34 @@
-# Lakshmi Stores — Google Photos Live Saree Catalogue
-**Round West, Thrissur, Kerala, India**
+# Vastraa — Traditional Weaves • Timeless Beauty
+**A Co-Brand of Lakshmi Stores | Round West, Thrissur, Kerala, India**
 
-![Lakshmi Stores Banner](https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1200)
+![Vastraa Banner](public/images/hero/hero-desktop.jpg)
 
 > **Tradition. Elegance. Trust.**  
-> An e-commerce web platform for Lakshmi Stores, Thrissur, Kerala. Stock availability is synchronized in real-time with official Google Photos albums managed directly by store owners.
+> An e-commerce web platform for Vastraa (A Co-Brand of Lakshmi Stores), Thrissur, Kerala. Stock availability is synchronized in real-time with official showroom inventory feeds.
 
 ---
 
 ## 🌟 Key Features
 
-* **Google Photos Source of Truth**: Live inventory synchronized directly with 9 Google Photos shared album categories. Photos added or deleted by store owners automatically update web availability.
-* **9 Configured Catalogues (A to I)**:
-  * **Catalogue A**: Kanchipuram Pure Wedding Silk Sarees (₹14,000–₹38,000)
-  * **Catalogue B**: Kanchipuram 100% Pure Fancy Silk Sarees (₹12,000–₹19,500)
-  * **Catalogue C**: Kanchipuram Pure Soft Silk Sarees (₹7,000–₹12,500)
-  * **Catalogue D**: K.M.D Silk Sarees (Pure Silk Plus Mix) (₹5,000–₹8,000)
-  * **Catalogue E**: Kanchi Semi Fancy Silk Sarees (₹2,500–₹7,500)
-  * **Catalogue F**: Semi Kanchipuram Arts Silk Sarees (₹4,000–₹8,500)
-  * **Catalogue G**: Gift Butta Arts Silk Sarees (₹2,000–₹4,100)
-  * **Catalogue H**: Semi Arts Silks Plain D.P (₹1,500–₹2,800)
-  * **Catalogue I**: Arts Silks R.P (₹1,800–₹2,800)
+* **Live Inventory Source**: Live inventory synchronized directly with 9 Google Photos shared album categories (A through I). Photos added or deleted by store owners automatically update web availability.
+* **All 9 Configured Catalogues (A to I)**:
+  * **Catalogue A**: Kanchipuram Pure Wedding Silk Sarees (₹13,500–₹32,500)
+  * **Catalogue B**: Kanchipuram Pure Fancy Silk Sarees (₹12,500–₹18,500)
+  * **Catalogue C**: Kanchipuram Pure Soft Silk Sarees (₹7,500–₹13,000)
+  * **Catalogue D**: Semi Silk Sarees (₹4,500–₹6,000)
+  * **Catalogue E**: Semi Fancy Silk Sarees (₹2,500–₹4,000)
+  * **Catalogue F**: Semi Kanchipuram Art Silk Sarees (₹3,500–₹6,000)
+  * **Catalogue G**: Butta Art Silk Sarees (₹2,000–₹3,500)
+  * **Catalogue H**: Semi Art Silk Sarees (₹1,500–₹3,000)
+  * **Catalogue I**: Arts Silk Sarees (₹1,500–₹3,000)
 * **Stock & Price Safeguards**: Individual saree prices default to **"Price on enquiry"**. Direct online checkout is disabled unless an item is confirmed available and explicitly priced.
 * **WhatsApp & Direct Enquiries**: Integrated modal enquiry submission and direct pre-filled WhatsApp links with saree ID and image URLs.
 * **Owner Admin Dashboard**:
-  * Live status for all 9 Google Photos album sources.
+  * Live status for all 9 album sources.
   * Trigger manual/scheduled catalogue refresh button.
   * Live inventory table with status indicators (`Live In Stock`, `Availability Confirmation Required`, `Unavailable/Removed`).
   * Customer enquiry management with status updates (`Pending`, `Contacted`, `Fulfilled`, `Cancelled`).
-* **Firebase Security**: Firestore security rules enforcing read/write restrictions for admin portals and public enquiry creation.
+* **Firebase Security**: Firestore security rules enforcing least-privilege read/write restrictions for admin portals and customer enquiry creation.
 
 ---
 
@@ -38,7 +38,7 @@
 * **Services**: Google Photos API / Shared Album Resolver, StockSyncService
 * **Database & Auth**: Firebase Firestore & Firebase Auth
 * **Testing**: Vitest 5, React Testing Library, JSDOM
-* **Styling**: Deep Maroon (`#800020`), Champagne Gold (`#D4AF37`), Warm Ivory (`#FAF8F5`)
+* **Styling**: Deep Maroon (`#800020`), Champagne Gold (`#C5A46D`), Warm Ivory (`#FAF7F0`)
 
 ---
 
@@ -51,7 +51,8 @@
 ### 2. Installation
 ```bash
 # Clone or navigate to the project root
-cd G:/ecommerce-website-with-admin-dashboard
+git clone https://github.com/lakshmistoresonline-afk/VASTRAA.git
+cd VASTRAA
 
 # Install dependencies
 npm install
@@ -74,7 +75,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ```bash
 npm test
 ```
-Executes all 12 mandatory unit and integration test cases covering album sync, removal detection, price policy safeguards, and account fallback.
+Executes all 12 mandatory unit and integration test cases.
 
 ### 6. Production Build & Linting
 ```bash
@@ -90,9 +91,10 @@ npm run build
 ## 🔐 Owner Admin Portal Access
 
 * **URL**: `/dashboard`
-* **Demo Credentials**:
-  * **Email**: `admin@lakshmistores.com`
-  * **Password**: `admin123`
+* **Authorized Administrator Emails**:
+  * `lakshmistoresonline@gmail.com`
+  * `admin@vastraa.com`
+  * `admin@lakshmistores.com`
 
 ---
 
@@ -104,4 +106,4 @@ npm run build
 
 ---
 
-© 2026 Lakshmi Stores, Round West, Thrissur, Kerala, India.
+© 2026 Vastraa — A Co-Brand of Lakshmi Stores, Round West, Thrissur, Kerala, India.
