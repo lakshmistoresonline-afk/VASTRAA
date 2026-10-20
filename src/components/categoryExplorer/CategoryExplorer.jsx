@@ -5,31 +5,31 @@ import { FiArrowRight, FiGrid } from 'react-icons/fi';
 
 const SILK_CATEGORY_BANNERS = [
   {
-    id: 'wedding-silk-sarees',
+    id: 'pure-wedding-silks',
     title: 'Pure Wedding Silks',
-    subtitle: 'Exquisite bridal handloom Kanchipuram weaves',
-    image: '/images/categories/silk-sarees.jpg',
+    subtitle: "Traditional weaves for life's special moments",
+    image: '/images/categories/pure-wedding-silks.jpg',
     filterValue: 'Kanchipuram Pure Wedding Silk Sarees'
   },
   {
-    id: 'fancy-silk-sarees',
+    id: 'pure-fancy-silks',
     title: 'Pure Fancy Silks',
-    subtitle: 'Vibrant contemporary handwoven silk sarees',
-    image: '/images/categories/festive-wear.jpg',
+    subtitle: 'Elegant designs for every celebration',
+    image: '/images/categories/pure-fancy-silks.jpg',
     filterValue: 'Kanchipuram Pure Fancy Silk Sarees'
   },
   {
-    id: 'soft-silk-sarees',
+    id: 'pure-soft-silks',
     title: 'Pure Soft Silks',
-    subtitle: 'Lightweight & comfortable pure Kanchipuram silk',
-    image: '/images/categories/kerala-sarees.jpg',
+    subtitle: 'Lightweight elegance for everyday grace',
+    image: '/images/categories/pure-soft-silks.jpg',
     filterValue: 'Kanchipuram Pure Soft Silk Sarees'
   },
   {
-    id: 'art-silk-sarees',
+    id: 'art-semi-silks',
     title: 'Art & Semi Silks',
-    subtitle: 'Affordable luxury for everyday celebrations',
-    image: '/images/categories/cotton-sarees.jpg',
+    subtitle: 'Contemporary styles with timeless charm',
+    image: '/images/categories/art-semi-silks.jpg',
     filterValue: 'Semi Silk Sarees'
   }
 ];
@@ -42,7 +42,7 @@ function CategoryExplorer() {
     <section className="py-10 bg-[#FAF7F0] dark:bg-gray-950 transition-colors">
       <div className="container mx-auto px-4 max-w-7xl space-y-10">
 
-        {/* Section B: Shop Silk Sarees By Type (4 Compact Category Tiles) */}
+        {/* Section B: Shop Silk Sarees By Type (4 Saree-Only Category Tiles) */}
         <div>
           <div className="text-center max-w-xl mx-auto mb-6">
             <span className="text-[#800020] dark:text-[#E5C158] font-bold text-[11px] uppercase tracking-widest block mb-1">
@@ -59,7 +59,7 @@ function CategoryExplorer() {
                 key={banner.id}
                 to="/allproducts"
                 onClick={() => setFilterType(banner.filterValue)}
-                className="group relative h-40 rounded-2xl overflow-hidden shadow-sm border border-[#E9E1D5] dark:border-gray-800 bg-white dark:bg-gray-900 flex items-end p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                className="group relative h-48 rounded-2xl overflow-hidden shadow-sm border border-[#E9E1D5] dark:border-gray-800 bg-white dark:bg-gray-900 flex items-end p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
               >
                 <img
                   src={banner.image}
@@ -67,18 +67,18 @@ function CategoryExplorer() {
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent"></div>
 
                 <div className="relative z-10 text-white space-y-1 w-full">
-                  <h3 className="font-serif font-bold text-base text-amber-50 group-hover:text-[#E5C158] transition-colors">
+                  <h3 className="font-serif font-bold text-lg text-amber-50 group-hover:text-[#E5C158] transition-colors">
                     {banner.title}
                   </h3>
-                  <p className="text-[10px] text-amber-100/80 font-normal line-clamp-1">
+                  <p className="text-[11px] text-amber-100/80 font-normal line-clamp-1">
                     {banner.subtitle}
                   </p>
-                  <div className="pt-1 flex items-center gap-1 text-[10px] font-bold text-[#E5C158]">
-                    <span>Explore Silks</span>
-                    <FiArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                  <div className="pt-1.5 flex items-center gap-1 text-[11px] font-bold text-[#E5C158]">
+                    <span>Explore Now</span>
+                    <FiArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </Link>
