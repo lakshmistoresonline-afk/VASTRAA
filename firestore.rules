@@ -21,6 +21,12 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Users collection: Admin read/write; Owner read/write
+    match /users/{userId} {
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      allow create: if request.auth != null;
+    }
+
     // Orders collection: Public create with valid email; Admin or owner read/delete
     match /order/{orderId} {
       allow create: if request.resource.data.email is string;
