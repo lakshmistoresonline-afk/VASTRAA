@@ -26,7 +26,7 @@ const MyState = (props) => {
   const [lastVerifiedAt, setLastVerifiedAt] = useState(null);
   const [catalogues, setCatalogues] = useState(CATALOGUES);
 
-  // Customer Enquiries and Orders
+  // Customer Enquiries and Orders (Admin Data)
   const [enquiries, setEnquiries] = useState([]);
   const [order, setOrder] = useState([]);
   const [user, setUser] = useState([]);
@@ -148,12 +148,10 @@ const MyState = (props) => {
       await Promise.race([firestorePromise, timeoutPromise]);
 
       toast.success("Enquiry submitted successfully! Our team will contact you shortly.");
-      getEnquiriesData();
       return { success: true, validation };
     } catch (err) {
       console.warn("Firestore save fallback notice:", err.message);
       toast.success("Enquiry submitted successfully! Our team will contact you shortly.");
-      getEnquiriesData();
       return { success: true, local: true };
     } finally {
       setLoading(false);
@@ -215,9 +213,6 @@ const MyState = (props) => {
 
   useEffect(() => {
     performCatalogueSync();
-    getEnquiriesData();
-    getOrderData();
-    getUserData();
   }, []);
 
   return (
@@ -232,6 +227,9 @@ const MyState = (props) => {
       lastVerifiedAt,
       triggerSync: performCatalogueSync,
       enquiries,
+      getEnquiriesData,
+      getOrderData,
+      getUserData,
       addEnquiry,
       updateEnquiryStatus,
       deleteEnquiry,

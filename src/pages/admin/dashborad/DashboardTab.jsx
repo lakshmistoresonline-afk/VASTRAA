@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
@@ -13,6 +13,9 @@ function DashboardTab() {
     lastVerifiedAt,
     triggerSync,
     enquiries,
+    getEnquiriesData,
+    getOrderData,
+    getUserData,
     updateEnquiryStatus,
     deleteEnquiry,
     storeInfo,
@@ -21,10 +24,16 @@ function DashboardTab() {
 
   const [searchTerm, setSearchTerm] = useState('');
 
+  useEffect(() => {
+    if (getEnquiriesData) getEnquiriesData();
+    if (getOrderData) getOrderData();
+    if (getUserData) getUserData();
+  }, []);
+
   const handleSyncClick = async () => {
-    toast.info("Syncing Google Photos albums...");
+    toast.info("Syncing showroom catalogues...");
     await triggerSync();
-    toast.success("Google Photos catalogue sync complete!");
+    toast.success("Catalogue sync complete!");
   };
 
   const filteredInventory = product ? product.filter((p) =>
@@ -41,7 +50,7 @@ function DashboardTab() {
         <div className="bg-gray-100/80 dark:bg-gray-950 p-4 border-b border-gray-200 dark:border-gray-800">
           <TabList className="flex flex-wrap gap-2 text-xs font-extrabold">
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
-              📸 Google Photos Albums ({catalogues.length})
+              📸 Showroom Albums ({catalogues.length})
             </Tab>
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
               👗 Live Inventory ({product ? product.length : 0})
@@ -55,12 +64,12 @@ function DashboardTab() {
           </TabList>
         </div>
 
-        {/* Tab 1: Google Photos Catalogues */}
+        {/* Tab 1: Showroom Catalogues */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-                Google Photos Album Sources
+                Showroom Catalogue Sources
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Last Verified Sync: {lastVerifiedAt ? new Date(lastVerifiedAt).toLocaleString() : 'Just now'}
@@ -73,7 +82,7 @@ function DashboardTab() {
               className="bg-[#800020] hover:bg-[#67001a] text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
             >
               <FiRefreshCw className={`w-4 h-4 text-[#D4AF37] ${loading ? 'animate-spin' : ''}`} />
-              <span>{loading ? "Syncing Cloud..." : "Trigger Google Photos Refresh"}</span>
+              <span>{loading ? "Syncing Cloud..." : "Trigger Catalogue Refresh"}</span>
             </button>
           </div>
 
@@ -231,7 +240,7 @@ function DashboardTab() {
         {/* Tab 3: Customer Enquiries */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-            Customer Availability & Price Enquiries
+            Customer Availability & Price Enquiries ({enquiries ? enquiries.length : 0})
           </h2>
 
           {!enquiries || enquiries.length === 0 ? (
@@ -260,7 +269,6 @@ function DashboardTab() {
                       <td className="px-5 py-4">
                         <span className="font-bold text-gray-900 dark:text-white block">{enq.customerName}</span>
                         <span className="text-[11px] text-blue-600 dark:text-blue-400 block font-semibold">📞 {enq.phone}</span>
-                        {enq.address && <span className="text-[10px] text-gray-400 block">{enq.address}</span>}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
@@ -308,7 +316,7 @@ function DashboardTab() {
         {/* Tab 4: Store Info */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-            Lakshmi Stores Settings
+            Vastraa Store Settings
           </h2>
 
           <div className="glass-card p-8 rounded-3xl border border-gray-200 dark:border-gray-800 max-w-2xl space-y-5 text-xs">
@@ -317,17 +325,13 @@ function DashboardTab() {
               <p className="text-base font-bold text-gray-900 dark:text-white">{storeInfo?.name}</p>
             </div>
             <div>
-              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Showroom Location:</span>
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">{storeInfo?.location}</p>
-            </div>
-            <div>
               <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">WhatsApp Hotline:</span>
               <p className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">{storeInfo?.whatsapp}</p>
             </div>
             <div>
               <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Integration Status:</span>
               <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                Live Google Photos album sync active. Every photo displayed reflects genuine showroom stock managed by Lakshmi Stores.
+                Live catalogue sync active. Every photo displayed reflects verified silk saree stock.
               </p>
             </div>
           </div>
