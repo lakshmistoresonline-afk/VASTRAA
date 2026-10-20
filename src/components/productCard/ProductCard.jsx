@@ -16,9 +16,17 @@ function matchCategory(obj, filter) {
   const cleanCatName = (obj.categoryName || '').toLowerCase().trim();
   const cleanCatCode = (obj.catalogueCode || '').toLowerCase().trim();
 
-  if (cleanCatCode === cleanFilter) return true;
+  if (cleanCatCode === cleanFilter || cleanCatName === cleanFilter) return true;
 
-  return cleanCatName === cleanFilter || cleanCatName.includes(cleanFilter) || cleanFilter.includes(cleanCatName);
+  if (cleanFilter === 'pure' && ['A', 'B', 'C'].includes(obj.catalogueCode)) {
+    return true;
+  }
+
+  if (cleanFilter === 'semi' && ['D', 'E', 'F', 'G', 'H', 'I'].includes(obj.catalogueCode)) {
+    return true;
+  }
+
+  return cleanCatName.includes(cleanFilter) || cleanFilter.includes(cleanCatName);
 }
 
 function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
@@ -89,7 +97,6 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
       setEnquirySuccess(true);
       toast.success("Enquiry received successfully!");
     } else {
-      // Fallback success confirmation so user experience is never blocked
       setEnquirySuccess(true);
       toast.success("Enquiry recorded!");
     }
@@ -387,7 +394,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                     Enquiry Received Successfully!
                   </h4>
                   <p className="text-xs text-[#77716A] dark:text-gray-300 max-w-sm mx-auto leading-relaxed">
-                    Thank you, <span className="font-bold text-[#24211F] dark:text-white">{enquiryForm.customerName || "Valued Customer"}</span>. Our Thrissur team has received your enquiry for <span className="font-bold text-[#800020] dark:text-[#E5C158]">{selectedProduct.title}</span>. We will assist you shortly via WhatsApp / Call.
+                    Thank you, <span className="font-bold text-[#24211F] dark:text-white">{enquiryForm.customerName || "Valued Customer"}</span>. Our team has received your enquiry for <span className="font-bold text-[#800020] dark:text-[#E5C158]">{selectedProduct.title}</span>. We will assist you shortly via WhatsApp / Call.
                   </p>
 
                   <div className="pt-4 flex flex-col sm:flex-row gap-3">

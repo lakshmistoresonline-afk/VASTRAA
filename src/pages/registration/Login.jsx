@@ -44,17 +44,7 @@ function Login() {
       navigate('/dashboard');
     } catch (err) {
       console.warn("Firebase Auth sign in notice:", err.message);
-      // Fallback local admin check if auth emulator or local environment
-      if (
-        ALLOWED_ADMIN_EMAILS.includes(cleanEmail) &&
-        (password === "Lakshmi@123" || password === "admin123" || password === "123456")
-      ) {
-        toast.success("Administrator Authenticated!");
-        localStorage.setItem("user", JSON.stringify({ user: { email: cleanEmail, uid: "dev_admin_uid_123" } }));
-        navigate('/dashboard');
-      } else {
-        toast.error("Invalid credentials. Please check your password.");
-      }
+      toast.error("Authentication failed: " + err.message);
     } finally {
       setLoading(false);
     }
