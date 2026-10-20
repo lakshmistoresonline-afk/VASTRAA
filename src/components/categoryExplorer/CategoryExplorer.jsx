@@ -2,34 +2,35 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { FiArrowRight, FiGrid } from 'react-icons/fi';
+import extractedData from '../../data/extractedSarees.json';
 
 const SILK_CATEGORY_BANNERS = [
   {
     id: 'pure-wedding-silks',
     title: 'Pure Wedding Silks',
     subtitle: "Traditional weaves for life's special moments",
-    image: '/images/categories/pure-wedding-silks.jpg',
+    image: extractedData.A?.[0]?.imageUrl || 'https://lh3.googleusercontent.com/pw/AP1GczO5uQ7JjyrEhAQYwqx_rnj_gHyjFNRYd7tskFvyG_Nzdnb4r6E20YcRSW3AxSY8YUNfesFS9A7kfJdIf8Bhpnx5fNOfFQ-4OTLId8_mmjQAD_Zxf-Na=w1024-h1024',
     filterValue: 'Kanchipuram Pure Wedding Silk Sarees'
   },
   {
     id: 'pure-fancy-silks',
     title: 'Pure Fancy Silks',
     subtitle: 'Elegant designs for every celebration',
-    image: '/images/categories/pure-fancy-silks.jpg',
+    image: extractedData.B?.[0]?.imageUrl || 'https://lh3.googleusercontent.com/pw/AP1GczOWJigXeG_thXvJVi0EEBbT8z8Q6wHNiWrgrb_x4UGYydoEPQChD6m94P23vI2wCZdzIbb2GyS4VydRkUAV2fDSkN3sBXqjY6ROILotB2mnmAW6NT7w=w1024-h1024',
     filterValue: 'Kanchipuram Pure Fancy Silk Sarees'
   },
   {
     id: 'pure-soft-silks',
     title: 'Pure Soft Silks',
     subtitle: 'Lightweight elegance for everyday grace',
-    image: '/images/categories/pure-soft-silks.jpg',
+    image: extractedData.C?.[0]?.imageUrl || 'https://lh3.googleusercontent.com/pw/AP1GczPFDfHbY5t2wrIOVhoLh2SA9-q8X5_RKK5hoBdTTWmJ6EUvq17h3RKpFK3SnG5stJta2IYQj_r1Ad0gX3x9F0oT9ysNei9MlldBy6j_tJ_J5hzUsrRa=w1024-h1024',
     filterValue: 'Kanchipuram Pure Soft Silk Sarees'
   },
   {
     id: 'art-semi-silks',
     title: 'Art & Semi Silks',
     subtitle: 'Contemporary styles with timeless charm',
-    image: '/images/categories/art-semi-silks.jpg',
+    image: extractedData.D?.[0]?.imageUrl || 'https://lh3.googleusercontent.com/pw/AP1GczOq12j8JAbQw9EXpbSfF7_I0aTwWWsPwmFEZf_TXDReyu6zo3mJHCKt7zkdYaHuf-XQwhWIWf0gJlh71ZIXGJoc0FFLpotksLd24zC2kULXy6_bBWz_=w1024-h1024',
     filterValue: 'Semi Silk Sarees'
   }
 ];

@@ -1,8 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShield, FiTruck, FiAward } from 'react-icons/fi';
+import extractedData from '../../data/extractedSarees.json';
 
 const HeroSection = () => {
+  // Use actual verified individual saree photo from Catalogue A (Zero models / 100% saree fabric)
+  const heroSareeUrl = extractedData.A?.[0]?.imageUrl || "https://lh3.googleusercontent.com/pw/AP1GczO5uQ7JjyrEhAQYwqx_rnj_gHyjFNRYd7tskFvyG_Nzdnb4r6E20YcRSW3AxSY8YUNfesFS9A7kfJdIf8Bhpnx5fNOfFQ-4OTLId8_mmjQAD_Zxf-Na=w1024-h1024";
+
   return (
     <section className="relative bg-[#FAF7F0] dark:bg-gray-950 transition-colors border-b border-[#E9E1D5] dark:border-gray-800">
 
@@ -12,16 +16,13 @@ const HeroSection = () => {
 
           {/* Background Saree-Only Fabric Photograph (No Models/People) */}
           <div className="absolute inset-0 z-0">
-            <picture>
-              <source media="(max-width: 768px)" srcSet="/images/hero/hero-mobile.jpg" />
-              <img
-                src="/images/hero/hero-desktop.jpg"
-                alt="Vastraa - Pure Kanchipuram Handloom Silk Saree Weave"
-                className="w-full h-full object-cover object-right filter brightness-95"
-              />
-            </picture>
+            <img
+              src={heroSareeUrl}
+              alt="Vastraa - Pure Kanchipuram Handloom Silk Saree Weave"
+              className="w-full h-full object-cover object-center filter brightness-95"
+            />
             {/* Soft Warm Gradient Overlay for Left Text Readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F0] via-[#FAF7F0]/90 lg:via-[#FAF7F0]/75 to-transparent dark:from-gray-950 dark:via-gray-950/90 lg:dark:via-gray-950/75"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F0] via-[#FAF7F0]/95 lg:via-[#FAF7F0]/85 to-transparent dark:from-gray-950 dark:via-gray-950/95 lg:dark:via-gray-950/85"></div>
           </div>
 
           {/* Left Text Content Area */}
