@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
-import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle } from 'react-icons/fi';
 
 function DashboardTab() {
   const context = useContext(myContext);
@@ -257,56 +257,71 @@ function DashboardTab() {
                     <th className="px-5 py-4">Requested Saree</th>
                     <th className="px-5 py-4">Message</th>
                     <th className="px-5 py-4">Status</th>
-                    <th className="px-5 py-4 text-right">Action</th>
+                    <th className="px-5 py-4 text-right">Action / WhatsApp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
-                  {enquiries.map((enq) => (
-                    <tr key={enq.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-4 whitespace-nowrap text-gray-500">
-                        {enq.createdAt ? new Date(enq.createdAt).toLocaleDateString() : 'Recent'}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="font-bold text-gray-900 dark:text-white block">{enq.customerName}</span>
-                        <span className="text-[11px] text-blue-600 dark:text-blue-400 block font-semibold">📞 {enq.phone}</span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          {enq.imageUrl && (
-                            <img src={enq.imageUrl} alt="" className="w-10 h-12 object-cover rounded-lg border shadow-sm" />
-                          )}
-                          <div>
-                            <span className="font-bold text-gray-900 dark:text-white block">{enq.sareeTitle}</span>
-                            <span className="text-[10px] text-gray-400 font-mono">ID: {enq.sareeId}</span>
+                  {enquiries.map((enq) => {
+                    const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
+                    const whatsappMsg = `Hello ${enq.customerName || 'Customer'}, regarding your enquiry for ${enq.sareeTitle || 'Saree'} (ID: ${enq.sareeId}) at Vastraa (Lakshmi Stores): `;
+
+                    return (
+                      <tr key={enq.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <td className="px-5 py-4 whitespace-nowrap text-gray-500">
+                          {enq.createdAt ? new Date(enq.createdAt).toLocaleDateString() : 'Recent'}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="font-bold text-gray-900 dark:text-white block">{enq.customerName}</span>
+                          <span className="text-[11px] text-blue-600 dark:text-blue-400 block font-semibold">📞 {enq.phone}</span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            {enq.imageUrl && (
+                              <img src={enq.imageUrl} alt="" className="w-10 h-12 object-cover rounded-lg border shadow-sm" />
+                            )}
+                            <div>
+                              <span className="font-bold text-gray-900 dark:text-white block">{enq.sareeTitle}</span>
+                              <span className="text-[10px] text-gray-400 font-mono">ID: {enq.sareeId}</span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 max-w-xs truncate">
-                        {enq.message || "—"}
-                      </td>
-                      <td className="px-5 py-4">
-                        <select
-                          value={enq.status || "Pending"}
-                          onChange={(e) => updateEnquiryStatus(enq.id, e.target.value)}
-                          className="text-xs px-3 py-1.5 rounded-xl border font-bold dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Fulfilled">Fulfilled</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        <button
-                          onClick={() => deleteEnquiry(enq.id)}
-                          className="p-2 text-rose-600 hover:text-rose-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-colors"
-                          title="Delete Enquiry"
-                        >
-                          <FiTrash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-5 py-4 max-w-xs truncate">
+                          {enq.message || "—"}
+                        </td>
+                        <td className="px-5 py-4">
+                          <select
+                            value={enq.status || "Pending"}
+                            onChange={(e) => updateEnquiryStatus(enq.id, e.target.value)}
+                            className="text-xs px-3 py-1.5 rounded-xl border font-bold dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Fulfilled">Fulfilled</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </td>
+                        <td className="px-5 py-4 text-right space-y-1 sm:space-y-0 sm:space-x-2 flex flex-col sm:flex-row justify-end items-center">
+                          <a
+                            href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl font-bold text-[11px] shadow-sm transition-all"
+                            title="Chat with customer on WhatsApp"
+                          >
+                            <FiMessageCircle className="w-3.5 h-3.5" />
+                            <span>WhatsApp</span>
+                          </a>
+                          <button
+                            onClick={() => deleteEnquiry(enq.id)}
+                            className="p-2 text-rose-600 hover:text-rose-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-colors"
+                            title="Delete Enquiry"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
