@@ -1,10 +1,9 @@
 import React, { Fragment, useContext, useState } from 'react';
 import { BsFillCloudSunFill } from 'react-icons/bs';
-import { FiSun, FiShoppingBag, FiSearch, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
+import { FiSun, FiMessageCircle, FiSearch, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { Dialog, Transition } from '@headlessui/react';
-import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const context = useContext(myContext);
@@ -13,7 +12,6 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem('user'));
-  const cartItems = useSelector((state) => state.cart);
 
   const logout = () => {
     localStorage.clear();
@@ -134,17 +132,16 @@ const Navbar = () => {
                 {mode === 'light' ? <FiSun className="w-4 h-4" /> : <BsFillCloudSunFill className="w-4 h-4 text-amber-400" />}
               </button>
 
-              {/* Shopping Bag */}
-              <Link
-                to="/cart"
-                className="relative flex items-center gap-2 bg-[#800020] hover:bg-[#67001a] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
+              {/* Direct WhatsApp Hotline Button (Replaces Bag/Cart) */}
+              <a
+                href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=Hello%20Vastraa,%20I%20would%20like%20to%20enquire%20about%20silk%20saree%20availability.`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
               >
-                <FiShoppingBag className="w-4 h-4 text-[#C5A46D]" />
-                <span className="hidden sm:inline">Bag</span>
-                <span className="bg-[#C5A46D] text-gray-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
-                  {cartItems.length}
-                </span>
-              </Link>
+                <FiMessageCircle className="w-4 h-4 text-white" />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </a>
 
               {user ? (
                 <button
