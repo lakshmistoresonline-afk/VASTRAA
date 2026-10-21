@@ -39,7 +39,7 @@ function ProductInfo() {
     }
 
     if (!cleanPhone || cleanPhone.length < 10) {
-      toast.error("Please enter a valid 10-digit mobile number.");
+      toast.error("Please enter a valid 10-digit WhatsApp mobile number.");
       return;
     }
 
@@ -224,7 +224,7 @@ function ProductInfo() {
 
                         <div>
                           <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                            10-Digit Mobile / WhatsApp *
+                            10-Digit WhatsApp Mobile Number *
                           </label>
                           <input
                             type="tel"

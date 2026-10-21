@@ -78,7 +78,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
     }
 
     if (!cleanPhone || cleanPhone.length < 10) {
-      toast.error("Please enter a valid 10-digit mobile number.");
+      toast.error("Please enter a valid 10-digit WhatsApp mobile number.");
       return;
     }
 
@@ -444,7 +444,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
 
                   <div>
                     <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                      10-Digit WhatsApp / Phone Number *
+                      10-Digit WhatsApp Mobile Number *
                     </label>
                     <input
                       type="tel"
