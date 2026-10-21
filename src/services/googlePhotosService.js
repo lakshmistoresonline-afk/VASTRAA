@@ -43,10 +43,11 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
       case 'G': items = ALBUM_G_PHOTOS; break;
       case 'H': items = ALBUM_H_PHOTOS; break;
       case 'I': items = ALBUM_I_PHOTOS; break;
-      default: items = ALBUM_A_PHOTOS;
+      default:
+        throw new Error(`Diagnostic Error: Unrecognized catalogue code [${catalogueCode}]`);
     }
   } else {
-    // Fallback exact match on share URL
+    // Exact match on share URL
     if (albumUrl.includes("AF1QipM5") || albumUrl.includes("pOvLBxk4N3ojCnmp2")) {
       items = ALBUM_A_PHOTOS.slice(0, 300);
     } else if (albumUrl.includes("AF1QipOUZy") || albumUrl.includes("7nOr1gWP5mkjwfFu1")) {
@@ -70,7 +71,7 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     } else if (albumUrl.includes("AF1QipM3AE")) {
       items = ALBUM_I_PHOTOS;
     } else {
-      items = ALBUM_A_PHOTOS;
+      throw new Error(`Diagnostic Error: Unrecognized album URL mapping [${albumUrl}]`);
     }
   }
 
