@@ -14,9 +14,16 @@
   --border-beige: #E9E1D5;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background-color: var(--warm-ivory);
   color: var(--text-charcoal);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 .font-serif {
@@ -25,8 +32,8 @@ body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -39,7 +46,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #6E1028;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
