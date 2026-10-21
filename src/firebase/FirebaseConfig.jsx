@@ -3,14 +3,14 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration for vastraa-c7da1
 const firebaseConfig = {
-  apiKey: "AIzaSyBw94fJQrF9UUY_fnXTXnStJe3fDdpo9w4",
-  authDomain: "virtual-fashion-studio-5d8c9.firebaseapp.com",
-  projectId: "virtual-fashion-studio-5d8c9",
-  storageBucket: "virtual-fashion-studio-5d8c9.firebasestorage.app",
-  messagingSenderId: "597120741257",
-  appId: "1:597120741257:web:396ba099b80ed3d6367b58"
+  apiKey: "AIzaSyALS7GrNslShd2Zy3t-kB1BmNsNmPNlw18",
+  authDomain: "vastraa-c7da1.firebaseapp.com",
+  projectId: "vastraa-c7da1",
+  storageBucket: "vastraa-c7da1.firebasestorage.app",
+  messagingSenderId: "422113852506",
+  appId: "1:422113852506:web:35ebcfca7c8f7203666c63"
 };
 
 // Initialize Firebase
