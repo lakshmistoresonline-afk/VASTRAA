@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MyContext from '../../context/data/myContext';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
 import Loader from '../../components/loader/Loader';
@@ -39,38 +39,16 @@ function Login() {
 
     try {
       setLoading(true);
-      let authUser = null;
-      try {
-        const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
-        authUser = res.user;
-      } catch (signInErr) {
-        console.warn("Sign-in fallback notice:", signInErr.code);
-        try {
-          const createRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-          authUser = createRes.user;
-        } catch (_createErr) {
-          if (password.length >= 6) {
-            authUser = { email: cleanEmail, uid: "dev_admin_uid_123" };
-          } else {
-            throw new Error("Password must be at least 6 characters.");
-          }
-        }
-      }
-
+      const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
       toast.success("Administrator authenticated successfully!");
-      localStorage.setItem("user", JSON.stringify({ user: { email: authUser.email || cleanEmail, uid: authUser.uid || "dev_admin_uid_123" } }));
+      localStorage.setItem("user", JSON.stringify({ user: { email: res.user.email, uid: res.user.uid } }));
       navigate('/dashboard');
     } catch (err) {
-      console.error("Authentication error:", err);
-      toast.error("Authentication failed: " + err.message);
+      console.error("Authentication error:", err.message);
+      toast.error("Authentication failed: Invalid credentials or account does not exist.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillAdmin = () => {
-    setEmail("admin@gmail.com");
-    setPassword("Admin@123");
   };
 
   return (
@@ -119,15 +97,8 @@ function Login() {
           </button>
         </form>
 
-        <div className="border-t border-gray-800 pt-4 flex flex-col items-center gap-2 text-xs">
-          <button
-            type="button"
-            onClick={fillAdmin}
-            className="text-[#D4AF37] hover:underline font-semibold"
-          >
-            Fill Admin Credentials (admin@gmail.com)
-          </button>
-          <p className="text-gray-400 pt-2">
+        <div className="border-t border-gray-800 pt-4 text-center text-xs text-gray-400">
+          <p className="text-gray-400">
             Storefront customer? Return to <Link className="text-[#D4AF37] font-bold hover:underline" to="/">Storefront Home</Link>
           </p>
         </div>
