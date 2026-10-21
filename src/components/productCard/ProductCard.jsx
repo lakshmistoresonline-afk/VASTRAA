@@ -58,13 +58,14 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
   const [enquiryForm, setEnquiryForm] = useState({
     customerName: '',
     phone: '',
+    address: '',
     message: ''
   });
 
   const handleModalClose = () => {
     setSelectedProduct(null);
     setEnquirySuccess(false);
-    setEnquiryForm({ customerName: '', phone: '', message: '' });
+    setEnquiryForm({ customerName: '', phone: '', address: '', message: '' });
   };
 
   const handleEnquirySubmit = async (e) => {
@@ -90,6 +91,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
       imageUrl: selectedProduct.imageUrl,
       customerName: enquiryForm.customerName,
       phone: cleanPhone,
+      address: enquiryForm.address,
       message: enquiryForm.message,
     });
 
@@ -451,6 +453,19 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                       onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
                       className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
                       placeholder="e.g. 9746998785"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
+                      Delivery Address / Pincode (Optional for Shipping)
+                    </label>
+                    <input
+                      type="text"
+                      value={enquiryForm.address}
+                      onChange={(e) => setEnquiryForm({ ...enquiryForm, address: e.target.value })}
+                      className="w-full text-xs sm:text-sm px-4 py-3 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-[#800020] outline-none"
+                      placeholder="Enter delivery address / city / pincode for shipping"
                     />
                   </div>
 
