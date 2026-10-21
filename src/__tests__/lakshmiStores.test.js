@@ -64,7 +64,7 @@ describe('Vastraa (Co-Brand of Lakshmi Stores) - Live Catalogue Test Suite', () 
     expect(isValid).toBe(false);
   });
 
-  // Test Case 6: An unknown stock status prevents confirmed checkout and forces enquiry
+  // Test Case 6: An unknown stock status prevents confirmed checkout and requires enquiry
   it('6. Unknown stock status prevents confirmed checkout and requires enquiry', async () => {
     const unknownItem = {
       id: "unknown_saree_01",
@@ -107,7 +107,7 @@ describe('Vastraa (Co-Brand of Lakshmi Stores) - Live Catalogue Test Suite', () 
     expect(itemIds.length).toBe(uniqueIds.size);
   });
 
-  // Test Case 10: Firebase security rules check
+  // Test Case 10: Firebase security configuration restricts admin resources
   it('10. Firebase security configuration restricts admin resources', () => {
     expect(CATALOGUES.length).toBe(9);
     for (const cat of CATALOGUES) {
@@ -116,15 +116,9 @@ describe('Vastraa (Co-Brand of Lakshmi Stores) - Live Catalogue Test Suite', () 
     }
   });
 
-  // Test Case 11: The site handles an unavailable or unauthorized Google account gracefully
-  it('11. Handles offline / unauthorized Google Photos account gracefully with fallback', async () => {
-    const photos = await resolveAlbumPhotos("https://photos.google.com/share/AF1QipM5buHSeQB1b75c6cU-PPn1LZveH-AG42r3vgydczlm719FIPZFjv8dSMe-ZUanww?key=RF9SUzQ3ODVSNVNVcjJtV0k3X1V1cFo3b1V0bmpR", {
-      accessToken: "invalid_expired_access_token",
-      albumId: "invalid_album_id"
-    });
-
-    expect(photos).toBeDefined();
-    expect(Array.isArray(photos)).toBe(true);
+  // Test Case 11: Unknown album URL throws diagnostic error instead of silent fallback
+  it('11. Unknown album URL throws diagnostic error instead of silent fallback', async () => {
+    await expect(resolveAlbumPhotos("https://photos.google.com/share/UNKNOWN_MALFORMED_ALBUM_URL")).rejects.toThrowError(/Diagnostic Error/);
   });
 
   // Test Case 12: Stock revalidation service provides clear enquiry message for price on enquiry items
