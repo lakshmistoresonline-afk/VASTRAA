@@ -25,76 +25,76 @@ const Navbar = () => {
                   user?.user?.email === "aliali@gmail.com";
 
   return (
-    <div className="sticky top-0 z-50">
+    <div className="sticky top-0 z-50 w-full shadow-md bg-[#211A19] dark:bg-gray-950">
       {/* Top Announcement Bar */}
-      <div className="maroon-gradient text-[#E5C158] text-xs py-2 px-4 border-b border-[#C5A46D]/30">
+      <div className="bg-[#4A071B] text-[#C6A15B] text-[11px] sm:text-xs py-2 px-4 border-b border-[#C6A15B]/30">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2 font-medium text-[11px] sm:text-xs">
+          <div className="flex items-center gap-2 font-medium">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Authentic Pure Silk Sarees • Pan India Express Shipping • Handloom Guarantee</span>
+            <span>Timeless Silk Sarees • Pan India Express Shipping • Handloom Guarantee</span>
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs">
-            <span className="flex items-center gap-1">
-              <FiCheckCircle className="text-emerald-400" /> Verified Live Inventory
+            <span className="flex items-center gap-1 text-amber-200">
+              <FiCheckCircle className="text-emerald-400" /> Verified Showroom Collections
             </span>
             <a
               href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}`}
               target="_blank"
               rel="noreferrer"
-              className="text-[#E5C158] hover:underline flex items-center gap-1 font-bold"
+              className="text-[#C6A15B] hover:underline flex items-center gap-1 font-bold"
             >
-              📞 Hotline / Enquiry: {storeInfo?.phone || "+91 97469 98785"}
+              📞 Hotline: {storeInfo?.phone || "+91 97469 98785"}
             </a>
           </div>
         </div>
       </div>
 
-      {/* Main Glassmorphic Navbar */}
-      <header className="glass-card shadow-lg transition-colors">
+      {/* Main Opaque Navigation Bar */}
+      <header className="bg-[#211A19] dark:bg-gray-900 border-b border-[#302625] dark:border-gray-800 transition-colors">
         <nav className="container mx-auto px-4 lg:px-8">
           <div className="flex h-20 items-center justify-between gap-4">
 
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="p-2.5 rounded-xl text-gray-700 dark:text-gray-200 lg:hidden hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="p-2.5 rounded-xl text-gray-200 lg:hidden hover:bg-white/10"
               onClick={() => setOpen(true)}
             >
-              <FiMenu className="w-6 h-6" />
+              <FiMenu className="w-6 h-6 text-[#C6A15B]" />
             </button>
 
             {/* Store Brand Logo */}
             <Link to="/" className="flex items-center gap-3.5 group">
-              <div className="bg-gradient-to-br from-[#800020] to-[#4A0012] text-[#E5C158] w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-serif font-black shadow-md border-2 border-[#C5A46D] group-hover:scale-105 transition-transform">
+              <div className="bg-gradient-to-br from-[#650A25] to-[#4A071B] text-[#C6A15B] w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-serif font-black shadow-md border-2 border-[#C6A15B] group-hover:scale-105 transition-transform">
                 V
               </div>
               <div>
-                <h1 className="text-2xl font-serif font-extrabold text-[#24211F] dark:text-white leading-tight tracking-tight">
+                <h1 className="text-2xl font-serif font-extrabold text-[#F7F0E4] leading-tight tracking-tight">
                   {storeInfo?.name || "Vastraa"}
                 </h1>
-                <p className="text-[10px] font-sans uppercase tracking-widest text-[#800020] dark:text-[#E5C158] font-bold">
+                <p className="text-[10px] font-sans uppercase tracking-widest text-[#C6A15B] font-bold">
                   {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Online Silk Store
                 </p>
               </div>
             </Link>
 
             {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center space-x-1 bg-[#FAF7F0] dark:bg-gray-800/80 p-1.5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700/50">
+            <div className="hidden lg:flex items-center space-x-1 bg-[#302625] dark:bg-gray-800 p-1.5 rounded-2xl border border-[#C6A15B]/30">
               <Link
                 to="/"
-                className="px-5 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
               >
                 Home
               </Link>
               <Link
                 to="/allproducts"
-                className="px-5 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
               >
                 Silk Sarees
               </Link>
               <Link
                 to="/order"
-                className="px-5 py-2 rounded-xl text-xs font-bold text-[#24211F] dark:text-gray-200 hover:text-[#800020] dark:hover:text-[#E5C158] transition-all"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
               >
                 Enquiries & Orders
               </Link>
@@ -102,7 +102,7 @@ const Navbar = () => {
               {isAdmin && (
                 <Link
                   to="/dashboard"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#800020] text-amber-100 shadow-md hover:bg-[#67001a] transition-all"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#650A25] text-amber-100 shadow-md hover:bg-[#4A071B] transition-all border border-[#C6A15B]/40"
                 >
                   Admin Portal
                 </Link>
@@ -112,32 +112,32 @@ const Navbar = () => {
             {/* Right Actions */}
             <div className="flex items-center space-x-3">
               {/* Quick Search Trigger */}
-              <div className="hidden md:flex items-center bg-[#FAF7F0] dark:bg-gray-800 rounded-xl px-3 py-2 border border-[#E9E1D5] dark:border-gray-700">
-                <FiSearch className="text-gray-400 w-4 h-4 mr-2" />
+              <div className="hidden md:flex items-center bg-[#302625] dark:bg-gray-800 rounded-xl px-3 py-2 border border-[#C6A15B]/30">
+                <FiSearch className="text-[#C6A15B] w-4 h-4 mr-2" />
                 <input
                   type="text"
                   value={searchKey}
                   onChange={(e) => setSearchKey(e.target.value)}
-                  placeholder="Search 3,250+ silk sarees..."
-                  className="bg-transparent text-xs outline-none text-[#24211F] dark:text-white placeholder:text-gray-400 w-36 focus:w-48 transition-all"
+                  placeholder="Search silk sarees..."
+                  className="bg-transparent text-xs outline-none text-white placeholder:text-gray-400 w-36 focus:w-48 transition-all"
                 />
               </div>
 
               {/* Theme Toggle */}
               <button
                 onClick={toggleMode}
-                className="p-2.5 text-gray-600 dark:text-gray-300 hover:text-[#800020] dark:hover:text-[#E5C158] transition-colors rounded-xl bg-[#FAF7F0] dark:bg-gray-800 border border-[#E9E1D5] dark:border-gray-700"
+                className="p-2.5 text-gray-300 hover:text-[#C6A15B] transition-colors rounded-xl bg-[#302625] dark:bg-gray-800 border border-[#C6A15B]/30"
                 title="Toggle Dark/Light Mode"
               >
-                {mode === 'light' ? <FiSun className="w-4 h-4" /> : <BsFillCloudSunFill className="w-4 h-4 text-amber-400" />}
+                {mode === 'light' ? <FiSun className="w-4 h-4 text-amber-300" /> : <BsFillCloudSunFill className="w-4 h-4 text-amber-400" />}
               </button>
 
-              {/* Direct WhatsApp Hotline Button (Replaces Bag/Cart) */}
+              {/* Direct WhatsApp Hotline Button */}
               <a
-                href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=Hello%20Vastraa,%20I%20would%20like%20to%20enquire%20about%20silk%20saree%20availability.`}
+                href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent('Hello Vastraa, I would like to enquire about silk saree availability.')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
+                className="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
               >
                 <FiMessageCircle className="w-4 h-4 text-white" />
                 <span className="hidden sm:inline">WhatsApp</span>
@@ -146,14 +146,14 @@ const Navbar = () => {
               {user ? (
                 <button
                   onClick={logout}
-                  className="hidden sm:inline-block text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-rose-600 px-3 py-2"
+                  className="hidden sm:inline-block text-xs font-bold text-gray-300 hover:text-rose-400 px-3 py-2"
                 >
                   Logout
                 </button>
               ) : (
                 <Link
                   to="/login"
-                  className="hidden sm:inline-block border border-[#800020] text-[#800020] dark:border-[#E5C158] dark:text-[#E5C158] hover:bg-[#800020] hover:text-white text-xs font-bold px-4 py-2 rounded-xl transition-all"
+                  className="hidden sm:inline-block border border-[#C6A15B] text-[#C6A15B] hover:bg-[#650A25] hover:text-white text-xs font-bold px-4 py-2 rounded-xl transition-all"
                 >
                   Admin
                 </Link>
@@ -176,7 +176,7 @@ const Navbar = () => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 z-50 flex">
@@ -189,20 +189,20 @@ const Navbar = () => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-[#FAF7F0] dark:bg-gray-900 pb-12 shadow-2xl">
-                <div className="flex px-5 pb-4 pt-6 justify-between items-center border-b border-[#E9E1D5] dark:border-gray-800">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-[#211A19] text-white pb-12 shadow-2xl border-r border-[#C6A15B]/30">
+                <div className="flex px-5 pb-4 pt-6 justify-between items-center border-b border-[#302625]">
                   <div className="flex items-center gap-3">
-                    <div className="bg-[#800020] text-[#E5C158] w-10 h-10 rounded-lg flex items-center justify-center font-serif font-bold border border-[#C5A46D]">
+                    <div className="bg-[#650A25] text-[#C6A15B] w-10 h-10 rounded-lg flex items-center justify-center font-serif font-bold border border-[#C6A15B]">
                       V
                     </div>
                     <div>
-                      <span className="text-lg font-serif font-bold text-[#24211F] dark:text-white block leading-tight">Vastraa</span>
-                      <span className="text-[10px] text-[#77716A]">A Co-Brand of Lakshmi Stores</span>
+                      <span className="text-lg font-serif font-bold text-white block leading-tight">Vastraa</span>
+                      <span className="text-[10px] text-[#C6A15B]">A Co-Brand of Lakshmi Stores</span>
                     </div>
                   </div>
                   <button
                     type="button"
-                    className="p-2 text-gray-500 hover:text-gray-700"
+                    className="p-2 text-gray-400 hover:text-white"
                     onClick={() => setOpen(false)}
                   >
                     <FiX className="w-6 h-6" />
@@ -210,27 +210,27 @@ const Navbar = () => {
                 </div>
 
                 <div className="space-y-3 px-5 py-6 text-sm font-semibold">
-                  <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-[#24211F] dark:text-white">
+                  <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                     🏠 Home
                   </Link>
-                  <Link to="/allproducts" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-[#24211F] dark:text-white">
+                  <Link to="/allproducts" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                     👗 Silk Sarees
                   </Link>
-                  <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-[#24211F] dark:text-white">
+                  <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                     📩 Enquiries & Orders
                   </Link>
                   {isAdmin && (
-                    <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#800020] text-amber-100 font-bold">
+                    <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#650A25] text-amber-100 font-bold border border-[#C6A15B]/40">
                       🔑 Admin Dashboard
                     </Link>
                   )}
 
                   {user ? (
-                    <button onClick={logout} className="block w-full text-left py-2.5 px-3 text-rose-600 font-bold">
+                    <button onClick={logout} className="block w-full text-left py-2.5 px-3 text-rose-400 font-bold">
                       🚪 Logout
                     </button>
                   ) : (
-                    <Link to="/login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl text-[#800020] font-bold border border-[#800020] text-center mt-4">
+                    <Link to="/login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl text-[#C6A15B] font-bold border border-[#C6A15B] text-center mt-4">
                       Admin Sign In
                     </Link>
                   )}
@@ -243,5 +243,7 @@ const Navbar = () => {
     </div>
   );
 };
+
+Navbar.displayName = 'Navbar';
 
 export default Navbar;
