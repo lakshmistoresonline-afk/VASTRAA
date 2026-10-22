@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useState } from 'react';
-import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { Dialog, Transition } from '@headlessui/react';
@@ -99,6 +99,14 @@ const Navbar = () => {
               >
                 Enquiries & Orders
               </Link>
+              {user && (
+                <Link
+                  to="/account"
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                >
+                  My Account
+                </Link>
+              )}
 
               {isAdmin && (
                 <Link
@@ -113,13 +121,13 @@ const Navbar = () => {
             {/* Right Actions */}
             <div className="flex items-center space-x-3">
 
-              {/* Shopping Bag / Cart Button */}
+              {/* Shopping Cart Button */}
               <Link
                 to="/cart"
                 className="relative flex items-center gap-2 bg-[#650A25] hover:bg-[#4A071B] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all border border-[#C6A15B]/40"
               >
                 <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
-                <span className="hidden sm:inline">Bag</span>
+                <span className="hidden sm:inline">Cart</span>
                 <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
                   {cartItems.length}
                 </span>
@@ -137,19 +145,38 @@ const Navbar = () => {
               </a>
 
               {user ? (
-                <button
-                  onClick={logout}
-                  className="hidden sm:inline-block text-xs font-bold text-gray-300 hover:text-rose-400 px-3 py-2"
-                >
-                  Logout
-                </button>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to="/account"
+                    className="hidden xl:inline-flex items-center gap-1 text-xs font-bold text-[#C6A15B] bg-[#302625] px-3 py-2 rounded-xl border border-[#C6A15B]/30 max-w-[160px] truncate hover:underline"
+                    title="View My Account"
+                  >
+                    <FiUser className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="truncate">{user?.user?.email || "Account"}</span>
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="text-xs font-bold text-gray-300 hover:text-rose-400 px-3 py-2 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
               ) : (
-                <Link
-                  to="/login"
-                  className="hidden sm:inline-block border border-[#C6A15B] text-[#C6A15B] hover:bg-[#650A25] hover:text-white text-xs font-bold px-4 py-2 rounded-xl transition-all"
-                >
-                  Admin
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to="/login"
+                    className="hidden sm:inline-flex items-center gap-1 text-[#C6A15B] hover:text-white text-xs font-bold px-3 py-2 transition-all"
+                  >
+                    <FiUser className="w-3.5 h-3.5" />
+                    <span>Sign In</span>
+                  </Link>
+                  <Link
+                    to="/admin-login"
+                    className="hidden sm:inline-block border border-[#C6A15B] text-[#C6A15B] hover:bg-[#650A25] hover:text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all"
+                  >
+                    Admin
+                  </Link>
+                </div>
               )}
             </div>
 
@@ -203,6 +230,12 @@ const Navbar = () => {
                 </div>
 
                 <div className="space-y-3 px-5 py-6 text-sm font-semibold">
+                  {user && (
+                    <div className="bg-[#302625] p-3 rounded-xl border border-[#C6A15B]/30 text-xs text-[#C6A15B] mb-2 truncate">
+                      👤 Signed in as: <span className="font-bold text-white">{user?.user?.email}</span>
+                    </div>
+                  )}
+
                   <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                     🏠 Home
                   </Link>
@@ -210,12 +243,17 @@ const Navbar = () => {
                     👗 Silk Sarees
                   </Link>
                   <Link to="/cart" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200 flex justify-between items-center">
-                    <span>🛍️ Shopping Bag</span>
+                    <span>🛍️ Shopping Cart</span>
                     <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-xs font-extrabold">{cartItems.length}</span>
                   </Link>
                   <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                     📩 Enquiries & Orders
                   </Link>
+                  {user && (
+                    <Link to="/account" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
+                      👤 My Account / Profile
+                    </Link>
+                  )}
                   {isAdmin && (
                     <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#650A25] text-amber-100 font-bold border border-[#C6A15B]/40">
                       🔑 Admin Dashboard
@@ -227,9 +265,14 @@ const Navbar = () => {
                       🚪 Logout
                     </button>
                   ) : (
-                    <Link to="/login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl text-[#C6A15B] font-bold border border-[#C6A15B] text-center mt-4">
-                      Admin Sign In
-                    </Link>
+                    <div className="pt-2 space-y-2">
+                      <Link to="/login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#650A25] text-amber-100 font-bold text-center">
+                        👤 Customer Sign In / Register
+                      </Link>
+                      <Link to="/admin-login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl border border-[#C6A15B] text-[#C6A15B] font-bold text-center">
+                        🔑 Admin Portal Sign In
+                      </Link>
+                    </div>
                   )}
                 </div>
               </Dialog.Panel>

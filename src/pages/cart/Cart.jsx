@@ -4,7 +4,7 @@ import Layout from '../../components/layout/Layout';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteFromCart, clearCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { FiShoppingBag, FiTrash2, FiSend, FiCheckCircle, FiMessageCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
@@ -34,6 +34,26 @@ function Cart() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
+  // Automatically fetch customer profile from Firestore if authenticated
+  useEffect(() => {
+    async function fetchCustomerProfile() {
+      if (!user || !user.user) return;
+      try {
+        const querySnapshot = await getDocs(collection(fireDB, 'users'));
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.email === user.user.email || data.uid === user.user.uid) {
+            if (data.name && !customerName) setCustomerName(data.name);
+            if (data.whatsapp && !phoneNumber) setPhoneNumber(data.whatsapp);
+          }
+        });
+      } catch (err) {
+        console.warn("Could not retrieve customer profile for autofill:", err);
+      }
+    }
+    fetchCustomerProfile();
+  }, [user]);
+
   const submitBagForReview = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
@@ -59,6 +79,13 @@ function Cart() {
       sareeTitle: `Shopping Bag Review Request (${cartItems.length} items)`,
       categoryName: "Multi-Item Bag Submission",
       imageUrl: cartItems[0]?.imageUrl || "",
+      cartItems: cartItems.map(i => ({
+        id: i.id,
+        title: i.title,
+        imageUrl: i.imageUrl,
+        categoryName: i.categoryName,
+        indicativePriceRange: i.indicativePriceRange
+      })),
       customerName: customerName,
       phone: cleanPhone,
       message: `Bag Ref: ${referenceId}. Items: ${cartItems.map(i => `${i.title} (${i.id})`).join(' | ')}. Delivery Address: ${address} - Pincode: ${pinCode}`,

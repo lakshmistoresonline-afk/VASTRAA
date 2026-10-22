@@ -110,13 +110,20 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
   };
 
   const handleAddToCart = (item) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      toast.info("Please sign in or register to add sarees to your cart.");
+      navigate('/login');
+      return;
+    }
+
     const exists = cart.some(cartItem => cartItem.id === item.id);
     if (exists) {
-      toast.info("This saree is already in your shopping bag.");
+      toast.info("This saree is already in your shopping cart.");
       navigate('/cart');
     } else {
       dispatch(addToCart(item));
-      toast.success("Saree added to your Shopping Bag!");
+      toast.success("Saree added to your Shopping Cart!");
     }
   };
 
@@ -195,7 +202,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 space-y-3 shadow-sm">
             <p className="text-[#77716A] dark:text-gray-400 text-base font-medium">No sarees match your current search or category filter.</p>
-            <p className="text-xs text-gray-400">Try resetting filters or searching for terms like "Pure Silk", "Soft Silk", "Wedding", or "Semi".</p>
+            <p className="text-xs text-gray-400">Try resetting filters or searching for terms like "Pure Silk", "Soft Silk", or "Wedding".</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -278,7 +285,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                     </div>
                   </div>
 
-                  {/* Single Unified Cart Action CTA (Add to Bag / Already in Bag) */}
+                  {/* Single Unified Cart Action CTA (Add to Cart / Already in Cart) */}
                   <div className="p-4 pt-0">
                     {isInCart ? (
                       <button
@@ -287,7 +294,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                         className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
                       >
                         <FiCheckCircle className="w-4 h-4 text-emerald-300" />
-                        <span>Already in Bag · View Bag</span>
+                        <span>Already in Cart · View Cart</span>
                       </button>
                     ) : (
                       <button
@@ -296,7 +303,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                         className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C5A46D]/40"
                       >
                         <FiShoppingBag className="w-4 h-4 text-[#C5A46D]" />
-                        <span>Add to Bag</span>
+                        <span>Add to Cart</span>
                       </button>
                     )}
                   </div>
@@ -366,5 +373,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
     </section>
   );
 }
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

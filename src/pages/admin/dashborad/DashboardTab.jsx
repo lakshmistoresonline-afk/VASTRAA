@@ -2,7 +2,11 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
-import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList } from 'react-icons/fi';
+import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
+import { fireDB } from '../../../firebase/FirebaseConfig';
+
+const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
 function DashboardTab() {
   const context = useContext(myContext);
@@ -23,6 +27,13 @@ function DashboardTab() {
   } = context;
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [enquiryViewMode, setEnquiryViewMode] = useState('kanban'); // 'kanban' or 'table'
+  const [quotationModalEnquiry, setQuotationModalEnquiry] = useState(null);
+  const [itemPrices, setItemPrices] = useState({});
+  const [itemAvailabilities, setItemAvailabilities] = useState({});
+  const [discountType, setDiscountType] = useState('fixed'); // 'fixed' or 'percentage'
+  const [discountValue, setDiscountValue] = useState(0);
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
 
   useEffect(() => {
     if (getEnquiriesData) getEnquiriesData();
@@ -34,6 +45,90 @@ function DashboardTab() {
     toast.info("Syncing showroom catalogues...");
     await triggerSync();
     toast.success("Catalogue sync complete!");
+  };
+
+  const openQuotationModal = (enq) => {
+    setQuotationModalEnquiry(enq);
+    const initialPrices = {};
+    const initialAvail = {};
+    const items = enq.cartItems || [{ id: enq.sareeId, title: enq.sareeTitle, imageUrl: enq.imageUrl }];
+    items.forEach((item, idx) => {
+      initialPrices[idx] = item.price || '';
+      initialAvail[idx] = true; // default available
+    });
+    setItemPrices(initialPrices);
+    setItemAvailabilities(initialAvail);
+    setDiscountType('fixed');
+    setDiscountValue(0);
+    setDeliveryCharge(0);
+  };
+
+  const handlePublishQuotation = async () => {
+    if (!quotationModalEnquiry) return;
+    try {
+      const items = quotationModalEnquiry.cartItems || [{ id: quotationModalEnquiry.sareeId, title: quotationModalEnquiry.sareeTitle, imageUrl: quotationModalEnquiry.imageUrl }];
+
+      let subtotal = 0;
+      const evaluatedItems = items.map((item, idx) => {
+        const isAvail = itemAvailabilities[idx] !== false;
+        const price = parseFloat(itemPrices[idx]) || 0;
+        if (isAvail) {
+          subtotal += price;
+        }
+        return {
+          ...item,
+          isAvailable: isAvail,
+          confirmedPrice: price
+        };
+      });
+
+      const discVal = parseFloat(discountValue) || 0;
+      let discountAmt = 0;
+      if (discountType === 'percentage') {
+        discountAmt = Math.round((subtotal * discVal) / 100);
+      } else {
+        discountAmt = Math.min(discVal, subtotal);
+      }
+
+      const shipping = parseFloat(deliveryCharge) || 0;
+      const finalPayable = Math.max(0, subtotal - discountAmt + shipping);
+
+      const enqRef = doc(fireDB, 'enquiries', quotationModalEnquiry.id);
+      await updateDoc(enqRef, {
+        status: "QUOTATION_READY",
+        quotationDetails: {
+          items: evaluatedItems,
+          subtotal,
+          discountType,
+          discountValue: discVal,
+          discountAmount: discountAmt,
+          deliveryCharge: shipping,
+          finalPayable,
+          publishedAt: new Date().toISOString(),
+          version: 1
+        }
+      });
+
+      // Automated WhatsApp Template Dispatch on Publication
+      const cleanPhone = quotationModalEnquiry.phone ? quotationModalEnquiry.phone.replace(/[^0-9]/g, '') : '919746998785';
+      const whatsAppMsg = `Hello ${quotationModalEnquiry.customerName || 'Valued Customer'}, your formal Vastraa quotation is ready! Net Payable: ₹${finalPayable}. Please sign in to your customer account to review availability and accept.`;
+
+      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
+        recipientPhone: cleanPhone,
+        customerName: quotationModalEnquiry.customerName,
+        message: whatsAppMsg,
+        amount: finalPayable,
+        status: 'DISPATCHED_TEMPLATE',
+        createdAt: new Date().toISOString()
+      });
+
+      toast.success(`Quotation published & WhatsApp template dispatched to ${quotationModalEnquiry.customerName} (${quotationModalEnquiry.phone})!`);
+      setQuotationModalEnquiry(null);
+      if (getEnquiriesData) getEnquiriesData();
+    } catch (err) {
+      console.error("Publish quotation error:", err);
+      toast.error("Failed to publish quotation: " + err.message);
+    }
   };
 
   const filteredInventory = product ? product.filter((p) =>
@@ -56,7 +151,7 @@ function DashboardTab() {
               👗 Live Inventory ({product ? product.length : 0})
             </Tab>
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
-              📩 Customer Enquiries ({enquiries ? enquiries.length : 0})
+              📩 Quotation Pipeline & Enquiries ({enquiries ? enquiries.length : 0})
             </Tab>
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
               ⚙️ Store Settings
@@ -198,8 +293,9 @@ function DashboardTab() {
                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3">
                         <img
-                          src={item.imageUrl}
+                          src={item.imageUrl || FALLBACK_SAREE_IMG}
                           alt={item.title}
+                          onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
                           className="w-12 h-16 object-cover rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
                           loading="lazy"
                         />
@@ -239,15 +335,117 @@ function DashboardTab() {
 
         {/* Tab 3: Customer Enquiries */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
-          <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-            Customer Availability & Price Enquiries ({enquiries ? enquiries.length : 0})
-          </h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+              Quotation Pipeline & Customer Requests ({enquiries ? enquiries.length : 0})
+            </h2>
+
+            {/* View Mode Toggle: Kanban vs Table */}
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setEnquiryViewMode('kanban')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  enquiryViewMode === 'kanban' ? 'bg-[#800020] text-white shadow-sm' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900'
+                }`}
+              >
+                <FiColumns className="w-3.5 h-3.5" />
+                <span>Kanban Pipeline</span>
+              </button>
+              <button
+                onClick={() => setEnquiryViewMode('table')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  enquiryViewMode === 'table' ? 'bg-[#800020] text-white shadow-sm' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900'
+                }`}
+              >
+                <FiList className="w-3.5 h-3.5" />
+                <span>Table View</span>
+              </button>
+            </div>
+          </div>
 
           {!enquiries || enquiries.length === 0 ? (
             <div className="text-center py-16 text-gray-500 text-xs font-medium">
-              No customer availability enquiries received yet.
+              No customer availability enquiries or bag reviews received yet.
+            </div>
+          ) : enquiryViewMode === 'kanban' ? (
+            /* KANBAN PIPELINE BOARD */
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 overflow-x-auto pb-4">
+              {['Pending Review', 'QUOTATION_DRAFT', 'QUOTATION_READY', 'PAYMENT_PENDING', 'Fulfilled'].map((colStatus, cIdx) => {
+                const colTitles = {
+                  'Pending Review': '1. Pending Review',
+                  'QUOTATION_DRAFT': '2. Quotation Drafted',
+                  'QUOTATION_READY': '3. Published (Ready)',
+                  'PAYMENT_PENDING': '4. Awaiting Payment',
+                  'Fulfilled': '5. Ready for Dispatch'
+                };
+
+                const colEnquiries = enquiries.filter(enq => {
+                  const s = enq.status || 'Pending';
+                  if (colStatus === 'Pending Review') return s === 'Pending' || s === 'Pending Review';
+                  if (colStatus === 'QUOTATION_DRAFT') return s === 'QUOTATION_DRAFT';
+                  if (colStatus === 'QUOTATION_READY') return s === 'QUOTATION_READY';
+                  if (colStatus === 'PAYMENT_PENDING') return s === 'PAYMENT_PENDING' || s === 'QUOTATION_ACCEPTED';
+                  if (colStatus === 'Fulfilled') return s === 'Fulfilled' || s === 'READY_FOR_DISPATCH';
+                  return false;
+                });
+
+                return (
+                  <div key={cIdx} className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 space-y-3 min-w-[240px]">
+                    <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="font-serif font-bold text-xs text-gray-900 dark:text-white">
+                        {colTitles[colStatus]}
+                      </h3>
+                      <span className="bg-[#800020] text-[#D4AF37] px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                        {colEnquiries.length}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                      {colEnquiries.length === 0 ? (
+                        <p className="text-[11px] text-gray-400 text-center py-6">No requests in this stage</p>
+                      ) : (
+                        colEnquiries.map(enq => {
+                          const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
+                          return (
+                            <div key={enq.id} className="bg-white dark:bg-gray-900 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-2.5">
+                              <div className="flex justify-between items-start">
+                                <span className="font-bold text-gray-900 dark:text-white text-xs">{enq.customerName}</span>
+                                <span className="text-[10px] text-gray-400 font-mono">{enq.createdAt ? new Date(enq.createdAt).toLocaleDateString() : ''}</span>
+                              </div>
+                              <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold">📞 {enq.phone}</p>
+                              <div className="text-[11px] text-gray-600 dark:text-gray-300 font-medium line-clamp-2">
+                                {enq.sareeTitle}
+                              </div>
+
+                              <div className="pt-2 flex justify-between items-center border-t border-gray-100 dark:border-gray-800">
+                                <button
+                                  onClick={() => openQuotationModal(enq)}
+                                  className="bg-[#800020] hover:bg-[#67001a] text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
+                                >
+                                  <FiFileText className="text-[#D4AF37]" />
+                                  <span>Review & Quote</span>
+                                </button>
+                                <a
+                                  href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello ${enq.customerName}, regarding your Vastraa request: `)}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold"
+                                  title="WhatsApp Customer"
+                                >
+                                  WhatsApp
+                                </a>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
+            /* TABLE VIEW */
             <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800">
               <table className="w-full text-xs text-left text-gray-600 dark:text-gray-300">
                 <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white uppercase text-[10px] tracking-wider font-extrabold">
@@ -275,37 +473,71 @@ function DashboardTab() {
                           <span className="text-[11px] text-blue-600 dark:text-blue-400 block font-semibold">📞 {enq.phone}</span>
                         </td>
                         <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                            {enq.imageUrl && (
-                              <img src={enq.imageUrl} alt="" className="w-10 h-12 object-cover rounded-lg border shadow-sm" />
-                            )}
-                            <div>
+                          {enq.cartItems && enq.cartItems.length > 0 ? (
+                            <div className="space-y-1.5">
                               <span className="font-bold text-gray-900 dark:text-white block">{enq.sareeTitle}</span>
-                              <span className="text-[10px] text-gray-400 font-mono">ID: {enq.sareeId}</span>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {enq.cartItems.map((ci, idx) => {
+                                  const liveP = product ? product.find(p => p.id === ci.id) : null;
+                                  const imgUrl = liveP?.imageUrl || ci.imageUrl || FALLBACK_SAREE_IMG;
+                                  return (
+                                    <img
+                                      key={idx}
+                                      src={imgUrl}
+                                      alt=""
+                                      onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+                                      className="w-8 h-10 object-cover rounded border shadow-xs"
+                                      title={ci.title}
+                                    />
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              {(() => {
+                                const liveP = product ? product.find(p => p.id === enq.sareeId) : null;
+                                const imgUrl = liveP?.imageUrl || enq.imageUrl || FALLBACK_SAREE_IMG;
+                                return (
+                                  <img
+                                    src={imgUrl}
+                                    alt=""
+                                    onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+                                    className="w-10 h-12 object-cover rounded-lg border shadow-sm"
+                                  />
+                                );
+                              })()}
+                              <div>
+                                <span className="font-bold text-gray-900 dark:text-white block">{enq.sareeTitle}</span>
+                                <span className="text-[10px] text-gray-400 font-mono">ID: {enq.sareeId}</span>
+                              </div>
+                            </div>
+                          )}
                         </td>
                         <td className="px-5 py-4 max-w-xs truncate">
                           {enq.message || "—"}
                         </td>
                         <td className="px-5 py-4">
-                          <select
-                            value={enq.status || "Pending"}
-                            onChange={(e) => updateEnquiryStatus(enq.id, e.target.value)}
-                            className="text-xs px-3 py-1.5 rounded-xl border font-bold dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="Contacted">Contacted</option>
-                            <option value="Fulfilled">Fulfilled</option>
-                            <option value="Cancelled">Cancelled</option>
-                          </select>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
+                            enq.status === 'QUOTATION_READY' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {enq.status || "Pending"}
+                          </span>
                         </td>
                         <td className="px-5 py-4 text-right space-y-1 sm:space-y-0 sm:space-x-2 flex flex-col sm:flex-row justify-end items-center">
+                          <button
+                            onClick={() => openQuotationModal(enq)}
+                            className="inline-flex items-center gap-1 bg-[#800020] hover:bg-[#67001a] text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
+                            title="Review & Prepare Quotation"
+                          >
+                            <FiFileText className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>Review & Quote</span>
+                          </button>
                           <a
                             href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl font-bold text-[11px] shadow-sm transition-all"
+                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
                             title="Chat with customer on WhatsApp"
                           >
                             <FiMessageCircle className="w-3.5 h-3.5" />
@@ -328,30 +560,222 @@ function DashboardTab() {
           )}
         </TabPanel>
 
-        {/* Tab 4: Store Info */}
+        {/* Tab 4: Store Settings */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-            Vastraa Store Settings
+            Store & Payment Configuration
           </h2>
-
-          <div className="glass-card p-8 rounded-3xl border border-gray-200 dark:border-gray-800 max-w-2xl space-y-5 text-xs">
-            <div>
-              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Store Name:</span>
-              <p className="text-base font-bold text-gray-900 dark:text-white">{storeInfo?.name}</p>
-            </div>
-            <div>
-              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">WhatsApp Hotline:</span>
-              <p className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">{storeInfo?.whatsapp}</p>
-            </div>
-            <div>
-              <span className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Integration Status:</span>
-              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                Live catalogue sync active. Every photo displayed reflects verified silk saree stock.
-              </p>
+          <div className="bg-gray-50 dark:bg-gray-800/60 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <span className="text-gray-500 block font-bold">Store Brand Name:</span>
+                <span className="text-gray-900 dark:text-white font-semibold text-sm">{storeInfo?.name}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block font-bold">Co-Brand Association:</span>
+                <span className="text-gray-900 dark:text-white font-semibold text-sm">{storeInfo?.coBrand}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block font-bold">Showroom Location:</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{storeInfo?.location}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block font-bold">Customer Hotline / WhatsApp:</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{storeInfo?.phone}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block font-bold">Verified UPI Payee Name:</span>
+                <span className="text-gray-900 dark:text-white font-semibold text-emerald-600 dark:text-emerald-400">Srinath Rajkiran</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block font-bold">Verified UPI ID:</span>
+                <span className="text-gray-900 dark:text-white font-semibold text-emerald-600 dark:text-emerald-400">srinathrajkiran007-2@okaxis</span>
+              </div>
             </div>
           </div>
         </TabPanel>
+
       </Tabs>
+
+      {/* Admin Quotation Editor Modal */}
+      {quotationModalEnquiry && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-gray-200 dark:border-gray-800 max-h-[90vh] overflow-y-auto space-y-6">
+            <button
+              onClick={() => setQuotationModalEnquiry(null)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+
+            <div>
+              <span className="text-xs font-bold text-[#800020] dark:text-[#E5C158] uppercase">
+                Admin Quotation Editor
+              </span>
+              <h3 className="font-serif font-bold text-xl text-gray-900 dark:text-white">
+                Review Request: {quotationModalEnquiry.customerName}
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                WhatsApp: {quotationModalEnquiry.phone} | Submitted: {quotationModalEnquiry.createdAt ? new Date(quotationModalEnquiry.createdAt).toLocaleString() : 'Recent'}
+              </p>
+            </div>
+
+            {/* Items review table */}
+            <div className="space-y-3">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Item-Level Availability & Pricing
+              </h4>
+              <div className="space-y-3">
+                {(quotationModalEnquiry.cartItems || [{ id: quotationModalEnquiry.sareeId, title: quotationModalEnquiry.sareeTitle, imageUrl: quotationModalEnquiry.imageUrl }]).map((item, idx) => {
+                  const liveP = product ? product.find(p => p.id === item.id) : null;
+                  const itemImgUrl = liveP?.imageUrl || item.imageUrl || FALLBACK_SAREE_IMG;
+                  return (
+                    <div key={idx} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={itemImgUrl}
+                          alt=""
+                          onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+                          className="w-12 h-16 object-cover rounded-xl border shadow-xs"
+                        />
+                        <div>
+                          <span className="font-bold text-gray-900 dark:text-white block text-sm">{item.title}</span>
+                          <span className="text-[10px] text-gray-400 font-mono">ID: {item.id}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <select
+                          value={itemAvailabilities[idx] !== false ? "available" : "unavailable"}
+                          onChange={(e) => setItemAvailabilities({ ...itemAvailabilities, [idx]: e.target.value === 'available' })}
+                          className="text-xs px-3 py-2 rounded-xl border font-bold bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                        >
+                          <option value="available">✓ Available</option>
+                          <option value="unavailable">✕ Unavailable</option>
+                        </select>
+
+                        {itemAvailabilities[idx] !== false && (
+                          <div className="relative">
+                            <span className="absolute left-3 top-2.5 text-xs text-gray-400">₹</span>
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder="Unit Price"
+                              value={itemPrices[idx] || ''}
+                              onChange={(e) => setItemPrices({ ...itemPrices, [idx]: e.target.value })}
+                              className="w-28 text-xs pl-7 pr-3 py-2 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Cart-level discount & delivery */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Cart Discount Type & Value
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={discountType}
+                    onChange={(e) => setDiscountType(e.target.value)}
+                    className="text-xs px-3 py-2.5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold"
+                  >
+                    <option value="fixed">Fixed (₹)</option>
+                    <option value="percentage">Percentage (%)</option>
+                  </select>
+                  <input
+                    type="number"
+                    min="0"
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(e.target.value)}
+                    placeholder="Discount"
+                    className="flex-1 text-xs px-3 py-2.5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Confirmed Delivery Charges (₹)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={deliveryCharge}
+                  onChange={(e) => setDeliveryCharge(e.target.value)}
+                  placeholder="0 for Free Shipping"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold"
+                />
+              </div>
+            </div>
+
+            {/* Live Calculation Summary Preview */}
+            <div className="bg-amber-50/80 dark:bg-gray-800/80 p-4 rounded-2xl border border-amber-200 dark:border-gray-700 space-y-2 text-xs">
+              {(() => {
+                const items = quotationModalEnquiry.cartItems || [{ id: quotationModalEnquiry.sareeId, title: quotationModalEnquiry.sareeTitle }];
+                let subtotal = 0;
+                items.forEach((item, idx) => {
+                  if (itemAvailabilities[idx] !== false) {
+                    subtotal += parseFloat(itemPrices[idx]) || 0;
+                  }
+                });
+                const discVal = parseFloat(discountValue) || 0;
+                let discountAmt = discountType === 'percentage' ? Math.round((subtotal * discVal) / 100) : Math.min(discVal, subtotal);
+                const shipping = parseFloat(deliveryCharge) || 0;
+                const finalPayable = Math.max(0, subtotal - discountAmt + shipping);
+
+                return (
+                  <>
+                    <div className="flex justify-between text-gray-600 dark:text-gray-300">
+                      <span>Available Items Subtotal:</span>
+                      <span className="font-bold text-gray-900 dark:text-white">₹{subtotal}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600 dark:text-gray-300">
+                      <span>Discount Amount:</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">- ₹{discountAmt}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600 dark:text-gray-300">
+                      <span>Delivery Charges:</span>
+                      <span className="font-bold text-gray-900 dark:text-white">₹{shipping}</span>
+                    </div>
+                    <div className="pt-2 border-t border-amber-200 dark:border-gray-700 flex justify-between font-serif font-extrabold text-sm text-gray-900 dark:text-white">
+                      <span>Net Payable Amount:</span>
+                      <span className="text-base text-[#800020] dark:text-[#E5C158]">₹{finalPayable}</span>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+
+            <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setQuotationModalEnquiry(null)}
+                className="px-5 py-3 border text-xs font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                Cancel / Close
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePublishQuotation}
+                className="bg-[#800020] hover:bg-[#67001a] text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all flex items-center gap-2"
+              >
+                <FiCheck className="w-4 h-4 text-[#D4AF37]" />
+                <span>Publish Quotation to Customer</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
