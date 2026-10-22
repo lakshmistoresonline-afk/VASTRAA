@@ -22,6 +22,16 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Quotation requests / Bag review submissions: Public create with shape validation; Private admin read/manage
+    match /quotation_requests/{requestId} {
+      allow create: if request.resource.data.requestReference is string &&
+                       request.resource.data.customerInfo.name is string &&
+                       request.resource.data.customerInfo.phone is string &&
+                       request.resource.data.customerInfo.name.size() > 0 &&
+                       request.resource.data.customerInfo.phone.size() >= 10;
+      allow read, update, delete: if isAdmin();
+    }
+
     // Users collection: Admin read/write; Owner read/write
     match /users/{userId} {
       allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
