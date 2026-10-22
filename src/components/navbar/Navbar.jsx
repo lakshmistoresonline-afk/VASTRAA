@@ -1,6 +1,5 @@
 import React, { Fragment, useContext, useState } from 'react';
-import { BsFillCloudSunFill } from 'react-icons/bs';
-import { FiSun, FiMessageCircle, FiShoppingBag, FiSearch, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { Dialog, Transition } from '@headlessui/react';
@@ -8,7 +7,7 @@ import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const context = useContext(myContext);
-  const { mode, toggleMode, storeInfo, searchKey, setSearchKey } = context;
+  const { storeInfo } = context;
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -113,26 +112,6 @@ const Navbar = () => {
 
             {/* Right Actions */}
             <div className="flex items-center space-x-3">
-              {/* Quick Search Trigger */}
-              <div className="hidden md:flex items-center bg-[#302625] dark:bg-gray-800 rounded-xl px-3 py-2 border border-[#C6A15B]/30">
-                <FiSearch className="text-[#C6A15B] w-4 h-4 mr-2" />
-                <input
-                  type="text"
-                  value={searchKey}
-                  onChange={(e) => setSearchKey(e.target.value)}
-                  placeholder="Search silk sarees..."
-                  className="bg-transparent text-xs outline-none text-white placeholder:text-gray-400 w-36 focus:w-48 transition-all"
-                />
-              </div>
-
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleMode}
-                className="p-2.5 text-gray-300 hover:text-[#C6A15B] transition-colors rounded-xl bg-[#302625] dark:bg-gray-800 border border-[#C6A15B]/30"
-                title="Toggle Dark/Light Mode"
-              >
-                {mode === 'light' ? <FiSun className="w-4 h-4 text-amber-300" /> : <BsFillCloudSunFill className="w-4 h-4 text-amber-400" />}
-              </button>
 
               {/* Shopping Bag / Cart Button */}
               <Link

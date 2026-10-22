@@ -1,24 +1,22 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import MyContext from '../../context/data/myContext';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
-import { FiMessageCircle, FiSend, FiMaximize2, FiX, FiCheckCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiMaximize2, FiX, FiCheckCircle, FiShoppingBag } from 'react-icons/fi';
 
 function ProductInfo() {
   const context = useContext(MyContext);
-  const { product, storeInfo, lastVerifiedAt, addEnquiry } = context;
+  const { product, storeInfo, lastVerifiedAt } = context;
   const params = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart);
 
   const [saree, setSaree] = useState(null);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [enquirySent, setEnquirySent] = useState(false);
-
-  const [enquiryForm, setEnquiryForm] = useState({
-    customerName: '',
-    phone: '',
-    message: ''
-  });
 
   useEffect(() => {
     if (product && product.length > 0) {
@@ -29,38 +27,15 @@ function ProductInfo() {
     }
   }, [product, params.id]);
 
-  const handleEnquirySubmit = async (e) => {
-    e.preventDefault();
-    const cleanPhone = enquiryForm.phone.replace(/[^0-9]/g, '');
+  const isInCart = saree ? cart.some(item => item.id === saree.id) : false;
 
-    if (!enquiryForm.customerName || enquiryForm.customerName.trim().length === 0) {
-      toast.error("Please enter your full name.");
-      return;
-    }
-
-    if (!cleanPhone || cleanPhone.length < 10) {
-      toast.error("Please enter a valid 10-digit WhatsApp mobile number.");
-      return;
-    }
-
-    toast.info("Submitting your enquiry...");
-
-    const res = await addEnquiry({
-      sareeId: saree.id,
-      sareeTitle: saree.title,
-      categoryName: saree.categoryName,
-      imageUrl: saree.imageUrl,
-      customerName: enquiryForm.customerName,
-      phone: cleanPhone,
-      message: enquiryForm.message
-    });
-
-    if (res && res.success) {
-      setEnquirySent(true);
-      toast.success("Enquiry received successfully!");
+  const handleAddToCart = () => {
+    if (isInCart) {
+      toast.info("This saree is already in your shopping bag.");
+      navigate('/cart');
     } else {
-      setEnquirySent(true);
-      toast.success("Enquiry recorded!");
+      dispatch(addToCart(saree));
+      toast.success("Saree added to your Shopping Bag!");
     }
   };
 
@@ -119,7 +94,7 @@ function ProductInfo() {
                 </div>
               </div>
 
-              {/* Right Column: Saree Details & Enquiry Form */}
+              {/* Right Column: Saree Details & Bag Action */}
               <div className="lg:col-span-6 space-y-6">
 
                 <div>
@@ -165,114 +140,50 @@ function ProductInfo() {
                   </div>
                 </div>
 
+                {/* Add to Bag & WhatsApp Actions */}
+                <div className="space-y-3 pt-2">
+                  {isInCart ? (
+                    <button
+                      onClick={() => navigate('/cart')}
+                      type="button"
+                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                    >
+                      <FiCheckCircle className="w-4 h-4 text-emerald-300" />
+                      <span>Already in Bag · View Bag</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      type="button"
+                      className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C5A46D]/40"
+                    >
+                      <FiShoppingBag className="w-4 h-4 text-[#C5A46D]" />
+                      <span>Add to Shopping Bag</span>
+                    </button>
+                  )}
+
+                  <a
+                    href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
+                      `Hello Vastraa (Co-Brand of Lakshmi Stores), I am interested in saree ID: ${saree.id} (${saree.categoryName}). Photo: ${saree.imageUrl}`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    <FiMessageCircle className="w-4 h-4" />
+                    <span>Enquire via WhatsApp</span>
+                  </a>
+                </div>
+
                 {/* Showroom Details */}
-                <div className="space-y-2 text-xs text-[#77716A] dark:text-gray-300">
+                <div className="space-y-2 text-xs text-[#77716A] dark:text-gray-300 pt-4 border-t border-[#E9E1D5] dark:border-gray-800">
                   <p className="font-bold text-[#24211F] dark:text-white uppercase tracking-wider">Showroom & Product Overview:</p>
                   <ul className="list-disc pl-5 space-y-1">
                     <li>Brand: Vastraa (A Co-Brand of Lakshmi Stores)</li>
                     <li>Catalogue Category: {saree.categoryName}</li>
                     <li>Saree Code Identifier: {saree.id}</li>
-                    <li>Direct Assistance via WhatsApp & Online Enquiry Form</li>
+                    <li>Direct Assistance via WhatsApp & Shopping Bag Review</li>
                   </ul>
-                </div>
-
-                {/* Direct Enquiry Form */}
-                <div className="border-t border-[#E9E1D5] dark:border-gray-800 pt-6 space-y-4">
-                  <h3 className="font-serif font-bold text-base text-[#24211F] dark:text-white">
-                    Send Direct Showroom Enquiry
-                  </h3>
-
-                  {enquirySent ? (
-                    <div className="bg-emerald-50 dark:bg-emerald-950/40 p-6 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-center space-y-3">
-                      <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-sm">
-                        <FiCheckCircle />
-                      </div>
-                      <h4 className="font-serif font-bold text-lg text-emerald-900 dark:text-emerald-200">
-                        Enquiry Sent Successfully!
-                      </h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300">
-                        Thank you <span className="font-bold">{enquiryForm.customerName}</span>. Our team will contact you shortly regarding <span className="font-bold">{saree.title}</span>.
-                      </p>
-                      <a
-                        href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
-                          `Hello Vastraa (Co-Brand of Lakshmi Stores), I just submitted an enquiry for saree ID: ${saree.id} (${saree.title}). Name: ${enquiryForm.customerName}, Phone: ${enquiryForm.phone}`
-                        )}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all mt-2"
-                      >
-                        <FiMessageCircle className="w-4 h-4" />
-                        <span>Chat Instantly on WhatsApp</span>
-                      </a>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleEnquirySubmit} className="space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                            Full Name *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={enquiryForm.customerName}
-                            onChange={(e) => setEnquiryForm({ ...enquiryForm, customerName: e.target.value })}
-                            className="w-full text-xs px-3.5 py-2.5 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
-                            placeholder="e.g. Ananya Nair"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                            10-Digit WhatsApp Mobile Number *
-                          </label>
-                          <input
-                            type="tel"
-                            required
-                            value={enquiryForm.phone}
-                            onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
-                            className="w-full text-xs px-3.5 py-2.5 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
-                            placeholder="e.g. 9746998785"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
-                          Message / Special Requests
-                        </label>
-                        <textarea
-                          rows={2}
-                          value={enquiryForm.message}
-                          onChange={(e) => setEnquiryForm({ ...enquiryForm, message: e.target.value })}
-                          className="w-full text-xs px-3.5 py-2.5 border border-[#E9E1D5] rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
-                          placeholder="Ask about exact individual price, color variations, or matching blouse..."
-                        />
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                        <button
-                          type="submit"
-                          className="flex-1 bg-[#800020] hover:bg-[#67001a] text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
-                        >
-                          <FiSend className="w-4 h-4 text-[#C5A46D]" />
-                          <span>Submit Direct Enquiry</span>
-                        </button>
-
-                        <a
-                          href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
-                            `Hello Vastraa (Co-Brand of Lakshmi Stores), I am interested in saree ID: ${saree.id} (${saree.categoryName}). Photo: ${saree.imageUrl}`
-                          )}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition-all"
-                        >
-                          <FiMessageCircle className="w-4 h-4" />
-                          <span>WhatsApp Now</span>
-                        </a>
-                      </div>
-                    </form>
-                  )}
                 </div>
 
               </div>

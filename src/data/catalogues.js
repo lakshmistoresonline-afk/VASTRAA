@@ -84,7 +84,7 @@ export const CATALOGUES = [
       "https://photos.google.com/share/AF1QipNzEH9t3GatRzJk9nQS4VTM78LipiFDN40W62tXfOuoJKVmLSnY8lgZsVeMlc41OA?key=Z1JIUUVLR0RFOURhWjB1THcxX2gtV1MyOUdJRElR"
     ],
     description: "Artistic silk saree weaves featuring rich Kanchipuram-style traditional motifs.",
-    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczPVIT0M0chcKvg5KUY8ajFCDLJGg_MYIoRVKszBnGtWYdi2yJM93k6IyZkCEoK6quOkp3hr77C2N01yrTQWnzaNqs0-TDjci2Va1huSU8S0J_sIUEZm=w1024-h1024"
+    featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczPVIT0M0chcKvg5KUY8ajFCDLJGg_MYIoRVKszBnGtWYdi2yJM93k6IyZkCEoK6quOkp3hr77C2N01yrtQWnzNzaNqs0-TDjci2Va1huSU8S0J_sIUEZm=w1024-h1024"
   },
   {
     id: "butta-art-silk-sarees",
@@ -138,5 +138,7 @@ export const STORE_INFO = {
   whatsapp: "+91 97469 98785",
   whatsappFormatted: "919746998785",
   email: "contact@vastraa.com",
-  openingHours: "Mon - Sat: 9:30 AM - 8:00 PM, Sun: Closed"
+  openingHours: "Mon - Sat: 9:30 AM - 8:00 PM, Sun: Closed",
+  upiId: "srinathrajkiran007-2@okaxis",
+  payeeName: "Srinath Rajkiran"
 };
