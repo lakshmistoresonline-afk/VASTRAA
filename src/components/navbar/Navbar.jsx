@@ -1,9 +1,10 @@
 import React, { Fragment, useContext, useState } from 'react';
 import { BsFillCloudSunFill } from 'react-icons/bs';
-import { FiSun, FiMessageCircle, FiSearch, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
+import { FiSun, FiMessageCircle, FiShoppingBag, FiSearch, FiMenu, FiX, FiCheckCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { Dialog, Transition } from '@headlessui/react';
+import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const context = useContext(myContext);
@@ -12,6 +13,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem('user'));
+  const cartItems = useSelector((state) => state.cart);
 
   const logout = () => {
     localStorage.clear();
@@ -132,15 +134,27 @@ const Navbar = () => {
                 {mode === 'light' ? <FiSun className="w-4 h-4 text-amber-300" /> : <BsFillCloudSunFill className="w-4 h-4 text-amber-400" />}
               </button>
 
+              {/* Shopping Bag / Cart Button */}
+              <Link
+                to="/cart"
+                className="relative flex items-center gap-2 bg-[#650A25] hover:bg-[#4A071B] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all border border-[#C6A15B]/40"
+              >
+                <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
+                <span className="hidden sm:inline">Bag</span>
+                <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                  {cartItems.length}
+                </span>
+              </Link>
+
               {/* Direct WhatsApp Hotline Button */}
               <a
                 href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent('Hello Vastraa, I would like to enquire about silk saree availability.')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
+                className="hidden md:flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
               >
                 <FiMessageCircle className="w-4 h-4 text-white" />
-                <span className="hidden sm:inline">WhatsApp</span>
+                <span>WhatsApp</span>
               </a>
 
               {user ? (
@@ -215,6 +229,10 @@ const Navbar = () => {
                   </Link>
                   <Link to="/allproducts" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                     👗 Silk Sarees
+                  </Link>
+                  <Link to="/cart" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200 flex justify-between items-center">
+                    <span>🛍️ Shopping Bag</span>
+                    <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-xs font-extrabold">{cartItems.length}</span>
                   </Link>
                   <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                     📩 Enquiries & Orders

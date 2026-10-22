@@ -1,8 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
 import myContext from '../../context/data/myContext';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
-import { FiMessageCircle, FiSend, FiX, FiChevronLeft, FiChevronRight, FiHeart, FiCheckCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiSend, FiX, FiChevronLeft, FiChevronRight, FiHeart, FiCheckCircle, FiShoppingBag } from 'react-icons/fi';
 
 /**
  * Bulletproof category matching helper
@@ -33,6 +35,7 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
   const context = useContext(myContext);
   const { product, searchKey, filterType, storeInfo, addEnquiry } = context;
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [wishlist, setWishlist] = useState([]);
@@ -50,6 +53,11 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
       setWishlist([...wishlist, id]);
       toast.success("Saved to Wishlist!");
     }
+  };
+
+  const handleAddToCart = (item) => {
+    dispatch(addToCart(item));
+    toast.success("Saree added to your Shopping Bag!");
   };
 
   // Enquiry modal state
@@ -280,18 +288,27 @@ function ProductCard({ limit = 0, isPaginated = true, itemsPerPage = 24 }) {
                     </div>
                   </div>
 
-                  {/* Single Unified Luxury Action CTA */}
-                  <div className="p-4 pt-0">
+                  {/* Dual Action CTAs: Add to Bag + Request Enquiry */}
+                  <div className="p-4 pt-0 space-y-2">
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      type="button"
+                      className="w-full bg-[#302625] hover:bg-black text-[#C6A15B] font-extrabold py-2.5 px-3 rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 border border-[#C6A15B]/30"
+                    >
+                      <FiShoppingBag className="w-3.5 h-3.5" />
+                      <span>Add to Bag</span>
+                    </button>
+
                     <button
                       onClick={() => {
                         setSelectedProduct(item);
                         setEnquirySuccess(false);
                       }}
                       type="button"
-                      className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3 px-3 rounded-xl text-xs shadow-md transition-all duration-300 flex items-center justify-center gap-2 group border border-[#C5A46D]/40"
+                      className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-2.5 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1.5 border border-[#C5A46D]/40"
                     >
-                      <FiSend className="w-3.5 h-3.5 text-[#C5A46D] group-hover:scale-110 transition-transform" />
-                      <span>Request Price & Availability</span>
+                      <FiSend className="w-3.5 h-3.5 text-[#C5A46D]" />
+                      <span>Request Enquiry</span>
                     </button>
                   </div>
 
