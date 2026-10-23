@@ -22,18 +22,41 @@ function PurchaseJourney() {
 
   const authUser = JSON.parse(localStorage.getItem('user'));
   const userEmail = authUser?.user?.email?.trim().toLowerCase();
+  const userUid = authUser?.user?.uid;
   const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
 
   const fetchEnquiries = async () => {
-    if (!userEmail) return;
+    if (!userEmail && !userUid) return;
     try {
       setLoading(true);
+
+      // Fetch user's registered WhatsApp phone number for robust multi-criteria matching
+      let userPhone = '';
+      try {
+        const usersSnap = await getDocs(collection(fireDB, 'users'));
+        usersSnap.forEach((docSnap) => {
+          const uData = docSnap.data();
+          if ((userEmail && uData.email?.trim().toLowerCase() === userEmail) || (userUid && uData.uid === userUid)) {
+            if (uData.whatsapp) userPhone = uData.whatsapp.replace(/[^0-9]/g, '');
+          }
+        });
+      } catch (uErr) {
+        console.warn("Could not fetch user profile for phone matching:", uErr);
+      }
+
       const querySnapshot = await getDocs(collection(fireDB, 'enquiries'));
       const list = [];
       querySnapshot.forEach((d) => {
         const data = d.data();
         const enqEmail = (data.customerEmail || data.email || '').trim().toLowerCase();
-        if (enqEmail === userEmail) {
+        const enqUid = data.customerUid;
+        const enqPhone = (data.phone || '').replace(/[^0-9]/g, '');
+
+        const matchesEmail = userEmail && enqEmail === userEmail;
+        const matchesUid = userUid && enqUid === userUid;
+        const matchesPhone = userPhone && enqPhone && enqPhone === userPhone;
+
+        if (matchesEmail || matchesUid || matchesPhone) {
           list.push({ id: d.id, ...data });
         }
       });
@@ -47,7 +70,7 @@ function PurchaseJourney() {
 
   useEffect(() => {
     fetchEnquiries();
-  }, [userEmail]);
+  }, [userEmail, userUid]);
 
   const handleCustomerResponse = async (enqId, responseType) => {
     try {
@@ -494,7 +517,7 @@ function PurchaseJourney() {
                             ) : (
                               <div className="space-y-2">
                                 <label className="block font-semibold text-gray-700 dark:text-gray-300">
-                                  UPI / UTR Transaction Reference *
+                                 UPI / UTR Transaction Reference *
                                 </label>
                                 <div className="flex gap-2">
                                   <input
