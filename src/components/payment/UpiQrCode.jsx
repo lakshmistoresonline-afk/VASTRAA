@@ -1,6 +1,9 @@
 import React from 'react';
 
 const UpiQrCode = ({ amount, upiId = "srinathrajkiran007-2@okaxis", payeeName = "Srinath Rajkiran" }) => {
+  const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`;
+  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
+
   return (
     <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border-2 border-[#C6A15B]/40 text-center space-y-4 shadow-xl max-w-sm mx-auto">
       <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
@@ -15,22 +18,18 @@ const UpiQrCode = ({ amount, upiId = "srinathrajkiran007-2@okaxis", payeeName = 
         </span>
       </div>
 
-      {/* Embedded High-Contrast Scannable QR Graphic */}
-      <div className="relative w-44 h-44 mx-auto bg-white p-3 rounded-2xl border-2 border-gray-200 shadow-inner flex flex-col items-center justify-center">
-        {/* SVG QR Code Matrix representation for srinathrajkiran007-2@okaxis */}
-        <div className="w-full h-full bg-slate-900 rounded-xl p-2 flex flex-col items-center justify-center text-white relative overflow-hidden shadow">
-          <div className="absolute inset-0 grid grid-cols-7 grid-rows-7 opacity-90 p-2 gap-1 bg-white">
-            {/* Simulated high-density scannable QR blocks */}
-            {[...Array(49)].map((_, i) => (
-              <div key={i} className={`rounded-xs ${i % 2 === 0 || i % 5 === 0 || i % 7 === 0 || i === 0 || i === 6 || i === 42 || i === 48 ? 'bg-black' : 'bg-white'}`} />
-            ))}
-          </div>
-
-          {/* Center GPay / UPI Badge */}
-          <div className="relative z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-[#800020]">
-            <span className="text-xs font-black text-[#800020]">₹</span>
-          </div>
-        </div>
+      {/* Primary: User's Exact Store QR Code Asset (/srinath-qr.png) with API Fallback */}
+      <div className="relative w-44 h-44 mx-auto bg-white p-2 rounded-2xl border-2 border-gray-200 shadow-inner flex items-center justify-center">
+        <img
+          src="/srinath-qr.png"
+          alt="Srinath Rajkiran UPI QR Code"
+          className="w-40 h-40 object-contain rounded-xl mx-auto"
+          onError={(e) => {
+            // Fallback to dynamic QR API if static asset is not yet placed in public/
+            e.target.onerror = null;
+            e.target.src = qrApiUrl;
+          }}
+        />
       </div>
 
       <div className="space-y-1 bg-[#FAF7F0] dark:bg-gray-800/80 p-3.5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700">
