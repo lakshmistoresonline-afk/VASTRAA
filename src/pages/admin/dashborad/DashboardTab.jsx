@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
-import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck } from 'react-icons/fi';
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 
@@ -30,10 +30,16 @@ function DashboardTab() {
   const [enquiryViewMode, setEnquiryViewMode] = useState('kanban'); // 'kanban' or 'table'
   const [quotationModalEnquiry, setQuotationModalEnquiry] = useState(null);
   const [paymentVerifyModalEnquiry, setPaymentVerifyModalEnquiry] = useState(null);
+  const [trackingModalEnquiry, setTrackingModalEnquiry] = useState(null);
   const [itemPrices, setItemPrices] = useState({});
   const [itemAvailabilities, setItemAvailabilities] = useState({});
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
+
+  // Tracking modal form states
+  const [courierName, setCourierName] = useState('');
+  const [awbNumber, setAwbNumber] = useState('');
+  const [estimatedDate, setEstimatedDate] = useState('');
 
   useEffect(() => {
     if (getEnquiriesData) getEnquiriesData();
@@ -60,6 +66,13 @@ function DashboardTab() {
     setItemAvailabilities(initialAvail);
     setDiscountPercentage(0);
     setDeliveryCharge(0);
+  };
+
+  const openTrackingModal = (enq) => {
+    setTrackingModalEnquiry(enq);
+    setCourierName(enq.trackingDetails?.courierName || 'Delhivery Express');
+    setAwbNumber(enq.trackingDetails?.awbNumber || '');
+    setEstimatedDate(enq.trackingDetails?.estimatedDate || '');
   };
 
   const handlePublishQuotation = async () => {
@@ -136,6 +149,31 @@ function DashboardTab() {
       if (getEnquiriesData) getEnquiriesData();
     } catch (err) {
       toast.error("Failed to verify payment: " + err.message);
+    }
+  };
+
+  const handleSaveTrackingDetails = async () => {
+    if (!trackingModalEnquiry) return;
+    if (!awbNumber.trim()) {
+      toast.error("Please enter a valid tracking AWB number.");
+      return;
+    }
+    try {
+      const enqRef = doc(fireDB, 'enquiries', trackingModalEnquiry.id);
+      await updateDoc(enqRef, {
+        status: "DISPATCHED",
+        trackingDetails: {
+          courierName: courierName.trim(),
+          awbNumber: awbNumber.trim(),
+          estimatedDate: estimatedDate.trim(),
+          dispatchedAt: new Date().toISOString()
+        }
+      });
+      toast.success("Shipping tracking details saved and published to customer!");
+      setTrackingModalEnquiry(null);
+      if (getEnquiriesData) getEnquiriesData();
+    } catch (err) {
+      toast.error("Failed to save tracking details: " + err.message);
     }
   };
 
@@ -393,7 +431,7 @@ function DashboardTab() {
                   if (colStatus === 'QUOTATION_DRAFT') return s === 'QUOTATION_DRAFT';
                   if (colStatus === 'QUOTATION_READY') return s === 'QUOTATION_READY';
                   if (colStatus === 'PAYMENT_PENDING') return s === 'PAYMENT_PENDING' || s === 'QUOTATION_ACCEPTED';
-                  if (colStatus === 'Fulfilled') return s === 'Fulfilled' || s === 'READY_FOR_DISPATCH' || s === 'PAYMENT_VERIFIED_ORDER_CONFIRMED';
+                  if (colStatus === 'Fulfilled') return s === 'Fulfilled' || s === 'READY_FOR_DISPATCH' || s === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || s === 'DISPATCHED';
                   return false;
                 });
 
@@ -415,6 +453,7 @@ function DashboardTab() {
                         colEnquiries.map(enq => {
                           const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                           const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
+                          const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'DISPATCHED';
 
                           return (
                             <div key={enq.id} className="bg-white dark:bg-gray-900 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-2.5">
@@ -428,7 +467,16 @@ function DashboardTab() {
                               </div>
 
                               <div className="pt-2 flex justify-between items-center border-t border-gray-100 dark:border-gray-800">
-                                {isAwaitingPayment ? (
+                                {isConfirmedOrVerified ? (
+                                  <button
+                                    onClick={() => openTrackingModal(enq)}
+                                    className="bg-indigo-700 hover:bg-indigo-800 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
+                                    title="Add or Update Shipping AWB / Tracking"
+                                  >
+                                    <FiTruck className="text-indigo-200" />
+                                    <span>{enq.trackingDetails ? "Edit Tracking" : "Add Tracking"}</span>
+                                  </button>
+                                ) : isAwaitingPayment ? (
                                   <button
                                     onClick={() => setPaymentVerifyModalEnquiry(enq)}
                                     className="bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
@@ -484,6 +532,7 @@ function DashboardTab() {
                     const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                     const whatsappMsg = `Hello ${enq.customerName || 'Customer'}, regarding your enquiry for ${enq.sareeTitle || 'Saree'} (ID: ${enq.sareeId}) at Vastraa (Lakshmi Stores): `;
                     const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
+                    const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'DISPATCHED';
 
                     return (
                       <tr key={enq.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -547,7 +596,16 @@ function DashboardTab() {
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right space-y-1 sm:space-y-0 sm:space-x-2 flex flex-col sm:flex-row justify-end items-center">
-                          {isAwaitingPayment ? (
+                          {isConfirmedOrVerified ? (
+                            <button
+                              onClick={() => openTrackingModal(enq)}
+                              className="inline-flex items-center gap-1 bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
+                              title="Add Tracking"
+                            >
+                              <FiTruck className="w-3.5 h-3.5 text-indigo-200" />
+                              <span>{enq.trackingDetails ? "Edit Tracking" : "Add Tracking"}</span>
+                            </button>
+                          ) : isAwaitingPayment ? (
                             <button
                               onClick={() => setPaymentVerifyModalEnquiry(enq)}
                               className="inline-flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
@@ -865,6 +923,89 @@ function DashboardTab() {
               >
                 <FiCheck className="w-4 h-4 text-emerald-300" />
                 <span>Verify Payment & Confirm Order</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Admin Tracking Details Modal */}
+      {trackingModalEnquiry && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-gray-200 dark:border-gray-800 space-y-6">
+            <button
+              onClick={() => setTrackingModalEnquiry(null)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+
+            <div>
+              <span className="text-xs font-bold text-indigo-600 uppercase flex items-center gap-1">
+                <FiTruck /> Enter Shipping & Tracking Details
+              </span>
+              <h3 className="font-serif font-bold text-lg text-gray-900 dark:text-white mt-1">
+                Customer: {trackingModalEnquiry.customerName}
+              </h3>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Courier Name / Service *
+                </label>
+                <input
+                  type="text"
+                  value={courierName}
+                  onChange={(e) => setCourierName(e.target.value)}
+                  placeholder="e.g. Delhivery Express / Blue Dart"
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Tracking AWB / Consignment Number *
+                </label>
+                <input
+                  type="text"
+                  value={awbNumber}
+                  onChange={(e) => setAwbNumber(e.target.value)}
+                  placeholder="e.g. DLVH987654321"
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Estimated Delivery Date
+                </label>
+                <input
+                  type="date"
+                  value={estimatedDate}
+                  onChange={(e) => setEstimatedDate(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setTrackingModalEnquiry(null)}
+                className="px-5 py-3 border text-xs font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveTrackingDetails}
+                className="bg-indigo-700 hover:bg-indigo-800 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all flex items-center gap-2"
+              >
+                <FiCheck className="w-4 h-4 text-indigo-200" />
+                <span>Save & Dispatch Order</span>
               </button>
             </div>
 
