@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
-import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX } from 'react-icons/fi';
+import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle } from 'react-icons/fi';
 import UpiQrCode from '../../components/payment/UpiQrCode';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
