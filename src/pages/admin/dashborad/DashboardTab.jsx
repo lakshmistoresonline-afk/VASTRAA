@@ -36,10 +36,10 @@ function DashboardTab() {
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
 
-  // Tracking modal form states
+  // Tracking modal form states (Courier Booked Date instead of Estimated Delivery)
   const [courierName, setCourierName] = useState('');
   const [awbNumber, setAwbNumber] = useState('');
-  const [estimatedDate, setEstimatedDate] = useState('');
+  const [courierBookedDate, setCourierBookedDate] = useState('');
 
   useEffect(() => {
     if (getEnquiriesData) getEnquiriesData();
@@ -70,9 +70,9 @@ function DashboardTab() {
 
   const openTrackingModal = (enq) => {
     setTrackingModalEnquiry(enq);
-    setCourierName(enq.trackingDetails?.courierName || 'Delhivery Express');
+    setCourierName(enq.trackingDetails?.courierName || '');
     setAwbNumber(enq.trackingDetails?.awbNumber || '');
-    setEstimatedDate(enq.trackingDetails?.estimatedDate || '');
+    setCourierBookedDate(enq.trackingDetails?.courierBookedDate || new Date().toISOString().split('T')[0]);
   };
 
   const handlePublishQuotation = async () => {
@@ -154,8 +154,8 @@ function DashboardTab() {
 
   const handleSaveTrackingDetails = async () => {
     if (!trackingModalEnquiry) return;
-    if (!awbNumber.trim()) {
-      toast.error("Please enter a valid tracking AWB number.");
+    if (!courierName.trim() || !awbNumber.trim()) {
+      toast.error("Please enter both courier service name and tracking AWB number.");
       return;
     }
     try {
@@ -165,7 +165,7 @@ function DashboardTab() {
         trackingDetails: {
           courierName: courierName.trim(),
           awbNumber: awbNumber.trim(),
-          estimatedDate: estimatedDate.trim(),
+          courierBookedDate: courierBookedDate.trim(),
           dispatchedAt: new Date().toISOString()
         }
       });
@@ -930,7 +930,7 @@ function DashboardTab() {
         </div>
       )}
 
-      {/* Admin Tracking Details Modal */}
+      {/* Admin Tracking Details Modal (Courier Booked Date) */}
       {trackingModalEnquiry && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-gray-200 dark:border-gray-800 space-y-6">
@@ -959,7 +959,7 @@ function DashboardTab() {
                   type="text"
                   value={courierName}
                   onChange={(e) => setCourierName(e.target.value)}
-                  placeholder="e.g. Delhivery Express / Blue Dart"
+                  placeholder="e.g. Blue Dart / DTDC / Speed Post"
                   className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-medium"
                 />
               </div>
@@ -979,12 +979,12 @@ function DashboardTab() {
 
               <div>
                 <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
-                  Estimated Delivery Date
+                  Courier Booked Date (Dispatch Date) *
                 </label>
                 <input
                   type="date"
-                  value={estimatedDate}
-                  onChange={(e) => setEstimatedDate(e.target.value)}
+                  value={courierBookedDate}
+                  onChange={(e) => setCourierBookedDate(e.target.value)}
                   className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-medium"
                 />
               </div>
