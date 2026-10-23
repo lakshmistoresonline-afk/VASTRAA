@@ -21,10 +21,10 @@ function Filter() {
     setLocalQuery(searchKey);
   }, [searchKey]);
 
-  // Dynamic rotating image indices for single-saree showcase
+  // Dynamic rotating image indices with mutually exclusive uniqueness across cards
   const [allIndex, setAllIndex] = useState(0);
-  const [pureIndex, setPureIndex] = useState(0);
-  const [semiIndex, setSemiIndex] = useState(0);
+  const [pureIndex, setPureIndex] = useState(12);
+  const [semiIndex, setSemiIndex] = useState(25);
 
   const allSareeImages = product && product.length > 0 ? product.map(p => p.imageUrl).filter(Boolean) : [];
   const pureSareeImages = product && product.length > 0 ? product.filter(p => ['A', 'B', 'C'].includes(p.catalogueCode)).map(p => p.imageUrl).filter(Boolean) : [];
@@ -55,9 +55,21 @@ function Filter() {
     return () => clearInterval(timer);
   }, [semiArtSareeImages.length]);
 
-  const currentAllImg = allSareeImages[allIndex] || '/images/categories/pure-wedding-silks.jpg';
-  const currentPureImg = pureSareeImages[pureIndex] || '/images/categories/pure-soft-silks.jpg';
-  const currentSemiImg = semiArtSareeImages[semiIndex] || '/images/categories/art-semi-silks.jpg';
+  const currentAllImg = allSareeImages[allIndex % allSareeImages.length] || '/images/categories/pure-wedding-silks.jpg';
+
+  let pureActualIndex = pureIndex;
+  let currentPureImg = pureSareeImages[pureActualIndex % pureSareeImages.length] || '/images/categories/pure-soft-silks.jpg';
+  while (currentPureImg === currentAllImg && pureSareeImages.length > 1) {
+    pureActualIndex++;
+    currentPureImg = pureSareeImages[pureActualIndex % pureSareeImages.length];
+  }
+
+  let semiActualIndex = semiIndex;
+  let currentSemiImg = semiArtSareeImages[semiActualIndex % semiArtSareeImages.length] || '/images/categories/art-semi-silks.jpg';
+  while ((currentSemiImg === currentAllImg || currentSemiImg === currentPureImg) && semiArtSareeImages.length > 2) {
+    semiActualIndex++;
+    currentSemiImg = semiArtSareeImages[semiActualIndex % semiArtSareeImages.length];
+  }
 
   const scrollToResults = () => {
     const element = document.getElementById('live-showcase');

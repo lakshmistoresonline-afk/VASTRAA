@@ -18,7 +18,7 @@ function Cart() {
 
   const deleteCart = (item) => {
     dispatch(deleteFromCart(item));
-    toast.info("Item removed from bag");
+    toast.info("Item removed from cart");
   };
 
   useEffect(() => {
@@ -54,10 +54,10 @@ function Cart() {
     fetchCustomerProfile();
   }, [user]);
 
-  const submitBagForReview = async (e) => {
+  const submitCartForReview = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
-      toast.error("Your shopping bag is empty.");
+      toast.error("Your shopping cart is empty.");
       return;
     }
 
@@ -75,9 +75,9 @@ function Cart() {
     const referenceId = "VAST-REQ-" + Math.floor(100000 + Math.random() * 900000);
 
     const enquiryInfo = {
-      sareeId: "MULTIPLE_BAG_ITEMS",
-      sareeTitle: `Shopping Bag Review Request (${cartItems.length} items)`,
-      categoryName: "Multi-Item Bag Submission",
+      sareeId: "MULTIPLE_CART_ITEMS",
+      sareeTitle: `Shopping Cart Review Request (${cartItems.length} items)`,
+      categoryName: "Multi-Item Cart Submission",
       imageUrl: cartItems[0]?.imageUrl || "",
       cartItems: cartItems.map(i => ({
         id: i.id,
@@ -88,7 +88,7 @@ function Cart() {
       })),
       customerName: customerName,
       phone: cleanPhone,
-      message: `Bag Ref: ${referenceId}. Items: ${cartItems.map(i => `${i.title} (${i.id})`).join(' | ')}. Delivery Address: ${address} - Pincode: ${pinCode}`,
+      message: `Cart Ref: ${referenceId}. Items: ${cartItems.map(i => `${i.title} (${i.id})`).join(' | ')}. Delivery Address: ${address} - Pincode: ${pinCode}`,
       createdAt: new Date().toISOString(),
       status: "Pending"
     };
@@ -100,11 +100,11 @@ function Cart() {
       setRequestRef(referenceId);
       setSubmittedSuccess(true);
       dispatch(clearCart());
-      toast.success("Bag submitted for review successfully!");
+      toast.success("Cart submitted for review successfully!");
       setLoading(false);
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error("Unable to submit bag. Please try again or contact WhatsApp hotline.");
+      toast.error("Unable to submit cart. Please try again or contact WhatsApp hotline.");
       setLoading(false);
     }
   };
@@ -115,13 +115,13 @@ function Cart() {
         <div className="container mx-auto max-w-5xl">
           <div className="text-center space-y-2 mb-10">
             <span className="text-[#800020] dark:text-[#E5C158] font-bold text-xs uppercase tracking-widest block">
-              Assisted Shopping Bag
+              Assisted Shopping Cart
             </span>
             <h1 className="text-3xl font-serif font-extrabold text-[#24211F] dark:text-white">
               Your Selected Silk Sarees
             </h1>
             <p className="text-xs text-[#77716A] dark:text-gray-400">
-              Submit your bag for item availability and price confirmation. Final quotation provided before payment.
+              Submit your cart for item availability and price confirmation. Final quotation provided before payment.
             </p>
           </div>
 
@@ -132,7 +132,7 @@ function Cart() {
               </div>
               <div className="space-y-2">
                 <h2 className="text-2xl font-serif font-bold text-[#24211F] dark:text-white">
-                  Bag Submitted for Review!
+                  Cart Submitted for Review!
                 </h2>
                 <p className="text-xs text-[#77716A] dark:text-gray-300">
                   Reference ID: <span className="font-mono font-bold text-[#800020] dark:text-[#E5C158]">{requestRef}</span>
@@ -145,7 +145,7 @@ function Cart() {
               <div className="pt-4 flex flex-col sm:flex-row gap-3">
                 <a
                   href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
-                    `Hello Vastraa, I have submitted my shopping bag for review. Reference: ${requestRef}. Name: ${customerName}, Phone: ${phoneNumber}`
+                    `Hello Vastraa, I have submitted my shopping cart for review. Reference: ${requestRef}. Name: ${customerName}, Phone: ${phoneNumber}`
                   )}`}
                   target="_blank"
                   rel="noreferrer"
@@ -166,12 +166,12 @@ function Cart() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-              {/* Left Column: Bag Items */}
+              {/* Left Column: Cart Items */}
               <div className="lg:col-span-7 space-y-4">
                 {cartItems.length === 0 ? (
                   <div className="bg-white dark:bg-gray-900 p-10 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 text-center shadow-sm space-y-4">
                     <FiShoppingBag className="w-12 h-12 text-gray-300 mx-auto" />
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Your shopping bag is currently empty.</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Your shopping cart is currently empty.</p>
                     <Link
                       to="/allproducts"
                       className="inline-block bg-[#800020] text-amber-100 font-bold px-6 py-3 rounded-xl text-xs shadow-md hover:bg-[#67001a] transition-all"
@@ -224,7 +224,7 @@ function Cart() {
                 <div className="bg-white dark:bg-gray-900 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-5 sticky top-28">
                   <div>
                     <h3 className="font-serif font-bold text-lg text-[#24211F] dark:text-white">
-                      Submit Bag for Admin Review
+                      Submit Cart for Admin Review
                     </h3>
                     <p className="text-xs text-[#77716A] dark:text-gray-400 mt-1 leading-relaxed">
                       Submit your selected sarees for availability and price confirmation. You can review the final quotation before payment.
@@ -250,7 +250,7 @@ function Cart() {
                     </div>
                   </div>
 
-                  <form onSubmit={submitBagForReview} className="space-y-4">
+                  <form onSubmit={submitCartForReview} className="space-y-4">
                     <div>
                       <label className="block text-xs font-semibold text-[#24211F] dark:text-gray-300 mb-1">
                         Full Name *
@@ -299,7 +299,7 @@ function Cart() {
                       className="w-full bg-[#800020] hover:bg-[#67001a] disabled:opacity-50 text-white font-extrabold py-4 px-4 rounded-xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 border border-[#C5A46D]/40"
                     >
                       <FiSend className="w-4 h-4 text-[#C5A46D]" />
-                      <span>Submit Bag for Admin Review</span>
+                      <span>Submit Cart for Admin Review</span>
                     </button>
                   </form>
                 </div>

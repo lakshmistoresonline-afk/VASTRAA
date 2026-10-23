@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useState } from 'react';
-import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser } from 'react-icons/fi';
+import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser, FiShield, FiExternalLink } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { Dialog, Transition } from '@headlessui/react';
@@ -32,7 +32,7 @@ const Navbar = () => {
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2 font-medium">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Timeless Silk Sarees • Pan India Express Shipping • Handloom Guarantee</span>
+            <span>{isAdmin ? "🔒 Admin Command Center Active" : "Timeless Silk Sarees • Pan India Express Shipping • Handloom Guarantee"}</span>
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs">
             <span className="flex items-center gap-1 text-amber-200">
@@ -65,13 +65,13 @@ const Navbar = () => {
             </button>
 
             {/* Store Brand Logo */}
-            <Link to="/" className="flex items-center gap-3.5 group">
+            <Link to={isAdmin ? "/dashboard" : "/"} className="flex items-center gap-3.5 group">
               <div className="bg-gradient-to-br from-[#650A25] to-[#4A071B] text-[#C6A15B] w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-serif font-black shadow-md border-2 border-[#C6A15B] group-hover:scale-105 transition-transform">
                 V
               </div>
               <div>
                 <h1 className="text-2xl font-serif font-extrabold text-[#F7F0E4] leading-tight tracking-tight">
-                  {storeInfo?.name || "Vastraa"}
+                  {storeInfo?.name || "Vastraa"} {isAdmin && <span className="text-xs text-[#C6A15B] font-mono font-normal">| Admin Portal</span>}
                 </h1>
                 <p className="text-[10px] font-sans uppercase tracking-widest text-[#C6A15B] font-bold">
                   {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Online Silk Store
@@ -81,75 +81,91 @@ const Navbar = () => {
 
             {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center space-x-1 bg-[#302625] dark:bg-gray-800 p-1.5 rounded-2xl border border-[#C6A15B]/30">
-              <Link
-                to="/"
-                className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
-              >
-                Home
-              </Link>
-              <Link
-                to="/allproducts"
-                className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
-              >
-                Silk Sarees
-              </Link>
-              <Link
-                to="/order"
-                className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
-              >
-                Enquiries & Orders
-              </Link>
-              {user && (
-                <Link
-                  to="/account"
-                  className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
-                >
-                  My Account
-                </Link>
-              )}
-
-              {isAdmin && (
-                <Link
-                  to="/dashboard"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#650A25] text-amber-100 shadow-md hover:bg-[#4A071B] transition-all border border-[#C6A15B]/40"
-                >
-                  Admin Portal
-                </Link>
+              {isAdmin ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-[#650A25] text-amber-100 shadow-md transition-all border border-[#C6A15B]/40 flex items-center gap-1.5"
+                  >
+                    <FiShield className="w-3.5 h-3.5 text-[#C6A15B]" />
+                    <span>Admin Control Panel</span>
+                  </Link>
+                  <Link
+                    to="/"
+                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all flex items-center gap-1"
+                  >
+                    <span>View Storefront</span>
+                    <FiExternalLink className="w-3 h-3" />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/"
+                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    to="/allproducts"
+                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                  >
+                    Silk Sarees
+                  </Link>
+                  <Link
+                    to="/order"
+                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                  >
+                    Enquiries & Orders
+                  </Link>
+                  {user && (
+                    <Link
+                      to="/account"
+                      className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                    >
+                      My Account
+                    </Link>
+                  )}
+                </>
               )}
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center space-x-3">
 
-              {/* Shopping Cart Button */}
-              <Link
-                to="/cart"
-                className="relative flex items-center gap-2 bg-[#650A25] hover:bg-[#4A071B] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all border border-[#C6A15B]/40"
-              >
-                <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
-                <span className="hidden sm:inline">Cart</span>
-                <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
-                  {cartItems.length}
-                </span>
-              </Link>
+              {!isAdmin && (
+                <>
+                  {/* Shopping Cart Button */}
+                  <Link
+                    to="/cart"
+                    className="relative flex items-center gap-2 bg-[#650A25] hover:bg-[#4A071B] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all border border-[#C6A15B]/40"
+                  >
+                    <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
+                    <span className="hidden sm:inline">Cart</span>
+                    <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                      {cartItems.length}
+                    </span>
+                  </Link>
 
-              {/* Direct WhatsApp Hotline Button */}
-              <a
-                href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent('Hello Vastraa, I would like to enquire about silk saree availability.')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="hidden md:flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
-              >
-                <FiMessageCircle className="w-4 h-4 text-white" />
-                <span>WhatsApp</span>
-              </a>
+                  {/* Direct WhatsApp Hotline Button */}
+                  <a
+                    href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent('Hello Vastraa, I would like to enquire about silk saree availability.')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hidden md:flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
+                  >
+                    <FiMessageCircle className="w-4 h-4 text-white" />
+                    <span>WhatsApp</span>
+                  </a>
+                </>
+              )}
 
               {user ? (
                 <div className="flex items-center gap-2">
                   <Link
-                    to="/account"
+                    to={isAdmin ? "/dashboard" : "/account"}
                     className="hidden xl:inline-flex items-center gap-1 text-xs font-bold text-[#C6A15B] bg-[#302625] px-3 py-2 rounded-xl border border-[#C6A15B]/30 max-w-[160px] truncate hover:underline"
-                    title="View My Account"
+                    title={isAdmin ? "Admin Profile" : "View My Account"}
                   >
                     <FiUser className="w-3.5 h-3.5 flex-shrink-0" />
                     <span className="truncate">{user?.user?.email || "Account"}</span>
@@ -236,28 +252,36 @@ const Navbar = () => {
                     </div>
                   )}
 
-                  <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                    🏠 Home
-                  </Link>
-                  <Link to="/allproducts" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                    👗 Silk Sarees
-                  </Link>
-                  <Link to="/cart" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200 flex justify-between items-center">
-                    <span>🛍️ Shopping Cart</span>
-                    <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-xs font-extrabold">{cartItems.length}</span>
-                  </Link>
-                  <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                    📩 Enquiries & Orders
-                  </Link>
-                  {user && (
-                    <Link to="/account" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                      👤 My Account / Profile
-                    </Link>
-                  )}
-                  {isAdmin && (
-                    <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#650A25] text-amber-100 font-bold border border-[#C6A15B]/40">
-                      🔑 Admin Dashboard
-                    </Link>
+                  {isAdmin ? (
+                    <>
+                      <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#650A25] text-amber-100 font-bold border border-[#C6A15B]/40">
+                        🔑 Admin Control Panel
+                      </Link>
+                      <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
+                        🏠 View Storefront
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
+                        🏠 Home
+                      </Link>
+                      <Link to="/allproducts" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
+                        👗 Silk Sarees
+                      </Link>
+                      <Link to="/cart" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200 flex justify-between items-center">
+                        <span>🛍️ Shopping Cart</span>
+                        <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-xs font-extrabold">{cartItems.length}</span>
+                      </Link>
+                      <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
+                        📩 Enquiries & Orders
+                      </Link>
+                      {user && (
+                        <Link to="/account" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
+                          👤 My Account / Profile
+                        </Link>
+                      )}
+                    </>
                   )}
 
                   {user ? (

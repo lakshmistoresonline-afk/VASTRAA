@@ -6,16 +6,16 @@ import { Link } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
-import { FiCheckCircle, FiClock, FiFileText, FiMessageCircle, FiCheck, FiX } from 'react-icons/fi';
+import { FiCheckCircle, FiClock, FiFileText, FiMessageCircle, FiCheck, FiX, FiShield } from 'react-icons/fi';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
 const Order = () => {
   const context = useContext(MyContext);
-  const { loading, setLoading, order } = context;
+  const { loading, setLoading, product } = context;
 
   const [firestoreEnquiries, setFirestoreEnquiries] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user'));
+  const [utrInput, setUtrInput] = useState({});
 
   const fetchEnquiries = async () => {
     try {
@@ -24,7 +24,6 @@ const Order = () => {
       const list = [];
       querySnapshot.forEach((d) => {
         const data = d.data();
-        // If user is logged in, show their enquiries or all for demo convenience
         list.push({ id: d.id, ...data });
       });
       setFirestoreEnquiries(list);
@@ -47,10 +46,33 @@ const Order = () => {
         status: responseType === 'accept' ? 'QUOTATION_ACCEPTED' : 'QUOTATION_DECLINED',
         customerResponseAt: new Date().toISOString()
       });
-      toast.success(responseType === 'accept' ? "Quotation accepted! Proceeding to address confirmation & payment." : "Quotation declined.");
+      toast.success(responseType === 'accept' ? "Quotation accepted! Please complete payment via store QR code below." : "Quotation declined.");
       fetchEnquiries();
     } catch (err) {
       toast.error("Failed to update response: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUtrSubmit = async (enqId) => {
+    const refText = utrInput[enqId];
+    if (!refText || refText.trim() === '') {
+      toast.error("Please enter your UPI reference or UTR number.");
+      return;
+    }
+    try {
+      setLoading(true);
+      const enqRef = doc(fireDB, 'enquiries', enqId);
+      await updateDoc(enqRef, {
+        status: 'PAYMENT_PENDING',
+        paymentReference: refText.trim(),
+        paymentSubmittedAt: new Date().toISOString()
+      });
+      toast.success("Payment reference submitted for admin verification!");
+      fetchEnquiries();
+    } catch (err) {
+      toast.error("Failed to submit payment reference: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -81,8 +103,11 @@ const Order = () => {
 
             <div className="grid grid-cols-1 gap-6">
               {firestoreEnquiries.map((enq) => {
+                const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                 const isReady = enq.status === 'QUOTATION_READY' && enq.quotationDetails;
                 const isAccepted = enq.status === 'QUOTATION_ACCEPTED';
+                const isPaymentPending = enq.status === 'PAYMENT_PENDING';
+                const isVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED';
                 const qDetails = enq.quotationDetails;
 
                 return (
@@ -106,11 +131,15 @@ const Order = () => {
 
                       <div>
                         <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                          isAccepted ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' :
+                          isVerified ? 'bg-emerald-600 text-white' :
+                          isAccepted || isPaymentPending ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' :
                           isReady ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300' :
                           'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                         }`}>
-                          {isAccepted ? "✓ Quotation Accepted" : isReady ? "⭐ Quotation Ready for Review" : `Status: ${enq.status || "Pending"}`}
+                          {isVerified ? "✓ Order Confirmed & Payment Verified" :
+                           isPaymentPending ? "⏳ Payment Under Admin Verification" :
+                           isAccepted ? "✓ Quotation Accepted" :
+                           isReady ? "⭐ Quotation Ready for Review" : `Status: ${enq.status || "Pending"}`}
                         </span>
                       </div>
                     </div>
@@ -120,36 +149,39 @@ const Order = () => {
                       <h4 className="font-bold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
                         Requested Sarees & Availability
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {(enq.cartItems || [{ id: enq.sareeId, title: enq.sareeTitle, imageUrl: enq.imageUrl }]).map((item, idx) => {
                           const evaluated = qDetails?.items?.[idx];
+                          const liveP = product ? product.find(p => p.id === item.id) : null;
+                          const imgUrl = liveP?.imageUrl || item.imageUrl || FALLBACK_SAREE_IMG;
+
                           return (
-                            <div key={idx} className="bg-[#FAF7F0] dark:bg-gray-800/80 p-3.5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-3">
+                            <div key={idx} className="bg-[#FAF7F0] dark:bg-gray-800/80 p-4 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-4">
                                 <img
-                                  src={item.imageUrl || FALLBACK_SAREE_IMG}
-                                  alt=""
+                                  src={imgUrl}
+                                  alt={item.title}
                                   onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                                  className="w-12 h-16 object-cover rounded-xl border shadow-xs"
+                                  className="w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-2xl shadow-md border border-[#E9E1D5] flex-shrink-0"
                                 />
-                                <div>
-                                  <span className="font-serif font-bold text-xs text-gray-900 dark:text-white line-clamp-1">{item.title}</span>
-                                  <span className="text-[10px] text-gray-500">ID: {item.id}</span>
+                                <div className="space-y-1">
+                                  <span className="font-serif font-bold text-xs text-gray-900 dark:text-white line-clamp-2">{item.title}</span>
+                                  <span className="text-[10px] text-gray-500 font-mono block">ID: {item.id}</span>
                                 </div>
                               </div>
 
-                              <div className="text-right">
+                              <div className="text-right flex-shrink-0">
                                 {evaluated ? (
                                   <div>
-                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${evaluated.isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${evaluated.isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
                                       {evaluated.isAvailable ? "Available" : "Unavailable"}
                                     </span>
-                                    <p className="text-xs font-extrabold text-[#800020] dark:text-[#E5C158] mt-1">
+                                    <p className="text-sm font-extrabold text-[#800020] dark:text-[#E5C158] mt-1.5">
                                       {evaluated.isAvailable ? `₹${evaluated.confirmedPrice}` : "Excluded"}
                                     </p>
                                   </div>
                                 ) : (
-                                  <span className="text-[11px] text-amber-700 dark:text-amber-400 font-bold">Awaiting Price</span>
+                                  <span className="text-xs text-amber-700 dark:text-amber-400 font-bold">Awaiting Price</span>
                                 )}
                               </div>
                             </div>
@@ -181,7 +213,7 @@ const Order = () => {
                           <span className="text-xl text-[#800020] dark:text-[#E5C158]">₹{qDetails.finalPayable}</span>
                         </div>
 
-                        {!isAccepted && (
+                        {!isAccepted && !isPaymentPending && !isVerified && (
                           <div className="pt-4 flex flex-col sm:flex-row gap-3">
                             <button
                               onClick={() => handleCustomerResponse(enq.id, 'accept')}
@@ -203,11 +235,74 @@ const Order = () => {
                       </div>
                     )}
 
+                    {/* QR Payment & UTR Submission (If Accepted) */}
+                    {(isAccepted || isPaymentPending || isVerified) && qDetails && (
+                      <div className="bg-emerald-50 dark:bg-gray-800 p-6 rounded-2xl border border-emerald-200 dark:border-gray-700 space-y-4 text-xs">
+                        <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
+                          <FiShield className="w-5 h-5" />
+                          <span>Store QR Code Payment Instructions</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border text-center space-y-2">
+                            <div className="w-36 h-36 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto flex flex-col items-center justify-center border p-2 shadow-inner">
+                              <span className="font-serif font-extrabold text-[#800020] dark:text-[#E5C158] text-base">VASTRAA</span>
+                              <span className="text-[10px] text-gray-500 font-mono mt-1">UPI QR CODE</span>
+                              <span className="text-[11px] font-bold text-gray-900 dark:text-white mt-1">₹{qDetails.finalPayable}</span>
+                            </div>
+                            <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200">
+                              Payee: Srinath Rajkiran
+                            </p>
+                            <p className="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold select-all">
+                              UPI ID: srinathrajkiran007-2@okaxis
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                              Scan the store QR code using any UPI app (Google Pay, PhonePe, Paytm) to pay exactly <span className="font-bold text-[#800020] dark:text-[#E5C158]">₹{qDetails.finalPayable}</span>. Then enter your UTR / Transaction Reference below.
+                            </p>
+
+                            {isVerified ? (
+                              <div className="bg-emerald-600 text-white p-3.5 rounded-xl font-bold text-center">
+                                ✓ Payment Verified & Order Confirmed!
+                              </div>
+                            ) : isPaymentPending ? (
+                              <div className="bg-amber-100 text-amber-900 p-3.5 rounded-xl font-bold text-center">
+                                ⏳ Payment Reference Submitted. Awaiting Admin Verification.
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <label className="block font-semibold text-gray-700 dark:text-gray-300">
+                                  UPI / UTR Transaction Reference *
+                                </label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={utrInput[enq.id] || ''}
+                                    onChange={(e) => setUtrInput({ ...utrInput, [enq.id]: e.target.value })}
+                                    placeholder="e.g. UPI/432198765432"
+                                    className="flex-1 px-3.5 py-2.5 rounded-xl border dark:bg-gray-900 dark:border-gray-700 dark:text-white font-mono"
+                                  />
+                                  <button
+                                    onClick={() => handleUtrSubmit(enq.id)}
+                                    className="bg-[#800020] hover:bg-[#67001a] text-white px-5 py-2.5 rounded-xl font-bold shadow-sm"
+                                  >
+                                    Submit UTR
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* WhatsApp Follow-up */}
                     <div className="pt-2 flex justify-between items-center text-xs">
                       <span className="text-gray-400 font-mono">Ref: {enq.message ? enq.message.split('.')[0] : enq.id}</span>
                       <a
-                        href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Vastraa team, I am following up on my bag review request (${enq.customerName}).`)}`}
+                        href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Vastraa team, I am following up on my bag review request (${enq.customerName}).`)}` }
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold hover:underline"

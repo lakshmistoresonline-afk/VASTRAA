@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
-import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield } from 'react-icons/fi';
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 
@@ -29,10 +29,10 @@ function DashboardTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [enquiryViewMode, setEnquiryViewMode] = useState('kanban'); // 'kanban' or 'table'
   const [quotationModalEnquiry, setQuotationModalEnquiry] = useState(null);
+  const [paymentVerifyModalEnquiry, setPaymentVerifyModalEnquiry] = useState(null);
   const [itemPrices, setItemPrices] = useState({});
   const [itemAvailabilities, setItemAvailabilities] = useState({});
-  const [discountType, setDiscountType] = useState('fixed'); // 'fixed' or 'percentage'
-  const [discountValue, setDiscountValue] = useState(0);
+  const [discountPercentage, setDiscountPercentage] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
 
   useEffect(() => {
@@ -58,8 +58,7 @@ function DashboardTab() {
     });
     setItemPrices(initialPrices);
     setItemAvailabilities(initialAvail);
-    setDiscountType('fixed');
-    setDiscountValue(0);
+    setDiscountPercentage(0);
     setDeliveryCharge(0);
   };
 
@@ -82,14 +81,8 @@ function DashboardTab() {
         };
       });
 
-      const discVal = parseFloat(discountValue) || 0;
-      let discountAmt = 0;
-      if (discountType === 'percentage') {
-        discountAmt = Math.round((subtotal * discVal) / 100);
-      } else {
-        discountAmt = Math.min(discVal, subtotal);
-      }
-
+      const discPct = parseFloat(discountPercentage) || 0;
+      const discountAmt = Math.round((subtotal * discPct) / 100);
       const shipping = parseFloat(deliveryCharge) || 0;
       const finalPayable = Math.max(0, subtotal - discountAmt + shipping);
 
@@ -99,8 +92,8 @@ function DashboardTab() {
         quotationDetails: {
           items: evaluatedItems,
           subtotal,
-          discountType,
-          discountValue: discVal,
+          discountType: 'percentage',
+          discountValue: discPct,
           discountAmount: discountAmt,
           deliveryCharge: shipping,
           finalPayable,
@@ -128,6 +121,21 @@ function DashboardTab() {
     } catch (err) {
       console.error("Publish quotation error:", err);
       toast.error("Failed to publish quotation: " + err.message);
+    }
+  };
+
+  const handleVerifyPaymentAndConfirmOrder = async (enq) => {
+    try {
+      const enqRef = doc(fireDB, 'enquiries', enq.id);
+      await updateDoc(enqRef, {
+        status: "PAYMENT_VERIFIED_ORDER_CONFIRMED",
+        paymentVerifiedAt: new Date().toISOString()
+      });
+      toast.success("Payment verified successfully! Order confirmed and sent to fulfillment.");
+      setPaymentVerifyModalEnquiry(null);
+      if (getEnquiriesData) getEnquiriesData();
+    } catch (err) {
+      toast.error("Failed to verify payment: " + err.message);
     }
   };
 
@@ -385,7 +393,7 @@ function DashboardTab() {
                   if (colStatus === 'QUOTATION_DRAFT') return s === 'QUOTATION_DRAFT';
                   if (colStatus === 'QUOTATION_READY') return s === 'QUOTATION_READY';
                   if (colStatus === 'PAYMENT_PENDING') return s === 'PAYMENT_PENDING' || s === 'QUOTATION_ACCEPTED';
-                  if (colStatus === 'Fulfilled') return s === 'Fulfilled' || s === 'READY_FOR_DISPATCH';
+                  if (colStatus === 'Fulfilled') return s === 'Fulfilled' || s === 'READY_FOR_DISPATCH' || s === 'PAYMENT_VERIFIED_ORDER_CONFIRMED';
                   return false;
                 });
 
@@ -406,6 +414,8 @@ function DashboardTab() {
                       ) : (
                         colEnquiries.map(enq => {
                           const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
+                          const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
+
                           return (
                             <div key={enq.id} className="bg-white dark:bg-gray-900 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-2.5">
                               <div className="flex justify-between items-start">
@@ -418,13 +428,24 @@ function DashboardTab() {
                               </div>
 
                               <div className="pt-2 flex justify-between items-center border-t border-gray-100 dark:border-gray-800">
-                                <button
-                                  onClick={() => openQuotationModal(enq)}
-                                  className="bg-[#800020] hover:bg-[#67001a] text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
-                                >
-                                  <FiFileText className="text-[#D4AF37]" />
-                                  <span>Review & Quote</span>
-                                </button>
+                                {isAwaitingPayment ? (
+                                  <button
+                                    onClick={() => setPaymentVerifyModalEnquiry(enq)}
+                                    className="bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
+                                  >
+                                    <FiShield className="text-emerald-300" />
+                                    <span>Verify Payment</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => openQuotationModal(enq)}
+                                    className="bg-[#800020] hover:bg-[#67001a] text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
+                                  >
+                                    <FiFileText className="text-[#D4AF37]" />
+                                    <span>Review & Quote</span>
+                                  </button>
+                                )}
+
                                 <a
                                   href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello ${enq.customerName}, regarding your Vastraa request: `)}`}
                                   target="_blank"
@@ -462,6 +483,7 @@ function DashboardTab() {
                   {enquiries.map((enq) => {
                     const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                     const whatsappMsg = `Hello ${enq.customerName || 'Customer'}, regarding your enquiry for ${enq.sareeTitle || 'Saree'} (ID: ${enq.sareeId}) at Vastraa (Lakshmi Stores): `;
+                    const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
 
                     return (
                       <tr key={enq.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -486,7 +508,7 @@ function DashboardTab() {
                                       src={imgUrl}
                                       alt=""
                                       onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                                      className="w-8 h-10 object-cover rounded border shadow-xs"
+                                      className="w-16 h-20 object-cover rounded-xl border shadow-sm"
                                       title={ci.title}
                                     />
                                   );
@@ -503,7 +525,7 @@ function DashboardTab() {
                                     src={imgUrl}
                                     alt=""
                                     onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                                    className="w-10 h-12 object-cover rounded-lg border shadow-sm"
+                                    className="w-20 h-28 object-cover rounded-2xl border shadow-md"
                                   />
                                 );
                               })()}
@@ -525,14 +547,25 @@ function DashboardTab() {
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right space-y-1 sm:space-y-0 sm:space-x-2 flex flex-col sm:flex-row justify-end items-center">
-                          <button
-                            onClick={() => openQuotationModal(enq)}
-                            className="inline-flex items-center gap-1 bg-[#800020] hover:bg-[#67001a] text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
-                            title="Review & Prepare Quotation"
-                          >
-                            <FiFileText className="w-3.5 h-3.5 text-[#D4AF37]" />
-                            <span>Review & Quote</span>
-                          </button>
+                          {isAwaitingPayment ? (
+                            <button
+                              onClick={() => setPaymentVerifyModalEnquiry(enq)}
+                              className="inline-flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
+                              title="Verify Payment"
+                            >
+                              <FiShield className="w-3.5 h-3.5 text-emerald-300" />
+                              <span>Verify Payment</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => openQuotationModal(enq)}
+                              className="inline-flex items-center gap-1 bg-[#800020] hover:bg-[#67001a] text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
+                              title="Review & Prepare Quotation"
+                            >
+                              <FiFileText className="w-3.5 h-3.5 text-[#D4AF37]" />
+                              <span>Review & Quote</span>
+                            </button>
+                          )}
                           <a
                             href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`}
                             target="_blank"
@@ -636,7 +669,7 @@ function DashboardTab() {
                           src={itemImgUrl}
                           alt=""
                           onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                          className="w-12 h-16 object-cover rounded-xl border shadow-xs"
+                          className="w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-2xl shadow-md border border-gray-200 flex-shrink-0"
                         />
                         <div>
                           <span className="font-bold text-gray-900 dark:text-white block text-sm">{item.title}</span>
@@ -674,29 +707,23 @@ function DashboardTab() {
               </div>
             </div>
 
-            {/* Cart-level discount & delivery */}
+            {/* Cart-level discount (% only) & delivery */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                  Cart Discount Type & Value
+                  Cart Discount Percentage (%)
                 </label>
-                <div className="flex gap-2">
-                  <select
-                    value={discountType}
-                    onChange={(e) => setDiscountType(e.target.value)}
-                    className="text-xs px-3 py-2.5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold"
-                  >
-                    <option value="fixed">Fixed (₹)</option>
-                    <option value="percentage">Percentage (%)</option>
-                  </select>
+                <div className="relative">
                   <input
                     type="number"
                     min="0"
-                    value={discountValue}
-                    onChange={(e) => setDiscountValue(e.target.value)}
-                    placeholder="Discount"
-                    className="flex-1 text-xs px-3 py-2.5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold"
+                    max="100"
+                    value={discountPercentage}
+                    onChange={(e) => setDiscountPercentage(e.target.value)}
+                    placeholder="e.g. 10"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold"
                   />
+                  <span className="absolute right-3 top-2.5 text-xs text-gray-400">%</span>
                 </div>
               </div>
 
@@ -725,8 +752,8 @@ function DashboardTab() {
                     subtotal += parseFloat(itemPrices[idx]) || 0;
                   }
                 });
-                const discVal = parseFloat(discountValue) || 0;
-                let discountAmt = discountType === 'percentage' ? Math.round((subtotal * discVal) / 100) : Math.min(discVal, subtotal);
+                const discPct = parseFloat(discountPercentage) || 0;
+                const discountAmt = Math.round((subtotal * discPct) / 100);
                 const shipping = parseFloat(deliveryCharge) || 0;
                 const finalPayable = Math.max(0, subtotal - discountAmt + shipping);
 
@@ -737,7 +764,7 @@ function DashboardTab() {
                       <span className="font-bold text-gray-900 dark:text-white">₹{subtotal}</span>
                     </div>
                     <div className="flex justify-between text-gray-600 dark:text-gray-300">
-                      <span>Discount Amount:</span>
+                      <span>Discount Amount ({discPct}%):</span>
                       <span className="font-bold text-emerald-600 dark:text-emerald-400">- ₹{discountAmt}</span>
                     </div>
                     <div className="flex justify-between text-gray-600 dark:text-gray-300">
@@ -769,6 +796,75 @@ function DashboardTab() {
               >
                 <FiCheck className="w-4 h-4 text-[#D4AF37]" />
                 <span>Publish Quotation to Customer</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Admin Payment Verification Modal */}
+      {paymentVerifyModalEnquiry && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-gray-200 dark:border-gray-800 space-y-6">
+            <button
+              onClick={() => setPaymentVerifyModalEnquiry(null)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+
+            <div>
+              <span className="text-xs font-bold text-emerald-600 uppercase flex items-center gap-1">
+                <FiShield /> Manual Payment Verification
+              </span>
+              <h3 className="font-serif font-bold text-xl text-gray-900 dark:text-white mt-1">
+                Order for: {paymentVerifyModalEnquiry.customerName}
+              </h3>
+              <p className="text-xs text-gray-500">
+                Phone: {paymentVerifyModalEnquiry.phone}
+              </p>
+            </div>
+
+            <div className="bg-amber-50 dark:bg-gray-800 p-4 rounded-2xl border border-amber-200 dark:border-gray-700 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Net Payable Amount:</span>
+                <span className="font-extrabold text-[#800020] dark:text-[#E5C158] text-sm">
+                  ₹{paymentVerifyModalEnquiry.quotationDetails?.finalPayable || 0}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Store UPI Payee:</span>
+                <span className="font-bold text-gray-900 dark:text-white">Srinath Rajkiran (srinathrajkiran007-2@okaxis)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Customer UTR Reference:</span>
+                <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                  {paymentVerifyModalEnquiry.paymentReference || "Awaiting UTR / Cash Transfer"}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+              Please verify that you have received the exact amount in the store's bank or UPI account matching the customer's transfer reference before confirming this order.
+            </p>
+
+            <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setPaymentVerifyModalEnquiry(null)}
+                className="px-5 py-3 border text-xs font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleVerifyPaymentAndConfirmOrder(paymentVerifyModalEnquiry)}
+                className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all flex items-center gap-2"
+              >
+                <FiCheck className="w-4 h-4 text-emerald-300" />
+                <span>Verify Payment & Confirm Order</span>
               </button>
             </div>
 
