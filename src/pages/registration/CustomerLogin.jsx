@@ -21,7 +21,6 @@ function CustomerLogin() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/cart';
 
   const handleCustomerAuth = async (e) => {
     e.preventDefault();
@@ -58,7 +57,7 @@ function CustomerLogin() {
       }
 
       localStorage.setItem("user", JSON.stringify({ user: { email: cleanEmail, uid: auth.currentUser?.uid } }));
-      navigate(from, { replace: true });
+      navigate('/purchase-journey', { replace: true });
     } catch (err) {
       console.error("Customer auth error:", err.message);
       toast.error("Authentication failed: " + err.message);
