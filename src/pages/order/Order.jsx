@@ -7,6 +7,7 @@ import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
 import { FiCheckCircle, FiClock, FiFileText, FiMessageCircle, FiCheck, FiX, FiShield } from 'react-icons/fi';
+import UpiQrCode from '../../components/payment/UpiQrCode';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
@@ -244,19 +245,7 @@ const Order = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border text-center space-y-2">
-                            <div className="w-36 h-36 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto flex flex-col items-center justify-center border p-2 shadow-inner">
-                              <span className="font-serif font-extrabold text-[#800020] dark:text-[#E5C158] text-base">VASTRAA</span>
-                              <span className="text-[10px] text-gray-500 font-mono mt-1">UPI QR CODE</span>
-                              <span className="text-[11px] font-bold text-gray-900 dark:text-white mt-1">₹{qDetails.finalPayable}</span>
-                            </div>
-                            <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200">
-                              Payee: Srinath Rajkiran
-                            </p>
-                            <p className="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold select-all">
-                              UPI ID: srinathrajkiran007-2@okaxis
-                            </p>
-                          </div>
+                          <UpiQrCode amount={qDetails.finalPayable} />
 
                           <div className="space-y-3">
                             <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -302,7 +291,7 @@ const Order = () => {
                     <div className="pt-2 flex justify-between items-center text-xs">
                       <span className="text-gray-400 font-mono">Ref: {enq.message ? enq.message.split('.')[0] : enq.id}</span>
                       <a
-                        href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Vastraa team, I am following up on my bag review request (${enq.customerName}).`)}` }
+                        href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Vastraa team, I am following up on my bag review request (${enq.customerName}).`)}`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold hover:underline"
