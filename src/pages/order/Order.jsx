@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
-import { FiCheckCircle, FiClock, FiFileText, FiMessageCircle, FiCheck, FiX, FiShield } from 'react-icons/fi';
+import { FiCheckCircle, FiClock, FiFileText, FiMessageCircle, FiCheck, FiX, FiShield, FiTruck } from 'react-icons/fi';
 import UpiQrCode from '../../components/payment/UpiQrCode';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
@@ -109,6 +109,7 @@ const Order = () => {
                 const isAccepted = enq.status === 'QUOTATION_ACCEPTED';
                 const isPaymentPending = enq.status === 'PAYMENT_PENDING';
                 const isVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED';
+                const isDispatched = enq.status === 'DISPATCHED' || enq.trackingDetails;
                 const qDetails = enq.quotationDetails;
 
                 return (
@@ -120,7 +121,7 @@ const Order = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-gray-100 dark:border-gray-800">
                       <div>
                         <span className="text-[10px] font-extrabold text-[#800020] dark:text-[#E5C158] uppercase tracking-wider">
-                          Enquiry / Bag Submission
+                          Enquiry / Cart Submission
                         </span>
                         <h3 className="font-serif font-bold text-gray-900 dark:text-white text-base">
                           {enq.customerName || "Customer"} — <span className="font-mono text-xs text-gray-500">{enq.phone}</span>
@@ -132,18 +133,44 @@ const Order = () => {
 
                       <div>
                         <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
+                          isDispatched ? 'bg-indigo-700 text-white' :
                           isVerified ? 'bg-emerald-600 text-white' :
                           isAccepted || isPaymentPending ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' :
                           isReady ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300' :
                           'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                         }`}>
-                          {isVerified ? "✓ Order Confirmed & Payment Verified" :
+                          {isDispatched ? "📦 Order Dispatched & In Transit" :
+                           isVerified ? "✓ Order Confirmed & Payment Verified" :
                            isPaymentPending ? "⏳ Payment Under Admin Verification" :
                            isAccepted ? "✓ Quotation Accepted" :
                            isReady ? "⭐ Quotation Ready for Review" : `Status: ${enq.status || "Pending"}`}
                         </span>
                       </div>
                     </div>
+
+                    {/* Shipping & Tracking Details (If Dispatched) */}
+                    {isDispatched && enq.trackingDetails && (
+                      <div className="bg-indigo-50 dark:bg-gray-800/90 p-5 rounded-2xl border border-indigo-200 dark:border-indigo-800 space-y-3 text-xs">
+                        <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-300 font-bold text-sm">
+                          <FiTruck className="w-5 h-5 text-indigo-700 dark:text-indigo-400" />
+                          <span>Shipment & Courier Tracking Details</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border">
+                            <span className="text-gray-500 block text-[10px] uppercase font-bold">Courier Service</span>
+                            <span className="font-bold text-gray-900 dark:text-white text-sm">{enq.trackingDetails.courierName}</span>
+                          </div>
+                          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border">
+                            <span className="text-gray-500 block text-[10px] uppercase font-bold">AWB / Consignment ID</span>
+                            <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm select-all">{enq.trackingDetails.awbNumber}</span>
+                          </div>
+                          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border">
+                            <span className="text-gray-500 block text-[10px] uppercase font-bold">Courier Booked Date</span>
+                            <span className="font-bold text-gray-900 dark:text-white text-sm">{enq.trackingDetails.courierBookedDate || 'Recently Dispatched'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Items List */}
                     <div className="space-y-3">
@@ -214,7 +241,7 @@ const Order = () => {
                           <span className="text-xl text-[#800020] dark:text-[#E5C158]">₹{qDetails.finalPayable}</span>
                         </div>
 
-                        {!isAccepted && !isPaymentPending && !isVerified && (
+                        {!isAccepted && !isPaymentPending && !isVerified && !isDispatched && (
                           <div className="pt-4 flex flex-col sm:flex-row gap-3">
                             <button
                               onClick={() => handleCustomerResponse(enq.id, 'accept')}
@@ -237,7 +264,7 @@ const Order = () => {
                     )}
 
                     {/* QR Payment & UTR Submission (If Accepted) */}
-                    {(isAccepted || isPaymentPending || isVerified) && qDetails && (
+                    {(isAccepted || isPaymentPending || isVerified || isDispatched) && qDetails && !isVerified && !isDispatched && (
                       <div className="bg-emerald-50 dark:bg-gray-800 p-6 rounded-2xl border border-emerald-200 dark:border-gray-700 space-y-4 text-xs">
                         <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
                           <FiShield className="w-5 h-5" />
@@ -252,11 +279,7 @@ const Order = () => {
                               Scan the store QR code using any UPI app (Google Pay, PhonePe, Paytm) to pay exactly <span className="font-bold text-[#800020] dark:text-[#E5C158]">₹{qDetails.finalPayable}</span>. Then enter your UTR / Transaction Reference below.
                             </p>
 
-                            {isVerified ? (
-                              <div className="bg-emerald-600 text-white p-3.5 rounded-xl font-bold text-center">
-                                ✓ Payment Verified & Order Confirmed!
-                              </div>
-                            ) : isPaymentPending ? (
+                            {isPaymentPending ? (
                               <div className="bg-amber-100 text-amber-900 p-3.5 rounded-xl font-bold text-center">
                                 ⏳ Payment Reference Submitted. Awaiting Admin Verification.
                               </div>
