@@ -36,6 +36,9 @@ function DashboardTab() {
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
 
+  // Customer History & LTV Info for Admin Quotation Editor
+  const [customerLtvInfo, setCustomerLtvInfo] = useState({ pastOrdersCount: 0, lifetimeValue: 0, isVip: false });
+
   // Tracking modal form states (Courier Booked Date instead of Estimated Delivery)
   const [courierName, setCourierName] = useState('');
   const [awbNumber, setAwbNumber] = useState('');
@@ -66,6 +69,17 @@ function DashboardTab() {
     setItemAvailabilities(initialAvail);
     setDiscountPercentage(0);
     setDeliveryCharge(0);
+
+    // Compute customer history & LTV in real-time from enquiries array
+    if (enquiries && enquiries.length > 0) {
+      const past = enquiries.filter(e => e.id !== enq.id && (e.phone === enq.phone || e.customerName?.toLowerCase() === enq.customerName?.toLowerCase()));
+      const pastOrdersCount = past.length;
+      const lifetimeValue = past.reduce((sum, e) => sum + (e.quotationDetails?.finalPayable || 0), 0);
+      const isVip = pastOrdersCount > 0 || lifetimeValue > 15000;
+      setCustomerLtvInfo({ pastOrdersCount, lifetimeValue, isVip });
+    } else {
+      setCustomerLtvInfo({ pastOrdersCount: 0, lifetimeValue: 0, isVip: false });
+    }
   };
 
   const openTrackingModal = (enq) => {
@@ -731,6 +745,49 @@ function DashboardTab() {
               <p className="text-xs text-gray-500 mt-0.5">
                 WhatsApp: {quotationModalEnquiry.phone} | Submitted: {quotationModalEnquiry.createdAt ? new Date(quotationModalEnquiry.createdAt).toLocaleString() : 'Recent'}
               </p>
+            </div>
+
+            {/* Customer History & Lifetime Value (LTV) Summary Card */}
+            <div className="bg-[#FAF7F0] dark:bg-gray-800 p-4 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-3 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="font-serif font-bold text-gray-900 dark:text-white flex items-center gap-1.5 text-sm">
+                  <FiUserCheck className="text-[#800020] dark:text-[#C6A15B]" />
+                  <span>Customer Profile & Lifetime Value (LTV)</span>
+                </span>
+                <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${
+                  customerLtvInfo.isVip ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {customerLtvInfo.isVip ? "⭐ Repeat VIP Customer" : "🌱 First-Time Buyer"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-1">
+                <div>
+                  <span className="text-gray-500 block">Total Past Orders:</span>
+                  <span className="font-extrabold text-gray-900 dark:text-white text-sm">{customerLtvInfo.pastOrdersCount} Orders</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block">Lifetime Order Value (LTV):</span>
+                  <span className="font-extrabold text-[#800020] dark:text-[#E5C158] text-sm">₹{customerLtvInfo.lifetimeValue}</span>
+                </div>
+              </div>
+
+              {/* Smart Discount Recommendation Banner */}
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium">
+                  💡 {customerLtvInfo.lifetimeValue > 50000 ? "Suggested: Wedding VIP Discount (15%)" : customerLtvInfo.lifetimeValue > 15000 || customerLtvInfo.pastOrdersCount > 0 ? "Suggested: VIP Customer Discount (10%)" : "Suggested: Welcome Discount (5%)"}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDiscountPercentage(customerLtvInfo.lifetimeValue > 50000 ? 15 : customerLtvInfo.lifetimeValue > 15000 || customerLtvInfo.pastOrdersCount > 0 ? 10 : 5)}
+                    className="bg-[#800020] hover:bg-[#67001a] text-amber-100 px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all shadow-xs flex items-center gap-1"
+                  >
+                    <FiTrendingUp className="text-[#C6A15B]" />
+                    <span>Apply Suggested ({customerLtvInfo.lifetimeValue > 50000 ? '15%' : customerLtvInfo.lifetimeValue > 15000 || customerLtvInfo.pastOrdersCount > 0 ? '10%' : '5%'})</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Items review table */}
