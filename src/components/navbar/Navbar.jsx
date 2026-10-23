@@ -113,12 +113,6 @@ const Navbar = () => {
                     Silk Sarees
                   </Link>
                   <Link
-                    to="/order"
-                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
-                  >
-                    Enquiries & Orders
-                  </Link>
-                  <Link
                     to="/purchase-journey"
                     className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
                   >
@@ -278,9 +272,6 @@ const Navbar = () => {
                       <Link to="/cart" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200 flex justify-between items-center">
                         <span>🛍️ Shopping Cart</span>
                         <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-xs font-extrabold">{cartItems.length}</span>
-                      </Link>
-                      <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                        📩 Enquiries & Orders
                       </Link>
                       <Link to="/purchase-journey" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                         🛤️ Purchase Journey

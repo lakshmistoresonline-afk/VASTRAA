@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import Home from './pages/home/Home';
-import Order from './pages/order/Order';
 import Cart from './pages/cart/Cart';
 import Account from './pages/account/Account';
 import PurchaseJourney from './pages/purchaseJourney/PurchaseJourney';
@@ -39,7 +38,7 @@ const App = () => {
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/order" element={<Order />} />
+          <Route path="/order" element={<Navigate to="/purchase-journey" replace />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="/purchase-journey" element={<ProtectedRoute><PurchaseJourney /></ProtectedRoute>} />

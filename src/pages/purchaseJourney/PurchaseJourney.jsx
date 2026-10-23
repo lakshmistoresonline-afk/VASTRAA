@@ -3,47 +3,91 @@ import Layout from '../../components/layout/Layout';
 import MyContext from '../../context/data/myContext';
 import Loader from '../../components/loader/Loader';
 import { Link, useNavigate } from 'react-router-dom';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
-import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiRotateCcw } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX } from 'react-icons/fi';
+import UpiQrCode from '../../components/payment/UpiQrCode';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
 function PurchaseJourney() {
   const context = useContext(MyContext);
-  const { loading, setLoading } = context;
+  const { loading, setLoading, product } = context;
 
   const [myEnquiries, setMyEnquiries] = useState([]);
   const [showGuide, setShowGuide] = useState(false);
+  const [utrInput, setUtrInput] = useState({});
   const navigate = useNavigate();
 
   const authUser = JSON.parse(localStorage.getItem('user'));
   const userEmail = authUser?.user?.email?.trim().toLowerCase();
   const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
 
-  useEffect(() => {
-    async function fetchMyJourneyData() {
-      if (!userEmail) return;
-      try {
-        setLoading(true);
-        const querySnapshot = await getDocs(collection(fireDB, 'enquiries'));
-        const list = [];
-        querySnapshot.forEach((d) => {
-          const data = d.data();
-          const enqEmail = (data.customerEmail || data.email || '').trim().toLowerCase();
-          if (enqEmail === userEmail) {
-            list.push({ id: d.id, ...data });
-          }
-        });
-        setMyEnquiries(list);
-      } catch (err) {
-        console.error("Error fetching customer journey data:", err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchEnquiries = async () => {
+    if (!userEmail) return;
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(collection(fireDB, 'enquiries'));
+      const list = [];
+      querySnapshot.forEach((d) => {
+        const data = d.data();
+        const enqEmail = (data.customerEmail || data.email || '').trim().toLowerCase();
+        if (enqEmail === userEmail) {
+          list.push({ id: d.id, ...data });
+        }
+      });
+      setMyEnquiries(list);
+    } catch (err) {
+      console.error("Error fetching customer journey data:", err);
+    } finally {
+      setLoading(false);
     }
-    fetchMyJourneyData();
+  };
+
+  useEffect(() => {
+    fetchEnquiries();
   }, [userEmail]);
+
+  const handleCustomerResponse = async (enqId, responseType) => {
+    try {
+      setLoading(true);
+      const enqRef = doc(fireDB, 'enquiries', enqId);
+      await updateDoc(enqRef, {
+        status: responseType === 'accept' ? 'QUOTATION_ACCEPTED' : 'QUOTATION_DECLINED',
+        customerResponseAt: new Date().toISOString()
+      });
+      toast.success(responseType === 'accept' ? "Quotation accepted! Please complete payment via store QR code below." : "Quotation declined.");
+      fetchEnquiries();
+    } catch (err) {
+      toast.error("Failed to update response: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUtrSubmit = async (enqId) => {
+    const refText = utrInput[enqId];
+    if (!refText || refText.trim() === '') {
+      toast.error("Please enter your UPI reference or UTR number.");
+      return;
+    }
+    try {
+      setLoading(true);
+      const enqRef = doc(fireDB, 'enquiries', enqId);
+      await updateDoc(enqRef, {
+        status: 'PAYMENT_PENDING',
+        paymentReference: refText.trim(),
+        paymentSubmittedAt: new Date().toISOString()
+      });
+      toast.success("Payment reference submitted for admin verification!");
+      fetchEnquiries();
+    } catch (err) {
+      toast.error("Failed to submit payment reference: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Determine smart next action based on actual state
   let primaryActionText = "Browse Sarees";
@@ -55,28 +99,28 @@ function PurchaseJourney() {
   if (activeEnq) {
     const status = activeEnq.status || 'Pending';
     if (status === 'QUOTATION_READY' && activeEnq.quotationDetails) {
-      primaryActionText = "Review Quotation";
-      primaryActionRoute = "/order";
+      primaryActionText = "Review Quotation Below";
+      primaryActionRoute = "#requests-section";
       primaryActionSub = "Showroom confirmed prices ready for your acceptance";
     } else if (status === 'QUOTATION_ACCEPTED') {
-      primaryActionText = "Continue to Payment";
-      primaryActionRoute = "/order";
+      primaryActionText = "Complete Payment Below";
+      primaryActionRoute = "#requests-section";
       primaryActionSub = "Scan store UPI QR and submit UTR reference";
     } else if (status === 'PAYMENT_PENDING') {
       primaryActionText = "View Payment Status";
-      primaryActionRoute = "/order";
+      primaryActionRoute = "#requests-section";
       primaryActionSub = "Payment reference submitted — awaiting admin verification";
     } else if (status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || status === 'READY_FOR_DISPATCH') {
       primaryActionText = "View Order Status";
-      primaryActionRoute = "/order";
+      primaryActionRoute = "#requests-section";
       primaryActionSub = "Payment verified and order confirmed for dispatch";
     } else if (status === 'DISPATCHED' || activeEnq.trackingDetails) {
       primaryActionText = "Track Shipment";
-      primaryActionRoute = "/order";
+      primaryActionRoute = "#requests-section";
       primaryActionSub = "Order dispatched with courier AWB tracking details";
     } else {
       primaryActionText = "View Request Status";
-      primaryActionRoute = "/order";
+      primaryActionRoute = "#requests-section";
       primaryActionSub = "Showroom reviewing availability and prices";
     }
   } else if (cartItems.length > 0) {
@@ -102,13 +146,13 @@ function PurchaseJourney() {
       {/* Hero Banner */}
       <div className="bg-[#4A071B] text-amber-50 py-12 px-4 text-center border-b-4 border-[#C6A15B]">
         <span className="text-[#C6A15B] font-bold text-xs uppercase tracking-widest block mb-1">
-          Vastraa • Assisted Shopping Onboarding
+          Vastraa • Customer Purchase Journey & Tracker
         </span>
         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-[#F7F0E4]">
-          My Purchase Journey
+          My Purchase Journey & Order Tracker
         </h1>
         <p className="text-xs text-amber-200/80 mt-2 max-w-xl mx-auto">
-          Welcome back{authUser?.user?.email ? `, ${authUser.user.email}` : ''}! Track your silk saree selections from showroom review to doorstep delivery.
+          Welcome back{authUser?.user?.email ? `, ${authUser.user.email}` : ''}! Track your silk saree selections, quotations, payments, and dispatch tracking in one place.
         </p>
       </div>
 
@@ -129,13 +173,23 @@ function PurchaseJourney() {
           </div>
 
           <div className="flex flex-wrap gap-3 w-full sm:w-auto">
-            <Link
-              to={primaryActionRoute}
-              className="flex-1 sm:flex-initial bg-[#800020] hover:bg-[#4A071B] text-amber-100 font-bold px-7 py-3.5 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
-            >
-              <span>{primaryActionText}</span>
-              <FiArrowRight className="w-4 h-4 text-[#C6A15B]" />
-            </Link>
+            {primaryActionRoute.startsWith('#') ? (
+              <a
+                href={primaryActionRoute}
+                className="flex-1 sm:flex-initial bg-[#800020] hover:bg-[#4A071B] text-amber-100 font-bold px-7 py-3.5 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
+              >
+                <span>{primaryActionText}</span>
+                <FiArrowRight className="w-4 h-4 text-[#C6A15B]" />
+              </a>
+            ) : (
+              <Link
+                to={primaryActionRoute}
+                className="flex-1 sm:flex-initial bg-[#800020] hover:bg-[#4A071B] text-amber-100 font-bold px-7 py-3.5 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
+              >
+                <span>{primaryActionText}</span>
+                <FiArrowRight className="w-4 h-4 text-[#C6A15B]" />
+              </Link>
+            )}
 
             <button
               onClick={() => setShowGuide(!showGuide)}
@@ -147,7 +201,7 @@ function PurchaseJourney() {
           </div>
         </div>
 
-        {/* 6-Stage Purchase Guide (Collapsible or Toggleable) */}
+        {/* 6-Stage Purchase Guide */}
         {showGuide && (
           <div className="bg-[#FAF7F0] dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 shadow-md space-y-6">
             <div className="flex justify-between items-center">
@@ -172,25 +226,25 @@ function PurchaseJourney() {
                 <p className="text-gray-500">Add favorite sarees to your cart and submit your bag for showroom review. Cart submission does not require upfront payment.</p>
               </div>
 
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border space-y-1.5 shadow-xs">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">3</span>
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">Showroom Review & Quote</h4>
                 <p className="text-gray-500">Our team inspects physical availability, confirms unit prices, applies any cart discounts, and publishes a formal quotation.</p>
               </div>
 
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border space-y-1.5 shadow-xs">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">4</span>
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">Quotation Acceptance</h4>
                 <p className="text-gray-500">Review available items, confirmed prices, and net payable totals. Click Accept to confirm your delivery address.</p>
               </div>
 
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border space-y-1.5 shadow-xs">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">5</span>
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">Payment Verification</h4>
                 <p className="text-gray-500">Scan the store UPI QR code to pay the exact payable amount, then submit your UTR reference for manual bank verification.</p>
               </div>
 
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border space-y-1.5 shadow-xs">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">6</span>
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">Order Dispatch & Tracking</h4>
                 <p className="text-gray-500">Once payment is verified, your order is packed and dispatched with real-time courier AWB tracking details.</p>
@@ -199,8 +253,8 @@ function PurchaseJourney() {
           </div>
         )}
 
-        {/* Active Requests & Progress Trackers */}
-        <div className="space-y-6">
+        {/* Active Requests & Full Order / Quotation Tracker Section */}
+        <div id="requests-section" className="space-y-6">
           <h3 className="font-serif font-bold text-xl text-gray-900 dark:text-white">
             Your Active Requests & Quotations ({myEnquiries.length})
           </h3>
@@ -221,9 +275,15 @@ function PurchaseJourney() {
           ) : (
             <div className="space-y-6">
               {myEnquiries.map((enq) => {
+                const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                 const status = enq.status || 'Pending';
                 const hasTracking = Boolean(enq.trackingDetails);
                 const currentStage = getStageIndex(status, hasTracking);
+                const isReady = status === 'QUOTATION_READY' && enq.quotationDetails;
+                const isAccepted = status === 'QUOTATION_ACCEPTED';
+                const isPaymentPending = status === 'PAYMENT_PENDING';
+                const isVerified = status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED';
+                const isDispatched = status === 'DISPATCHED' || hasTracking;
                 const qDetails = enq.quotationDetails;
 
                 const stages = [
@@ -238,6 +298,7 @@ function PurchaseJourney() {
                 return (
                   <div key={enq.id} className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 shadow-lg space-y-6">
 
+                    {/* Header info */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-gray-100 dark:border-gray-800">
                       <div>
                         <span className="text-[10px] font-bold text-[#800020] dark:text-[#E5C158] uppercase tracking-wider block">
@@ -252,14 +313,19 @@ function PurchaseJourney() {
                       </div>
 
                       <div className="text-right">
-                        <span className="bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 font-bold px-3.5 py-1.5 rounded-full text-xs">
-                          Status: {status}
+                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
+                          isDispatched ? 'bg-indigo-700 text-white' :
+                          isVerified ? 'bg-emerald-600 text-white' :
+                          isAccepted || isPaymentPending ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' :
+                          isReady ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300' :
+                          'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                        }`}>
+                          {isDispatched ? "📦 Order Dispatched & In Transit" :
+                           isVerified ? "✓ Order Confirmed & Payment Verified" :
+                           isPaymentPending ? "⏳ Payment Under Admin Verification" :
+                           isAccepted ? "✓ Quotation Accepted" :
+                           isReady ? "⭐ Quotation Ready for Review" : `Status: ${status}`}
                         </span>
-                        {qDetails && (
-                          <p className="text-xs font-extrabold text-[#800020] dark:text-[#E5C158] mt-1.5">
-                            Net Payable: ₹{qDetails.finalPayable}
-                          </p>
-                        )}
                       </div>
                     </div>
 
@@ -290,13 +356,180 @@ function PurchaseJourney() {
                       </div>
                     </div>
 
-                    <div className="pt-2 flex justify-end">
-                      <Link
-                        to="/order"
-                        className="inline-flex items-center gap-1.5 bg-[#800020] hover:bg-[#67001a] text-amber-100 px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all"
+                    {/* Shipping & Tracking Details (If Dispatched) */}
+                    {isDispatched && enq.trackingDetails && (
+                      <div className="bg-indigo-50 dark:bg-gray-800/90 p-5 rounded-2xl border border-indigo-200 dark:border-indigo-800 space-y-3 text-xs">
+                        <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-300 font-bold text-sm">
+                          <FiTruck className="w-5 h-5 text-indigo-700 dark:text-indigo-400" />
+                          <span>Shipment & Courier Tracking Details</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border">
+                            <span className="text-gray-500 block text-[10px] uppercase font-bold">Courier Service</span>
+                            <span className="font-bold text-gray-900 dark:text-white text-sm">{enq.trackingDetails.courierName}</span>
+                          </div>
+                          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border">
+                            <span className="text-gray-500 block text-[10px] uppercase font-bold">AWB / Consignment ID</span>
+                            <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm select-all">{enq.trackingDetails.awbNumber}</span>
+                          </div>
+                          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border">
+                            <span className="text-gray-500 block text-[10px] uppercase font-bold">Courier Booked Date</span>
+                            <span className="font-bold text-gray-900 dark:text-white text-sm">{enq.trackingDetails.courierBookedDate || 'Recently Dispatched'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Items List */}
+                    <div className="space-y-3">
+                      <h4 className="font-bold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Requested Sarees & Availability
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {(enq.cartItems || [{ id: enq.sareeId, title: enq.sareeTitle, imageUrl: enq.imageUrl }]).map((item, idx) => {
+                          const evaluated = qDetails?.items?.[idx];
+                          const liveP = product ? product.find(p => p.id === item.id) : null;
+                          const imgUrl = liveP?.imageUrl || item.imageUrl || FALLBACK_SAREE_IMG;
+
+                          return (
+                            <div key={idx} className="bg-[#FAF7F0] dark:bg-gray-800/80 p-4 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-4">
+                                <img
+                                  src={imgUrl}
+                                  alt={item.title}
+                                  onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+                                  className="w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-2xl shadow-md border border-[#E9E1D5] flex-shrink-0"
+                                />
+                                <div className="space-y-1">
+                                  <span className="font-serif font-bold text-xs text-gray-900 dark:text-white line-clamp-2">{item.title}</span>
+                                  <span className="text-[10px] text-gray-500 font-mono block">ID: {item.id}</span>
+                                </div>
+                              </div>
+
+                              <div className="text-right flex-shrink-0">
+                                {evaluated ? (
+                                  <div>
+                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${evaluated.isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                                      {evaluated.isAvailable ? "Available" : "Unavailable"}
+                                    </span>
+                                    <p className="text-sm font-extrabold text-[#800020] dark:text-[#E5C158] mt-1.5">
+                                      {evaluated.isAvailable ? `₹${evaluated.confirmedPrice}` : "Excluded"}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-amber-700 dark:text-amber-400 font-bold">Awaiting Price</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Quotation Calculation Summary (If Published) */}
+                    {isReady && qDetails && (
+                      <div className="bg-amber-50/90 dark:bg-gray-800/90 p-5 rounded-2xl border border-amber-200 dark:border-gray-700 space-y-2.5 text-xs">
+                        <div className="flex justify-between text-gray-600 dark:text-gray-300 font-medium">
+                          <span>Available Items Subtotal:</span>
+                          <span className="font-bold text-gray-900 dark:text-white">₹{qDetails.subtotal}</span>
+                        </div>
+
+                        <div className="flex justify-between text-gray-600 dark:text-gray-300 font-medium">
+                          <span>Admin Discount ({qDetails.discountType === 'percentage' ? `${qDetails.discountValue}%` : `Fixed ₹${qDetails.discountValue}`}):</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">- ₹{qDetails.discountAmount}</span>
+                        </div>
+
+                        <div className="flex justify-between text-gray-600 dark:text-gray-300 font-medium">
+                          <span>Confirmed Delivery Charges:</span>
+                          <span className="font-bold text-gray-900 dark:text-white">{qDetails.deliveryCharge > 0 ? `₹${qDetails.deliveryCharge}` : 'FREE (₹0)'}</span>
+                        </div>
+
+                        <div className="pt-3 border-t border-amber-200 dark:border-gray-700 flex justify-between items-center font-serif font-extrabold text-base text-[#24211F] dark:text-white">
+                          <span>Net Payable Amount:</span>
+                          <span className="text-xl text-[#800020] dark:text-[#E5C158]">₹{qDetails.finalPayable}</span>
+                        </div>
+
+                        {!isAccepted && !isPaymentPending && !isVerified && !isDispatched && (
+                          <div className="pt-4 flex flex-col sm:flex-row gap-3">
+                            <button
+                              onClick={() => handleCustomerResponse(enq.id, 'accept')}
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                            >
+                              <FiCheck className="w-4 h-4" />
+                              <span>Accept Quotation & Confirm Address</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleCustomerResponse(enq.id, 'decline')}
+                              className="px-6 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <FiX className="w-4 h-4" />
+                              <span>Decline</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* QR Payment & UTR Submission (If Accepted) */}
+                    {(isAccepted || isPaymentPending || isVerified || isDispatched) && qDetails && !isVerified && !isDispatched && (
+                      <div className="bg-emerald-50 dark:bg-gray-800 p-6 rounded-2xl border border-emerald-200 dark:border-gray-700 space-y-4 text-xs">
+                        <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
+                          <FiShield className="w-5 h-5" />
+                          <span>Store QR Code Payment Instructions</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                          <UpiQrCode amount={qDetails.finalPayable} />
+
+                          <div className="space-y-3">
+                            <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                              Scan the store QR code using any UPI app (Google Pay, PhonePe, Paytm) to pay exactly <span className="font-bold text-[#800020] dark:text-[#E5C158]">₹{qDetails.finalPayable}</span>. Then enter your UTR / Transaction Reference below.
+                            </p>
+
+                            {isPaymentPending ? (
+                              <div className="bg-amber-100 text-amber-900 p-3.5 rounded-xl font-bold text-center">
+                                ⏳ Payment Reference Submitted. Awaiting Admin Verification.
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <label className="block font-semibold text-gray-700 dark:text-gray-300">
+                                  UPI / UTR Transaction Reference *
+                                </label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={utrInput[enq.id] || ''}
+                                    onChange={(e) => setUtrInput({ ...utrInput, [enq.id]: e.target.value })}
+                                    placeholder="e.g. UPI/432198765432"
+                                    className="flex-1 px-3.5 py-2.5 rounded-xl border dark:bg-gray-900 dark:border-gray-700 dark:text-white font-mono"
+                                  />
+                                  <button
+                                    onClick={() => handleUtrSubmit(enq.id)}
+                                    className="bg-[#800020] hover:bg-[#67001a] text-white px-5 py-2.5 rounded-xl font-bold shadow-sm"
+                                  >
+                                    Submit UTR
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* WhatsApp Follow-up */}
+                    <div className="pt-2 flex justify-between items-center text-xs">
+                      <span className="text-gray-400 font-mono">Ref: {enq.message ? enq.message.split('.')[0] : enq.id}</span>
+                      <a
+                        href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Vastraa team, I am following up on my bag review request (${enq.customerName}).`)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold hover:underline"
                       >
-                        <span>Open Order Tracker & Actions →</span>
-                      </Link>
+                        <FiMessageCircle className="w-4 h-4" />
+                        <span>Contact Store on WhatsApp</span>
+                      </a>
                     </div>
 
                   </div>
