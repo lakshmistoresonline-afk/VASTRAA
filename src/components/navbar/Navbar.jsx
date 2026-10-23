@@ -118,6 +118,12 @@ const Navbar = () => {
                   >
                     Enquiries & Orders
                   </Link>
+                  <Link
+                    to="/purchase-journey"
+                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                  >
+                    Purchase Journey
+                  </Link>
                   {user && (
                     <Link
                       to="/account"
@@ -275,6 +281,9 @@ const Navbar = () => {
                       </Link>
                       <Link to="/order" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
                         📩 Enquiries & Orders
+                      </Link>
+                      <Link to="/purchase-journey" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
+                        🛤️ Purchase Journey
                       </Link>
                       {user && (
                         <Link to="/account" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">

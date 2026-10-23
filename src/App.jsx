@@ -3,6 +3,7 @@ import Home from './pages/home/Home';
 import Order from './pages/order/Order';
 import Cart from './pages/cart/Cart';
 import Account from './pages/account/Account';
+import PurchaseJourney from './pages/purchaseJourney/PurchaseJourney';
 import Dashboard from './pages/admin/dashborad/Dashboard';
 import Signup from './pages/registration/Signup';
 import Login from './pages/registration/Login';
@@ -41,6 +42,7 @@ const App = () => {
           <Route path="/order" element={<Order />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="/purchase-journey" element={<ProtectedRoute><PurchaseJourney /></ProtectedRoute>} />
           <Route path="/allproducts" element={<AllProducts />} />
           <Route
             path="/dashboard"
