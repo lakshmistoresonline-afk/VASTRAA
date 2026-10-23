@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
-import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck, FiUserCheck, FiTrendingUp } from 'react-icons/fi';
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 
