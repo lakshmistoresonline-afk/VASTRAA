@@ -169,7 +169,7 @@ function DashboardTab() {
           dispatchedAt: new Date().toISOString()
         }
       });
-      toast.success("Shipping tracking details saved and published to customer!");
+      toast.success("Shipping tracking details saved! Request moved to Dispatched stage.");
       setTrackingModalEnquiry(null);
       if (getEnquiriesData) getEnquiriesData();
     } catch (err) {
@@ -414,15 +414,16 @@ function DashboardTab() {
               No customer availability enquiries or bag reviews received yet.
             </div>
           ) : enquiryViewMode === 'kanban' ? (
-            /* KANBAN PIPELINE BOARD */
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 overflow-x-auto pb-4">
-              {['Pending Review', 'QUOTATION_DRAFT', 'QUOTATION_READY', 'PAYMENT_PENDING', 'Fulfilled'].map((colStatus, cIdx) => {
+            /* 6-STAGE KANBAN PIPELINE BOARD */
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 overflow-x-auto pb-4">
+              {['Pending Review', 'QUOTATION_DRAFT', 'QUOTATION_READY', 'PAYMENT_PENDING', 'PAYMENT_VERIFIED_ORDER_CONFIRMED', 'DISPATCHED'].map((colStatus, cIdx) => {
                 const colTitles = {
                   'Pending Review': '1. Pending Review',
                   'QUOTATION_DRAFT': '2. Quotation Drafted',
                   'QUOTATION_READY': '3. Published (Ready)',
                   'PAYMENT_PENDING': '4. Awaiting Payment',
-                  'Fulfilled': '5. Ready for Dispatch'
+                  'PAYMENT_VERIFIED_ORDER_CONFIRMED': '5. Ready for Dispatch',
+                  'DISPATCHED': '6. Dispatched'
                 };
 
                 const colEnquiries = enquiries.filter(enq => {
@@ -431,12 +432,13 @@ function DashboardTab() {
                   if (colStatus === 'QUOTATION_DRAFT') return s === 'QUOTATION_DRAFT';
                   if (colStatus === 'QUOTATION_READY') return s === 'QUOTATION_READY';
                   if (colStatus === 'PAYMENT_PENDING') return s === 'PAYMENT_PENDING' || s === 'QUOTATION_ACCEPTED';
-                  if (colStatus === 'Fulfilled') return s === 'Fulfilled' || s === 'READY_FOR_DISPATCH' || s === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || s === 'DISPATCHED';
+                  if (colStatus === 'PAYMENT_VERIFIED_ORDER_CONFIRMED') return s === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || s === 'READY_FOR_DISPATCH';
+                  if (colStatus === 'DISPATCHED') return s === 'DISPATCHED' || enq.trackingDetails;
                   return false;
                 });
 
                 return (
-                  <div key={cIdx} className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 space-y-3 min-w-[240px]">
+                  <div key={cIdx} className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 space-y-3 min-w-[220px]">
                     <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
                       <h3 className="font-serif font-bold text-xs text-gray-900 dark:text-white">
                         {colTitles[colStatus]}
@@ -453,7 +455,8 @@ function DashboardTab() {
                         colEnquiries.map(enq => {
                           const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                           const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
-                          const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'DISPATCHED';
+                          const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'READY_FOR_DISPATCH';
+                          const isDispatched = enq.status === 'DISPATCHED' || enq.trackingDetails;
 
                           return (
                             <div key={enq.id} className="bg-white dark:bg-gray-900 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-2.5">
@@ -467,11 +470,20 @@ function DashboardTab() {
                               </div>
 
                               <div className="pt-2 flex justify-between items-center border-t border-gray-100 dark:border-gray-800">
-                                {isConfirmedOrVerified ? (
+                                {isDispatched ? (
                                   <button
                                     onClick={() => openTrackingModal(enq)}
                                     className="bg-indigo-700 hover:bg-indigo-800 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
-                                    title="Add or Update Shipping AWB / Tracking"
+                                    title="Edit Shipping AWB / Tracking"
+                                  >
+                                    <FiTruck className="text-indigo-200" />
+                                    <span>{enq.trackingDetails ? "Edit Tracking" : "Add Tracking"}</span>
+                                  </button>
+                                ) : isConfirmedOrVerified ? (
+                                  <button
+                                    onClick={() => openTrackingModal(enq)}
+                                    className="bg-indigo-700 hover:bg-indigo-800 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs flex items-center gap-1"
+                                    title="Add Shipping AWB / Tracking"
                                   >
                                     <FiTruck className="text-indigo-200" />
                                     <span>{enq.trackingDetails ? "Edit Tracking" : "Add Tracking"}</span>
@@ -532,7 +544,8 @@ function DashboardTab() {
                     const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                     const whatsappMsg = `Hello ${enq.customerName || 'Customer'}, regarding your enquiry for ${enq.sareeTitle || 'Saree'} (ID: ${enq.sareeId}) at Vastraa (Lakshmi Stores): `;
                     const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
-                    const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'DISPATCHED';
+                    const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'READY_FOR_DISPATCH';
+                    const isDispatched = enq.status === 'DISPATCHED' || enq.trackingDetails;
 
                     return (
                       <tr key={enq.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -596,14 +609,23 @@ function DashboardTab() {
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right space-y-1 sm:space-y-0 sm:space-x-2 flex flex-col sm:flex-row justify-end items-center">
-                          {isConfirmedOrVerified ? (
+                          {isDispatched ? (
+                            <button
+                              onClick={() => openTrackingModal(enq)}
+                              className="inline-flex items-center gap-1 bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
+                              title="Edit Tracking"
+                            >
+                              <FiTruck className="w-3.5 h-3.5 text-indigo-200" />
+                              <span>Edit Tracking</span>
+                            </button>
+                          ) : isConfirmedOrVerified ? (
                             <button
                               onClick={() => openTrackingModal(enq)}
                               className="inline-flex items-center gap-1 bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
                               title="Add Tracking"
                             >
                               <FiTruck className="w-3.5 h-3.5 text-indigo-200" />
-                              <span>{enq.trackingDetails ? "Edit Tracking" : "Add Tracking"}</span>
+                              <span>Add Tracking</span>
                             </button>
                           ) : isAwaitingPayment ? (
                             <button
