@@ -87,6 +87,8 @@ function Cart() {
         indicativePriceRange: i.indicativePriceRange
       })),
       customerName: customerName,
+      customerEmail: user?.user?.email || "",
+      customerUid: user?.user?.uid || "",
       phone: cleanPhone,
       message: `Cart Ref: ${referenceId}. Items: ${cartItems.map(i => `${i.title} (${i.id})`).join(' | ')}. Delivery Address: ${address} - Pincode: ${pinCode}`,
       createdAt: new Date().toISOString(),
