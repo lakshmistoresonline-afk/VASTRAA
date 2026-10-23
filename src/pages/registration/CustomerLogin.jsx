@@ -21,6 +21,7 @@ function CustomerLogin() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
   const handleCustomerAuth = async (e) => {
     e.preventDefault();
@@ -56,8 +57,9 @@ function CustomerLogin() {
         toast.success("Welcome back to Vastraa!");
       }
 
+      sessionStorage.setItem("show_onboarding_modal", "true");
       localStorage.setItem("user", JSON.stringify({ user: { email: cleanEmail, uid: auth.currentUser?.uid } }));
-      navigate('/purchase-journey', { replace: true });
+      navigate(from, { replace: true });
     } catch (err) {
       console.error("Customer auth error:", err.message);
       toast.error("Authentication failed: " + err.message);
