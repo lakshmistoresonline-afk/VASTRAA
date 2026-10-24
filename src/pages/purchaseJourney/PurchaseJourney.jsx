@@ -3,7 +3,7 @@ import Layout from '../../components/layout/Layout';
 import MyContext from '../../context/data/myContext';
 import Loader from '../../components/loader/Loader';
 import { Link, useNavigate } from 'react-router-dom';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, getDocsFromServer } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
 import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle } from 'react-icons/fi';
@@ -33,7 +33,12 @@ function PurchaseJourney() {
       // Fetch user's registered WhatsApp phone number for robust multi-criteria matching
       let userPhone = '';
       try {
-        const usersSnap = await getDocs(collection(fireDB, 'users'));
+        let usersSnap;
+        try {
+          usersSnap = await getDocsFromServer(collection(fireDB, 'users'));
+        } catch {
+          usersSnap = await getDocs(collection(fireDB, 'users'));
+        }
         usersSnap.forEach((docSnap) => {
           const uData = docSnap.data();
           if ((userEmail && uData.email?.trim().toLowerCase() === userEmail) || (userUid && uData.uid === userUid)) {
@@ -44,7 +49,14 @@ function PurchaseJourney() {
         console.warn("Could not fetch user profile for phone matching:", uErr);
       }
 
-      const querySnapshot = await getDocs(collection(fireDB, 'enquiries'));
+      // Force fresh server read to prevent stale offline cache on login/refresh
+      let querySnapshot;
+      try {
+        querySnapshot = await getDocsFromServer(collection(fireDB, 'enquiries'));
+      } catch {
+        querySnapshot = await getDocs(collection(fireDB, 'enquiries'));
+      }
+
       const list = [];
       querySnapshot.forEach((d) => {
         const data = d.data();
@@ -517,7 +529,7 @@ function PurchaseJourney() {
                             ) : (
                               <div className="space-y-2">
                                 <label className="block font-semibold text-gray-700 dark:text-gray-300">
-                                 UPI / UTR Transaction Reference *
+                                  UPI / UTR Transaction Reference *
                                 </label>
                                 <div className="flex gap-2">
                                   <input
