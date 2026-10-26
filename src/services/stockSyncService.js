@@ -64,24 +64,20 @@ export async function syncShowroomCatalogues(options = {}) {
             unavailable++;
           }
 
-          const is3G = photo.title?.toLowerCase().includes('3g') || photo.id?.toLowerCase().includes('3g') || (catalogue.code === 'A' && (photo.id?.includes('001') || photo.id?.includes('002')));
           const priceSpread = catalogue.maxPrice - catalogue.minPrice;
           let defaultPrice = catalogue.minPrice + Math.floor(priceSpread * 0.35);
 
-          if (is3G) {
-            defaultPrice = 24500;
-          } else {
-            switch (catalogue.code?.toUpperCase()) {
-              case 'B': defaultPrice = 16500; break;
-              case 'C': defaultPrice = 12500; break;
-              case 'D': defaultPrice = 4500; break;
-              case 'E': defaultPrice = 3900; break;
-              case 'F': defaultPrice = 5500; break;
-              case 'G': defaultPrice = 2350; break;
-              case 'H': defaultPrice = 1950; break;
-              case 'I': defaultPrice = 1950; break;
-              default: break;
-            }
+          switch (catalogue.code?.toUpperCase()) {
+            case 'A': defaultPrice = 21500; break;
+            case 'B': defaultPrice = 16500; break;
+            case 'C': defaultPrice = 12500; break;
+            case 'D': defaultPrice = 4500; break;
+            case 'E': defaultPrice = 3900; break;
+            case 'F': defaultPrice = 5500; break;
+            case 'G': defaultPrice = 2350; break;
+            case 'H': defaultPrice = 1950; break;
+            case 'I': defaultPrice = 1950; break;
+            default: break;
           }
 
           allItems.push({
