@@ -1,220 +1,314 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import MyContext from '../../context/data/myContext';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../../redux/cartSlice';
+import { addToCart, deleteFromCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
-import { FiMessageCircle, FiMaximize2, FiX, FiCheckCircle, FiShoppingBag } from 'react-icons/fi';
+import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX } from 'react-icons/fi';
+import { addDoc, collection } from 'firebase/firestore';
+import { fireDB } from '../../firebase/FirebaseConfig';
+
+const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
 function ProductInfo() {
   const context = useContext(MyContext);
-  const { product, storeInfo, lastVerifiedAt } = context;
-  const params = useParams();
+  const { product, setLoading, storeInfo } = context;
+
+  const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const cart = useSelector((state) => state.cart);
+  const cartItems = useSelector((state) => state.cart);
 
   const [saree, setSaree] = useState(null);
-  const [isZoomed, setIsZoomed] = useState(false);
+  const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerMessage, setCustomerMessage] = useState('');
 
   useEffect(() => {
     if (product && product.length > 0) {
-      const found = product.find((item) => item.id === params.id);
-      if (found) {
-        setSaree(found);
-      }
+      const found = product.find((p) => p.id === id);
+      if (found) setSaree(found);
     }
-  }, [product, params.id]);
+  }, [product, id]);
 
-  const isInCart = saree ? cart.some(item => item.id === saree.id) : false;
+  const isInCart = saree ? cartItems.some(p => p.id === saree.id) : false;
 
-  const handleAddToCart = () => {
-    if (isInCart) {
-      toast.info("This saree is already in your shopping bag.");
-      navigate('/cart');
-    } else {
-      dispatch(addToCart(saree));
-      toast.success("Saree added to your Shopping Bag!");
+  const addCart = (item) => {
+    dispatch(addToCart(item));
+    toast.success(`Added "${item.title}" to your shopping bag!`);
+  };
+
+  const removeCart = (item) => {
+    dispatch(deleteFromCart(item));
+    toast.info(`Removed "${item.title}" from your shopping bag.`);
+  };
+
+  const handleQuickEnquirySubmit = async (e) => {
+    e.preventDefault();
+    if (!customerName.trim() || !customerPhone.trim()) {
+      toast.error("Please provide your name and WhatsApp phone number.");
+      return;
+    }
+
+    const cleanPhone = customerPhone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length < 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    const enquiryData = {
+      sareeId: saree.id,
+      sareeTitle: saree.title,
+      categoryName: saree.categoryName,
+      imageUrl: saree.imageUrl || FALLBACK_SAREE_IMG,
+      customerName: customerName.trim(),
+      customerEmail: user?.user?.email || "",
+      customerUid: user?.user?.uid || "",
+      phone: cleanPhone,
+      message: customerMessage.trim() || `Quick availability and price enquiry for Saree ID: ${saree.id} (${saree.title})`,
+      createdAt: new Date().toISOString(),
+      status: "Pending"
+    };
+
+    try {
+      setLoading(true);
+      await addDoc(collection(fireDB, 'enquiries'), enquiryData);
+      toast.success("Availability enquiry sent to showroom successfully!");
+      setEnquiryModalOpen(false);
+      setCustomerMessage('');
+    } catch (err) {
+      console.error("Enquiry submission error:", err);
+      toast.error("Failed to submit enquiry. Please try WhatsApp hotline.");
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!saree) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-20 text-center space-y-3">
-          <div className="w-12 h-12 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-500 font-medium">Loading saree details from live catalogue...</p>
+        <div className="container mx-auto px-4 py-24 text-center space-y-4">
+          <p className="text-gray-600 dark:text-gray-400 text-base">Loading saree details or item not found...</p>
+          <Link to="/allproducts" className="inline-block bg-[#800020] text-amber-100 px-6 py-3 rounded-xl text-xs font-bold">
+            ← Back to Silk Sarees
+          </Link>
         </div>
       </Layout>
     );
   }
 
-  const isAvailable = saree.stockStatus === 'CONFIRMED_AVAILABLE';
-  const isUnknown = saree.stockStatus === 'UNKNOWN';
-
   return (
     <Layout>
-      <section className="py-12 bg-[#FAF7F0] dark:bg-gray-950 transition-colors min-h-screen">
-        <div className="container px-5 mx-auto max-w-6xl">
+      <div className="min-h-screen bg-[#FAF7F0] dark:bg-gray-950 py-10 px-4 transition-colors">
+        <div className="container mx-auto max-w-6xl space-y-8">
 
-          <div className="glass-card rounded-3xl shadow-2xl overflow-hidden border border-[#E9E1D5] dark:border-gray-800 p-6 sm:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Back button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[#800020] transition-colors"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+            <span>Back to Catalogues</span>
+          </button>
 
-              {/* Left Column: Image Viewer */}
-              <div className="lg:col-span-6 space-y-4">
-                <div className="relative aspect-[3/4] bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-inner group border border-[#E9E1D5] dark:border-gray-700">
-                  <img
-                    alt={saree.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
-                    src={saree.imageUrl}
-                    onClick={() => setIsZoomed(true)}
-                  />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
 
-                  <button
-                    onClick={() => setIsZoomed(true)}
-                    className="absolute bottom-4 right-4 bg-black/70 hover:bg-black text-white px-4 py-2 rounded-xl text-xs font-bold backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-all"
-                  >
-                    <FiMaximize2 className="w-4 h-4 text-[#C5A46D]" />
-                    <span>Click to Enlarge</span>
-                  </button>
+            {/* Left Column: Image */}
+            <div className="lg:col-span-6">
+              <div className="aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C6A15B]/30 bg-gray-100 dark:bg-gray-800">
+                <img
+                  src={saree.imageUrl || FALLBACK_SAREE_IMG}
+                  alt={saree.title}
+                  onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
 
-                  <div className="absolute top-4 left-4 bg-[#800020] text-[#E5C158] border border-[#C5A46D]/60 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
-                    Cat {saree.catalogueCode}
-                  </div>
+            {/* Right Column: Details & Pricing */}
+            <div className="lg:col-span-6 space-y-6">
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="bg-[#800020] text-[#C6A15B] px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest border border-[#C6A15B]/40">
+                    Cat {saree.catalogueCode || 'A'} • {saree.categoryName}
+                  </span>
+                  <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">
+                    ✓ Verified Showroom Stock
+                  </span>
                 </div>
 
-                <div className="bg-amber-50/80 dark:bg-gray-800/80 p-3.5 rounded-2xl text-xs text-gray-600 dark:text-gray-300 flex justify-between items-center border border-[#E9E1D5] dark:border-gray-700">
-                  <span className="flex items-center gap-1.5 font-semibold text-gray-800 dark:text-gray-200">
-                    <FiCheckCircle className="text-emerald-500 w-4 h-4" /> Live Inventory Verified Item
-                  </span>
-                  <span className="font-mono text-gray-500 dark:text-gray-400">
-                    Verified: {lastVerifiedAt ? new Date(lastVerifiedAt).toLocaleDateString() : 'Live'}
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#24211F] dark:text-white leading-snug">
+                  {saree.title}
+                </h1>
+
+                <p className="text-xs text-gray-400 font-mono mt-1">
+                  Saree Code: <span className="font-bold text-gray-700 dark:text-gray-300">{saree.id}</span>
+                </p>
+              </div>
+
+              {/* Price Information */}
+              <div className="bg-amber-50/90 dark:bg-gray-800/90 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-2.5">
+                <div className="flex justify-between text-xs text-[#77716A] dark:text-gray-300">
+                  <span>Category Indicative Range:</span>
+                  <span className="font-bold text-[#24211F] dark:text-white">{saree.indicativePriceRange}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2.5 border-t border-[#E9E1D5] dark:border-gray-700">
+                  <span className="text-xs font-bold text-[#24211F] dark:text-gray-200">Showcase Price:</span>
+                  <span className="text-2xl font-extrabold text-[#800020] dark:text-[#E5C158]">
+                    {saree.price ? `₹${Number(saree.price).toLocaleString()}` : saree.indicativePriceRange}
                   </span>
                 </div>
               </div>
 
-              {/* Right Column: Saree Details & Bag Action */}
-              <div className="lg:col-span-6 space-y-6">
+              {/* Description */}
+              <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-800 space-y-2 text-xs leading-relaxed text-gray-600 dark:text-gray-300 shadow-sm">
+                <h3 className="font-bold text-[#24211F] dark:text-white uppercase tracking-wider text-[11px]">
+                  Handloom Weave Guarantee
+                </h3>
+                <p>
+                  {saree.description || `Exquisite ${saree.categoryName} handloom silk saree sourced directly from Lakshmi Stores master weavers. Guaranteed pure silk luster with intricate zari pallu and matching unstitched blouse piece.`}
+                </p>
+              </div>
 
-                <div>
-                  <div className="inline-flex items-center gap-2 mb-3">
-                    <span className="text-[#800020] dark:text-[#E5C158] font-extrabold text-xs uppercase tracking-wider">
-                      {saree.categoryName}
-                    </span>
-                    {isAvailable ? (
-                      <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                        ✓ Live In Stock
-                      </span>
-                    ) : isUnknown ? (
-                      <span className="bg-amber-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                        Confirm Availability
-                      </span>
-                    ) : (
-                      <span className="bg-rose-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                        Unavailable
-                      </span>
-                    )}
-                  </div>
+              {/* Add to Bag & WhatsApp Actions */}
+              <div className="space-y-3 pt-2">
+                {isInCart ? (
+                  <button
+                    onClick={() => navigate('/cart')}
+                    type="button"
+                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    <FiCheckCircle className="w-4 h-4 text-emerald-300" />
+                    <span>Already in Shopping Bag · View Cart</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => addCart(saree)}
+                    type="button"
+                    className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
+                  >
+                    <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
+                    <span>Add to Shopping Bag</span>
+                  </button>
+                )}
 
-                  <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#24211F] dark:text-white leading-snug">
-                    {saree.title}
-                  </h1>
-
-                  <p className="text-xs text-gray-400 font-mono mt-1">
-                    Saree Code: <span className="font-bold text-gray-700 dark:text-gray-300">{saree.id}</span>
-                  </p>
-                </div>
-
-                {/* Price Information */}
-                <div className="bg-amber-50/90 dark:bg-gray-800/90 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-2">
-                  <div className="flex justify-between text-xs text-[#77716A] dark:text-gray-300">
-                    <span>Category Indicative Range:</span>
-                    <span className="font-bold text-[#24211F] dark:text-white">{saree.indicativePriceRange}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-[#E9E1D5] dark:border-gray-700">
-                    <span className="text-xs font-bold text-[#24211F] dark:text-gray-200">Individual Saree Price:</span>
-                    <span className="text-xl font-extrabold text-[#800020] dark:text-[#E5C158]">
-                      {saree.price ? `₹${saree.price}` : "Price on Enquiry"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Add to Bag & WhatsApp Actions */}
-                <div className="space-y-3 pt-2">
-                  {isInCart ? (
-                    <button
-                      onClick={() => navigate('/cart')}
-                      type="button"
-                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
-                    >
-                      <FiCheckCircle className="w-4 h-4 text-emerald-300" />
-                      <span>Already in Bag · View Bag</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleAddToCart}
-                      type="button"
-                      className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C5A46D]/40"
-                    >
-                      <FiShoppingBag className="w-4 h-4 text-[#C5A46D]" />
-                      <span>Add to Shopping Bag</span>
-                    </button>
-                  )}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setEnquiryModalOpen(true)}
+                    type="button"
+                    className="flex-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-700 dark:text-gray-200 font-bold py-3 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 border border-gray-300 dark:border-gray-700"
+                  >
+                    <FiHelpCircle className="w-4 h-4 text-[#800020] dark:text-[#C6A15B]" />
+                    <span>Quick Availability Enquiry</span>
+                  </button>
 
                   <a
-                    href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
-                      `Hello Vastraa (Co-Brand of Lakshmi Stores), I am interested in saree ID: ${saree.id} (${saree.categoryName}). Photo: ${saree.imageUrl}`
-                    )}`}
+                    href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(`Hello Vastraa, I am inquiring about Saree Code: ${saree.id} (${saree.title}) - Cat ${saree.catalogueCode}`)}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
                   >
                     <FiMessageCircle className="w-4 h-4" />
-                    <span>Enquire via WhatsApp</span>
+                    <span>WhatsApp</span>
                   </a>
                 </div>
-
-                {/* Showroom Details */}
-                <div className="space-y-2 text-xs text-[#77716A] dark:text-gray-300 pt-4 border-t border-[#E9E1D5] dark:border-gray-800">
-                  <p className="font-bold text-[#24211F] dark:text-white uppercase tracking-wider">Showroom & Product Overview:</p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>Brand: Vastraa (A Co-Brand of Lakshmi Stores)</li>
-                    <li>Catalogue Category: {saree.categoryName}</li>
-                    <li>Saree Code Identifier: {saree.id}</li>
-                    <li>Direct Assistance via WhatsApp & Shopping Bag Review</li>
-                  </ul>
-                </div>
-
               </div>
 
             </div>
+
           </div>
 
         </div>
-      </section>
+      </div>
 
-      {/* High Res Zoom Modal */}
-      {isZoomed && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+      {/* Quick Enquiry Modal */}
+      {enquiryModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-[#E9E1D5] dark:border-gray-800 space-y-5">
             <button
-              onClick={() => setIsZoomed(false)}
-              className="absolute top-2 right-2 bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold"
+              onClick={() => setEnquiryModalOpen(false)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
             >
-              <FiX className="w-6 h-6" />
+              <FiX className="w-5 h-5" />
             </button>
-            <img
-              src={saree.imageUrl}
-              alt={saree.title}
-              className="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/20"
-            />
-            <p className="text-white text-xs mt-3 font-serif font-bold text-center">
-              {saree.title} — Vastraa High Resolution View
-            </p>
+
+            <div>
+              <span className="text-xs font-bold text-[#800020] dark:text-[#E5C158] uppercase">
+                Showroom Saree Enquiry
+              </span>
+              <h3 className="font-serif font-bold text-lg text-gray-900 dark:text-white mt-0.5 line-clamp-1">
+                {saree.title}
+              </h3>
+              <p className="text-xs text-gray-500 font-mono">ID: {saree.id}</p>
+            </div>
+
+            <form onSubmit={handleQuickEnquirySubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Your Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="e.g. Ananya Nair"
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  10-Digit WhatsApp Mobile Number *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="e.g. 9746998785"
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Specific Question (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={customerMessage}
+                  onChange={(e) => setCustomerMessage(e.target.value)}
+                  placeholder="Ask about blouse piece, color shade, or custom pairing..."
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setEnquiryModalOpen(false)}
+                  className="px-5 py-3 border font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#800020] hover:bg-[#67001a] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all"
+                >
+                  Send Enquiry to Showroom
+                </button>
+              </div>
+            </form>
+
           </div>
         </div>
       )}
+
     </Layout>
   );
 }

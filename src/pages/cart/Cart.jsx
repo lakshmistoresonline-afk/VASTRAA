@@ -54,6 +54,8 @@ function Cart() {
     fetchCustomerProfile();
   }, [user]);
 
+  const cartSubtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+
   const submitCartForReview = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
@@ -84,13 +86,14 @@ function Cart() {
         title: i.title,
         imageUrl: i.imageUrl,
         categoryName: i.categoryName,
-        indicativePriceRange: i.indicativePriceRange
+        indicativePriceRange: i.indicativePriceRange,
+        price: i.price || 0
       })),
       customerName: customerName,
       customerEmail: user?.user?.email || "",
       customerUid: user?.user?.uid || "",
       phone: cleanPhone,
-      message: `Cart Ref: ${referenceId}. Items: ${cartItems.map(i => `${i.title} (${i.id})`).join(' | ')}. Delivery Address: ${address} - Pincode: ${pinCode}`,
+      message: `Cart Ref: ${referenceId}. Estimated Subtotal: ₹${cartSubtotal}. Items: ${cartItems.map(i => `${i.title} (${i.id} - ₹${i.price || 0})`).join(' | ')}. Delivery Address: ${address} - Pincode: ${pinCode}`,
       createdAt: new Date().toISOString(),
       status: "Pending"
     };
@@ -200,10 +203,10 @@ function Cart() {
                               {title}
                             </h3>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Indicative Range: <span className="font-bold">{indicativePriceRange}</span>
+                              Catalogue Range: <span className="font-bold">{indicativePriceRange}</span>
                             </p>
                             <p className="text-xs font-extrabold text-[#800020] dark:text-[#E5C158] pt-0.5">
-                              {price ? `₹${price}` : "Price pending confirmation"}
+                              {price ? `₹${Number(price).toLocaleString()}` : indicativePriceRange}
                             </p>
                           </div>
                         </div>
@@ -239,8 +242,8 @@ function Cart() {
                       <span className="font-bold text-[#24211F] dark:text-white">{cartItems.length} Items</span>
                     </div>
                     <div className="flex justify-between text-[#77716A] dark:text-gray-300">
-                      <span>Pricing Status:</span>
-                      <span className="font-bold text-amber-700 dark:text-amber-400">Price Pending Confirmation</span>
+                      <span>Estimated Subtotal:</span>
+                      <span className="font-bold text-[#800020] dark:text-[#E5C158]">₹{cartSubtotal.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-[#77716A] dark:text-gray-300">
                       <span>Shipping:</span>
@@ -248,7 +251,7 @@ function Cart() {
                     </div>
                     <div className="pt-2 border-t border-[#E9E1D5] dark:border-gray-700 flex justify-between font-extrabold text-[#24211F] dark:text-white text-sm">
                       <span>Estimated Total:</span>
-                      <span className="text-[#800020] dark:text-[#E5C158]">Awaiting Quotation</span>
+                      <span className="text-[#800020] dark:text-[#E5C158]">₹{cartSubtotal.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -298,7 +301,7 @@ function Cart() {
                     <button
                       type="submit"
                       disabled={cartItems.length === 0}
-                      className="w-full bg-[#800020] hover:bg-[#67001a] disabled:opacity-50 text-white font-extrabold py-4 px-4 rounded-xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 border border-[#C5A46D]/40"
+                      className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-4 px-4 rounded-xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 border border-[#C5A46D]/40 disabled:opacity-50"
                     >
                       <FiSend className="w-4 h-4 text-[#C5A46D]" />
                       <span>Submit Cart for Admin Review</span>

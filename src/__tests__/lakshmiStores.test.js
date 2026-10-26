@@ -89,12 +89,12 @@ describe('Vastraa (Co-Brand of Lakshmi Stores) - Live Catalogue Test Suite', () 
     expect(canDirectCheckout(unavailableItem)).toBe(false);
   });
 
-  // Test Case 8: Missing individual prices are shown as "Price on enquiry"
-  it('8. Missing individual prices default to null ("Price on enquiry")', async () => {
+  // Test Case 8: Each saree features a showcase price
+  it('8. Each saree features a showcase price', async () => {
     const syncData = await syncAllCatalogues();
     for (const item of syncData.items) {
-      expect(item.price).toBeNull();
-      expect(canDirectCheckout(item)).toBe(false);
+      expect(item.price).toBeGreaterThan(0);
+      expect(canDirectCheckout(item)).toBe(true);
     }
   });
 
@@ -121,14 +121,14 @@ describe('Vastraa (Co-Brand of Lakshmi Stores) - Live Catalogue Test Suite', () 
     await expect(resolveAlbumPhotos("https://photos.google.com/share/UNKNOWN_MALFORMED_ALBUM_URL")).rejects.toThrowError(/Diagnostic Error/);
   });
 
-  // Test Case 12: Stock revalidation service provides clear enquiry message for price on enquiry items
-  it('12. Stock revalidation service provides clear enquiry message for price on enquiry items', async () => {
+  // Test Case 12: Stock revalidation service provides clear confirmation message for available items
+  it('12. Stock revalidation service provides clear confirmation message for available items', async () => {
     const syncData = await syncAllCatalogues();
     const item = syncData.items[0];
 
     const validation = await revalidateItemStock(item.id);
     expect(validation).toHaveProperty('canOrder');
-    expect(validation.message).toContain('Price on enquiry required');
+    expect(validation.message).toContain('confirmed available');
   });
 
 });
