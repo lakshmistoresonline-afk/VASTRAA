@@ -10,11 +10,11 @@ import { fireDB } from '../../firebase/FirebaseConfig';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
-function ProductCard({ item }) {
+function SingleProductCard({ item }) {
   const context = useContext(myContext);
   const { setLoading, storeInfo } = context;
 
-  const { id, title, categoryName, indicativePriceRange, price, imageUrl, catalogueCode, stockStatus } = item;
+  const { id, title, categoryName, indicativePriceRange, price, imageUrl, catalogueCode, stockStatus } = item || {};
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -29,11 +29,6 @@ function ProductCard({ item }) {
   const addCart = (sareeItem) => {
     dispatch(addToCart(sareeItem));
     toast.success(`Added "${sareeItem.title}" to your shopping bag!`);
-  };
-
-  const removeCart = (sareeItem) => {
-    dispatch(deleteFromCart(sareeItem));
-    toast.info(`Removed "${sareeItem.title}" from your shopping bag.`);
   };
 
   const handleQuickEnquirySubmit = async (e) => {
@@ -267,6 +262,44 @@ function ProductCard({ item }) {
         </div>
       )}
 
+    </div>
+  );
+}
+
+function ProductCard(props) {
+  const context = useContext(myContext);
+  const { product, searchKey, filterType, filterPrice } = context;
+
+  // If item is passed directly as prop
+  if (props.item) {
+    return <SingleProductCard item={props.item} />;
+  }
+
+  // Otherwise render catalogue grid with search & filter
+  const filteredProducts = product ? product.filter((obj) => {
+    if (!searchKey) return true;
+    return obj.title?.toLowerCase().includes(searchKey.toLowerCase()) ||
+           obj.categoryName?.toLowerCase().includes(searchKey.toLowerCase()) ||
+           obj.id?.toLowerCase().includes(searchKey.toLowerCase());
+  }).filter((obj) => {
+    if (!filterType) return true;
+    return obj.categoryName?.toLowerCase().includes(filterType.toLowerCase()) ||
+           obj.catalogueCode?.toLowerCase() === filterType.toLowerCase();
+  }) : [];
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {filteredProducts.length === 0 ? (
+        <div className="text-center py-16 text-gray-500 text-xs font-medium">
+          No matching silk sarees found. Try adjusting your search or category filters.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredProducts.map((item) => (
+            <SingleProductCard key={item.id} item={item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
