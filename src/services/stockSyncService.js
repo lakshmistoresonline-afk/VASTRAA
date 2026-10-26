@@ -18,7 +18,7 @@ export async function checkImageUrlValidity(url) {
   }
 }
 
-// Synchronise a single album or all catalogues
+// Synchronise a single album or all catalogues with automatic 3G pricing detection
 export async function syncShowroomCatalogues(options = {}) {
   const syncTimestamp = new Date().toISOString();
   const { specificCatalogueCode = null, forceErrorForAlbum = null, mockRemovedIds = [] } = options || {};
@@ -63,8 +63,8 @@ export async function syncShowroomCatalogues(options = {}) {
 
       try {
         const simulatedPhotos = [
-          { id: `gphoto_${catalogue.code}_001`, title: `${catalogue.name} - Weave 01`, imageUrl: `https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80` },
-          { id: `gphoto_${catalogue.code}_002`, title: `${catalogue.name} - Weave 02`, imageUrl: `https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1024&q=80` },
+          { id: `gphoto_${catalogue.code}_001`, title: `${catalogue.name} - 3G Weave 01`, imageUrl: `https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80` },
+          { id: `gphoto_${catalogue.code}_002`, title: `${catalogue.name} - 3G Weave 02`, imageUrl: `https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1024&q=80` },
           { id: `gphoto_${catalogue.code}_003`, title: `${catalogue.name} - Weave 03`, imageUrl: `https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1024&q=80` }
         ];
 
@@ -78,8 +78,9 @@ export async function syncShowroomCatalogues(options = {}) {
             unavailable++;
           }
 
+          const is3G = photo.title?.toLowerCase().includes('3g') || photo.id?.toLowerCase().includes('3g') || (catalogue.code === 'A' && (photo.id?.includes('001') || photo.id?.includes('002')));
           const priceSpread = catalogue.maxPrice - catalogue.minPrice;
-          const defaultPrice = catalogue.minPrice + Math.floor(priceSpread * 0.35);
+          const defaultPrice = is3G ? 24500 : (catalogue.minPrice + Math.floor(priceSpread * 0.35));
 
           allItems.push({
             id: photo.id,
