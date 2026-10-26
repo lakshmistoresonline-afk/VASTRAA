@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
-import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck, FiUserCheck, FiTrendingUp } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck, FiUserCheck, FiTrendingUp, FiEdit3 } from 'react-icons/fi';
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 
@@ -43,6 +43,10 @@ function DashboardTab() {
   const [courierName, setCourierName] = useState('');
   const [awbNumber, setAwbNumber] = useState('');
   const [courierBookedDate, setCourierBookedDate] = useState('');
+
+  // Live Inventory Price Editing Modal States
+  const [editPriceModalItem, setEditPriceModalItem] = useState(null);
+  const [newSareePrice, setNewSareePrice] = useState('');
 
   useEffect(() => {
     if (getEnquiriesData) getEnquiriesData();
@@ -87,6 +91,36 @@ function DashboardTab() {
     setCourierName(enq.trackingDetails?.courierName || '');
     setAwbNumber(enq.trackingDetails?.awbNumber || '');
     setCourierBookedDate(enq.trackingDetails?.courierBookedDate || new Date().toISOString().split('T')[0]);
+  };
+
+  const openEditPriceModal = (item) => {
+    setEditPriceModalItem(item);
+    setNewSareePrice(item.price || item.minPrice || '');
+  };
+
+  const handleSaveInventoryPrice = async () => {
+    if (!editPriceModalItem) return;
+    const priceVal = parseFloat(newSareePrice);
+    if (isNaN(priceVal) || priceVal < 0) {
+      toast.error("Please enter a valid saree price.");
+      return;
+    }
+    try {
+      const productRef = doc(fireDB, 'products', editPriceModalItem.id);
+      await updateDoc(productRef, { price: priceVal });
+      toast.success(`Updated price for ${editPriceModalItem.title} to ₹${priceVal}!`);
+      setEditPriceModalItem(null);
+      window.location.reload();
+    } catch (err) {
+      try {
+        await addDoc(collection(fireDB, 'products'), { ...editPriceModalItem, price: priceVal });
+        toast.success(`Saved new product price successfully!`);
+        setEditPriceModalItem(null);
+        window.location.reload();
+      } catch (ex) {
+        toast.error("Failed to update price: " + ex.message);
+      }
+    }
   };
 
   const handlePublishQuotation = async () => {
@@ -341,7 +375,9 @@ function DashboardTab() {
                   <th className="px-5 py-4">Saree ID / Title</th>
                   <th className="px-5 py-4">Catalogue Category</th>
                   <th className="px-5 py-4">Indicative Range</th>
-                  <th className="px-5 py-4">Stock Verification</th>
+                  <th className="px-5 py-4">Showcase Price</th>
+                  <th className="px-5 py-4">Stock Status</th>
+                  <th className="px-5 py-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
@@ -370,6 +406,9 @@ function DashboardTab() {
                       <td className="px-5 py-3">
                         {item.indicativePriceRange}
                       </td>
+                      <td className="px-5 py-3 font-extrabold text-[#800020] dark:text-[#E5C158]">
+                        {item.price ? `₹${Number(item.price).toLocaleString()}` : 'Not Set'}
+                      </td>
                       <td className="px-5 py-3">
                         {isAvailable ? (
                           <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 font-bold px-3 py-1 rounded-full text-[10px]">
@@ -381,9 +420,18 @@ function DashboardTab() {
                           </span>
                         ) : (
                           <span className="bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300 font-bold px-3 py-1 rounded-full text-[10px]">
-                            ✕ Removed / Sold Out
+                            ✕ Sold Out
                           </span>
                         )}
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <button
+                          onClick={() => openEditPriceModal(item)}
+                          className="bg-[#800020] hover:bg-[#67001a] text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-xs transition-all inline-flex items-center gap-1"
+                        >
+                          <FiEdit3 className="w-3 h-3 text-[#D4AF37]" />
+                          <span>Edit Price</span>
+                        </button>
                       </td>
                     </tr>
                   );
@@ -1095,6 +1143,71 @@ function DashboardTab() {
               >
                 <FiCheck className="w-4 h-4 text-indigo-200" />
                 <span>Save & Dispatch Order</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Edit Inventory Saree Price Modal */}
+      {editPriceModalItem && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative border border-gray-200 dark:border-gray-800 space-y-4">
+            <button
+              onClick={() => setEditPriceModalItem(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-bold text-[#800020] dark:text-[#E5C158] uppercase">
+                Update Inventory Price
+              </span>
+              <h3 className="font-serif font-bold text-base text-gray-900 dark:text-white mt-0.5 line-clamp-1">
+                {editPriceModalItem.title}
+              </h3>
+              <p className="text-[11px] text-gray-500 font-mono">ID: {editPriceModalItem.id}</p>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Individual Showcase Price (₹) *
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-3 text-xs text-gray-400">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={newSareePrice}
+                    onChange={(e) => setNewSareePrice(e.target.value)}
+                    placeholder="e.g. 12499"
+                    className="w-full text-xs pl-7 pr-3 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-bold"
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Catalogue Range: {editPriceModalItem.indicativePriceRange}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-3 flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setEditPriceModalItem(null)}
+                className="px-4 py-2.5 border text-xs font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveInventoryPrice}
+                className="bg-[#800020] hover:bg-[#67001a] text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-1.5"
+              >
+                <FiCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>Save Price</span>
               </button>
             </div>
 
