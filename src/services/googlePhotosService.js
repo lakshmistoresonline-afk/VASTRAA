@@ -75,11 +75,10 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     }
   }
 
-  const filteredItems = items.filter(item => !mockRemovedIds.includes(item.id));
-
-  return filteredItems.map(item => ({
+  return items.map(item => ({
     ...item,
-    albumUrl
+    albumUrl,
+    stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
   }));
 }
 

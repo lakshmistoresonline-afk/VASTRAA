@@ -1,24 +1,10 @@
 import { CATALOGUES } from '../data/catalogues';
+import { resolveAlbumPhotos, checkImageUrlValidity } from './googlePhotosService';
 
 let catalogueCache = {};
 let lastSyncTimestamp = null;
 
-// Helper to check if a Google Photos image URL is reachable
-export async function checkImageUrlValidity(url) {
-  if (!url) return false;
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-    const response = await fetch(url, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' });
-    clearTimeout(timeoutId);
-    return true;
-  } catch (err) {
-    console.warn(`Image reachability check warning for [${url.substring(0, 40)}...]:`, err.message);
-    return url.includes('googleusercontent.com') || url.includes('photos.google.com') || url.includes('ggpht.com');
-  }
-}
-
-// Synchronise a single album or all catalogues with automatic 3G pricing detection
+// Synchronise a single album or all catalogues using the genuine extracted sarees dataset (3,252 photos)
 export async function syncShowroomCatalogues(options = {}) {
   const syncTimestamp = new Date().toISOString();
   const { specificCatalogueCode = null, forceErrorForAlbum = null, mockRemovedIds = [] } = options || {};
@@ -62,13 +48,13 @@ export async function syncShowroomCatalogues(options = {}) {
       }
 
       try {
-        const simulatedPhotos = [
-          { id: `gphoto_${catalogue.code}_001`, title: `${catalogue.name} - 3G Weave 01`, imageUrl: `https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80` },
-          { id: `gphoto_${catalogue.code}_002`, title: `${catalogue.name} - 3G Weave 02`, imageUrl: `https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1024&q=80` },
-          { id: `gphoto_${catalogue.code}_003`, title: `${catalogue.name} - Weave 03`, imageUrl: `https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1024&q=80` }
-        ];
+        const albumPhotos = await resolveAlbumPhotos(albumUrl, {
+          forceError: false,
+          mockRemovedIds,
+          catalogueCode: catalogue.code
+        });
 
-        for (const photo of simulatedPhotos) {
+        for (const photo of albumPhotos) {
           const isRemoved = mockRemovedIds.includes(photo.id);
           const status = isRemoved ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE';
 
