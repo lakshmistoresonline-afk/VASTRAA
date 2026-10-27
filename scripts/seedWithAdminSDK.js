@@ -78,12 +78,14 @@ async function runAdminSeeding() {
       console.log(`Created test user: ${testEmail} (UID: ${testUid})`);
     }
 
+    const phoneNum = i === 1 ? "9746998783" : `974699878${i}`;
+
     await db.collection("users").doc(testUid).set({
       uid: testUid,
       name: `Test Customer ${i}`,
       email: testEmail,
       role: "customer",
-      whatsapp: `974699878${i}`,
+      whatsapp: phoneNum,
       address: `Address for Customer ${i}, Thrissur, Kerala`,
       pincode: "680001",
       createdAt: new Date().toISOString()

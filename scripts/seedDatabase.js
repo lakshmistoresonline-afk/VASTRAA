@@ -54,7 +54,7 @@ async function cleanAndSeedFirestoreData() {
   // 4. Seed ONLY Master Admin & Customer User Details
   const usersToSeed = [
     { email: "admin@gmail.com", name: "Vastraa Master Admin", role: "admin", whatsapp: "+919746998785", address: "Round West, Thrissur, Kerala", pincode: "680001", uid: "admin_uid_001" },
-    { email: "test1@gmail.com", name: "Test Customer One", role: "customer", whatsapp: "9746998785", address: "MG Road, Thrissur, Kerala", pincode: "680001", uid: "test_uid_001" },
+    { email: "test1@gmail.com", name: "Test Customer One", role: "customer", whatsapp: "9746998783", address: "MG Road, Thrissur, Kerala", pincode: "680001", uid: "test_uid_001" },
     { email: "test2@gmail.com", name: "Test Customer Two", role: "customer", whatsapp: "9746998786", address: "Shornur Road, Thrissur, Kerala", pincode: "680002", uid: "test_uid_002" },
     { email: "test3@gmail.com", name: "Test Customer Three", role: "customer", whatsapp: "9746998787", address: "Sakthan Nagar, Thrissur, Kerala", pincode: "680003", uid: "test_uid_003" },
     { email: "test4@gmail.com", name: "Test Customer Four", role: "customer", whatsapp: "9746998788", address: "East Fort, Thrissur, Kerala", pincode: "680005", uid: "test_uid_004" },
