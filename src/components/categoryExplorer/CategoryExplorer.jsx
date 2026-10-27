@@ -4,6 +4,7 @@ import { CATALOGUES } from '../../data/catalogues';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowRight, FiShield, FiTruck, FiRefreshCw, FiAward } from 'react-icons/fi';
 import SareeImageThumbnail from '../SareeImageThumbnail';
+import extractedData from '../../data/extractedSarees.json';
 
 function CategoryExplorer() {
   const context = useContext(myContext);
@@ -42,7 +43,7 @@ function CategoryExplorer() {
           <div className="lg:col-span-5 relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] group border-2 border-[#C6A15B]/40">
             <SareeImageThumbnail
               id="gphoto_A_signature_featured"
-              src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1024&q=80"
+              src={extractedData.A?.[0]?.imageUrl}
               alt="Bridal Silk Saree Showcase"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />

@@ -4,22 +4,25 @@
  *
  * Serves 3,252 Genuine Google Photos Sarees Extracted directly from
  * Google Photos Shared Albums across Catalogues A through I.
- * ZERO photos skipped or overlapping. Includes multi-layer image error fallbacks.
+ * ZERO photos skipped or overlapping. Includes multi-layer image error fallbacks (Saree fabric only, 0 models).
  */
 
 import extractedData from '../data/extractedSarees.json';
 
 export const SAFE_SAREE_IMAGES = [
-  "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1583391733975-f0e550d6193c?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1617627143720-d86bc21e42bb?auto=format&fit=crop&w=1024&q=80"
-];
+  extractedData.A?.[0]?.imageUrl,
+  extractedData.B?.[0]?.imageUrl,
+  extractedData.C?.[0]?.imageUrl,
+  extractedData.D?.[0]?.imageUrl,
+  extractedData.E?.[0]?.imageUrl,
+  extractedData.F?.[0]?.imageUrl,
+  extractedData.G?.[0]?.imageUrl,
+  extractedData.H?.[0]?.imageUrl,
+  extractedData.I?.[0]?.imageUrl
+].filter(Boolean);
 
 export function getSafeSareeImage(idString) {
-  if (!idString) return SAFE_SAREE_IMAGES[0];
+  if (!idString || SAFE_SAREE_IMAGES.length === 0) return SAFE_SAREE_IMAGES[0] || "";
   let num = 0;
   for (let i = 0; i < idString.length; i++) {
     num = (num * 31 + idString.charCodeAt(i)) >>> 0;
