@@ -15,9 +15,16 @@ const auth = getAuth();
 const db = getFirestore();
 
 async function runAdminSeeding() {
-  console.log("Starting Firebase Admin SDK Seeding for Vastraa...");
+  console.log("Starting Firebase Admin SDK Seeding for Vastraa (Users & Admin Only)...");
 
-  // 1. Seed Admin User
+  // 1. Cleanup all enquiries
+  const enqSnap = await db.collection("enquiries").get();
+  for (const doc of enqSnap.docs) {
+    await doc.ref.delete();
+  }
+  console.log("Cleared all old enquiries.");
+
+  // 2. Seed Admin User
   const adminEmail = "admin@gmail.com";
   const adminPassword = "Admin@123";
   let adminUid = "";
@@ -43,10 +50,13 @@ async function runAdminSeeding() {
     name: "Vastraa Master Admin",
     email: adminEmail,
     role: "admin",
+    whatsapp: "+919746998785",
+    address: "Round West, Thrissur, Kerala",
+    pincode: "680001",
     createdAt: new Date().toISOString()
   }, { merge: true });
 
-  // 2. Seed 5 Test Users
+  // 3. Seed 5 Test Customer Users
   for (let i = 1; i <= 5; i++) {
     const testEmail = `test${i}@gmail.com`;
     const testPassword = "Test@123";
@@ -73,23 +83,12 @@ async function runAdminSeeding() {
       name: `Test Customer ${i}`,
       email: testEmail,
       role: "customer",
+      whatsapp: `974699878${i}`,
+      address: `Address for Customer ${i}, Thrissur, Kerala`,
+      pincode: "680001",
       createdAt: new Date().toISOString()
     }, { merge: true });
   }
-
-  // 3. Seed Sample Enquiries
-  await db.collection("enquiries").add({
-    sareeId: "gphoto_A_001",
-    sareeTitle: "Kanchipuram Pure Wedding Silk Saree - Item 1",
-    categoryName: "Kanchipuram Pure Wedding Silk Sarees",
-    imageUrl: "https://lh3.googleusercontent.com/pw/AP1GczO5uQ7JjyrEhAQYwqx_rnj_gHyjFNRYd7tskFvyG_Nzdnb4r6E20YcRSW3AxSY8YUNfesFS9A7kfJdIf8Bhpnx5fNOfFQ-4OTLId8_mmjQAD_Zxf-Na=w1024-h1024",
-    customerName: "Test Customer One",
-    phone: "9746998785",
-    message: "Please share individual price and availability for wedding ceremony.",
-    createdAt: new Date().toISOString(),
-    status: "Pending"
-  });
-  console.log("Seeded sample customer enquiry to Firestore.");
 
   // 4. Seed Catalogue Config Sync Status
   await db.collection("catalogue_config").doc("sync_status").set({
@@ -99,7 +98,7 @@ async function runAdminSeeding() {
   }, { merge: true });
   console.log("Seeded catalogue sync status to Firestore.");
 
-  console.log("Firebase Admin SDK Seeding Completed Successfully!");
+  console.log("Firebase Admin SDK Seeding Completed Successfully! ZERO orders/enquiries seeded.");
 }
 
 runAdminSeeding().catch(err => {
