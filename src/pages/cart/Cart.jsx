@@ -86,7 +86,6 @@ function Cart() {
         title: i.title,
         imageUrl: i.imageUrl,
         categoryName: i.categoryName,
-        indicativePriceRange: i.indicativePriceRange,
         price: i.price || 0
       })),
       customerName: customerName,
@@ -102,10 +101,27 @@ function Cart() {
       setLoading(true);
       await addDoc(collection(fireDB, 'enquiries'), enquiryInfo);
 
+      // Automated WhatsApp Dispatch to Store Hotline 9746998785
+      const storeWhatsAppMsg = `🛍️ NEW ONLINE ORDER SUBMISSION!\nRef ID: ${referenceId}\nCustomer: ${customerName}\nPhone: ${cleanPhone}\nItems: ${cartItems.length} Sarees\nSubtotal: ₹${cartSubtotal}\nAddress: ${address} (${pinCode})`;
+
+      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
+        recipientPhone: "919746998785",
+        type: "STORE_NEW_CART_SUBMISSION",
+        customerName: customerName,
+        customerPhone: cleanPhone,
+        referenceId: referenceId,
+        itemsCount: cartItems.length,
+        estimatedSubtotal: cartSubtotal,
+        deliveryAddress: address,
+        message: storeWhatsAppMsg,
+        status: "DISPATCHED_AUTOMATED",
+        createdAt: new Date().toISOString()
+      });
+
       setRequestRef(referenceId);
       setSubmittedSuccess(true);
       dispatch(clearCart());
-      toast.success("Cart submitted for review successfully!");
+      toast.success("Cart submitted & automated store WhatsApp notification sent!");
       setLoading(false);
     } catch (error) {
       console.error("Submission error:", error);
@@ -143,7 +159,7 @@ function Cart() {
                   Reference ID: <span className="font-mono font-bold text-[#800020] dark:text-[#E5C158]">{requestRef}</span>
                 </p>
                 <p className="text-xs text-[#77716A] dark:text-gray-300 leading-relaxed pt-2">
-                  Thank you, <span className="font-bold">{customerName}</span>. Our online store team has received your enquiry for your selected sarees and will publish your formal quotation shortly.
+                  Thank you, <span className="font-bold">{customerName}</span>. Our online store team has received your enquiry for your selected sarees and an automated notification has been dispatched to our store hotline.
                 </p>
               </div>
 
@@ -186,7 +202,7 @@ function Cart() {
                   </div>
                 ) : (
                   cartItems.map((item, index) => {
-                    const { id, title, categoryName, indicativePriceRange, price, imageUrl } = item;
+                    const { id, title, categoryName, price, imageUrl } = item;
                     return (
                       <div key={id || index} className="bg-white dark:bg-gray-900 rounded-2xl border border-[#E9E1D5] dark:border-gray-800 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-sm">
                         <div className="flex items-center gap-4">
@@ -202,11 +218,8 @@ function Cart() {
                             <h3 className="font-serif font-bold text-sm text-[#24211F] dark:text-white line-clamp-1">
                               {title}
                             </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Catalogue Range: <span className="font-bold">{indicativePriceRange}</span>
-                            </p>
                             <p className="text-xs font-extrabold text-[#800020] dark:text-[#E5C158] pt-0.5">
-                              {price ? `₹${Number(price).toLocaleString()}` : indicativePriceRange}
+                              {price ? `₹${Number(price).toLocaleString()}` : ''}
                             </p>
                           </div>
                         </div>

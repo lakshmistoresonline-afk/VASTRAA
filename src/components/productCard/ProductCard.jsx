@@ -1,12 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import myContext from '../../context/data/myContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiCheckCircle } from 'react-icons/fi';
-
-const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
+import { getSafeSareeImage } from '../../services/googlePhotosService';
 
 function SingleProductCard({ item }) {
   const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus } = item || {};
@@ -30,9 +29,9 @@ function SingleProductCard({ item }) {
       <div className="relative overflow-hidden aspect-[3/4] bg-gray-100 dark:bg-gray-800">
         <img
           onClick={() => navigate(`/productinfo/${id}`)}
-          src={imageUrl || FALLBACK_SAREE_IMG}
+          src={imageUrl || getSafeSareeImage(id)}
           alt={title}
-          onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+          onError={(e) => { e.target.onerror = null; e.target.src = getSafeSareeImage(id); }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
           loading="lazy"
         />
@@ -106,6 +105,13 @@ function ProductCard(props) {
   const context = useContext(myContext);
   const { product, searchKey, filterType, filterPrice } = context;
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = props.itemsPerPage || 24;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchKey, filterType, filterPrice]);
+
   // If item is passed directly as prop
   if (props.item) {
     return <SingleProductCard item={props.item} />;
@@ -132,18 +138,82 @@ function ProductCard(props) {
     return true;
   }) : [];
 
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      const el = document.getElementById('catalogue-results');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 space-y-8">
       {filteredProducts.length === 0 ? (
         <div className="text-center py-16 text-gray-500 text-xs font-medium">
           No matching silk sarees found. Try adjusting your search or category filters.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((item) => (
-            <SingleProductCard key={item.id} item={item} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {paginatedProducts.map((item) => (
+              <SingleProductCard key={item.id} item={item} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 shadow-md flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-bold">
+              <span className="text-gray-600 dark:text-gray-300">
+                Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length} Sarees (Page {currentPage} of {totalPages})
+              </span>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-800 dark:text-white rounded-xl disabled:opacity-40 font-bold transition-all"
+                >
+                  ← Previous
+                </button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, idx) => {
+                  let pNum = currentPage;
+                  if (currentPage <= 3) pNum = idx + 1;
+                  else if (currentPage >= totalPages - 2) pNum = totalPages - 4 + idx;
+                  else pNum = currentPage - 2 + idx;
+
+                  if (pNum < 1 || pNum > totalPages) return null;
+
+                  return (
+                    <button
+                      key={pNum}
+                      onClick={() => handlePageChange(pNum)}
+                      className={`w-9 h-9 rounded-xl font-bold transition-all text-xs ${
+                        currentPage === pNum
+                          ? 'bg-[#800020] text-amber-100 shadow-md'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                      }`}
+                    >
+                      {pNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className="px-4 py-2 bg-[#800020] hover:bg-[#67001a] text-white rounded-xl disabled:opacity-40 font-bold transition-all shadow-sm"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

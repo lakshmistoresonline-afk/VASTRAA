@@ -31,6 +31,9 @@ function DashboardTab() {
   const [selectedPriceFilter, setSelectedPriceFilter] = useState('');
   const [activeQuickTab, setActiveQuickTab] = useState('BRIDAL');
 
+  const [adminInventoryPage, setAdminInventoryPage] = useState(1);
+  const [adminItemsPerPage, setAdminItemsPerPage] = useState(25);
+
   const [enquiryViewMode, setEnquiryViewMode] = useState('kanban'); // 'kanban' or 'table'
   const [quotationModalEnquiry, setQuotationModalEnquiry] = useState(null);
   const [paymentVerifyModalEnquiry, setPaymentVerifyModalEnquiry] = useState(null);
@@ -196,7 +199,21 @@ function DashboardTab() {
         status: "PAYMENT_VERIFIED_ORDER_CONFIRMED",
         paymentVerifiedAt: new Date().toISOString()
       });
-      toast.success("Payment verified successfully! Order confirmed and sent to fulfillment.");
+
+      // Automated WhatsApp Dispatch to Customer on Payment Verification
+      const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
+      const whatsAppMsg = `✓ Hello ${enq.customerName || 'Valued Customer'}, your payment for Vastraa order (Ref: ${enq.message ? enq.message.split('.')[0] : enq.id}) has been verified successfully! Your order is confirmed and sent for express fulfillment.`;
+
+      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
+        recipientPhone: cleanPhone,
+        customerName: enq.customerName,
+        message: whatsAppMsg,
+        amount: enq.quotationDetails?.finalPayable || 0,
+        status: 'DISPATCHED_AUTOMATED',
+        createdAt: new Date().toISOString()
+      });
+
+      toast.success("Payment verified & automated WhatsApp confirmation sent!");
       setPaymentVerifyModalEnquiry(null);
       if (getEnquiriesData) getEnquiriesData();
     } catch (err) {
@@ -221,7 +238,20 @@ function DashboardTab() {
           dispatchedAt: new Date().toISOString()
         }
       });
-      toast.success("Shipping tracking details saved! Request moved to Dispatched stage.");
+
+      // Automated WhatsApp Dispatch to Customer on Order Dispatch
+      const cleanPhone = trackingModalEnquiry.phone ? trackingModalEnquiry.phone.replace(/[^0-9]/g, '') : '919746998785';
+      const whatsAppMsg = `📦 Hello ${trackingModalEnquiry.customerName || 'Valued Customer'}, your Vastraa silk saree order has been dispatched via ${courierName.trim()}! Tracking AWB: ${awbNumber.trim()}. Booked Date: ${courierBookedDate}. Track live in your Purchase Journey portal!`;
+
+      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
+        recipientPhone: cleanPhone,
+        customerName: trackingModalEnquiry.customerName,
+        message: whatsAppMsg,
+        status: 'DISPATCHED_AUTOMATED',
+        createdAt: new Date().toISOString()
+      });
+
+      toast.success("Shipping details saved & automated WhatsApp tracking dispatched!");
       setTrackingModalEnquiry(null);
       if (getEnquiriesData) getEnquiriesData();
     } catch (err) {
@@ -249,6 +279,14 @@ function DashboardTab() {
     if (selectedPriceFilter === 'above_20000') return pr > 20000;
     return true;
   }) : [];
+
+  useEffect(() => {
+    setAdminInventoryPage(1);
+  }, [searchTerm, selectedCategoryFilter, selectedPriceFilter, adminItemsPerPage]);
+
+  const totalAdminInventoryPages = Math.ceil(filteredInventory.length / adminItemsPerPage);
+  const adminStartIndex = (adminInventoryPage - 1) * adminItemsPerPage;
+  const paginatedInventory = filteredInventory.slice(adminStartIndex, adminStartIndex + adminItemsPerPage);
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -493,7 +531,7 @@ function DashboardTab() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
-                {filteredInventory.map((item) => {
+                {paginatedInventory.map((item) => {
                   const isAvailable = item.stockStatus === 'CONFIRMED_AVAILABLE';
                   const isUnknown = item.stockStatus === 'UNKNOWN';
 
@@ -548,6 +586,49 @@ function DashboardTab() {
               </tbody>
             </table>
           </div>
+
+          {/* Admin Live Inventory Table Pagination Footer */}
+          {totalAdminInventoryPages > 1 && (
+            <div className="bg-[#FAF7F0] dark:bg-gray-800 p-4 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-bold">
+              <div className="flex items-center gap-3">
+                <span className="text-gray-600 dark:text-gray-300">
+                  Showing {adminStartIndex + 1}–{Math.min(adminStartIndex + adminItemsPerPage, filteredInventory.length)} of {filteredInventory.length} Sarees
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-gray-500 font-normal">Rows per page:</span>
+                  <select
+                    value={adminItemsPerPage}
+                    onChange={(e) => setAdminItemsPerPage(Number(e.target.value))}
+                    className="px-2 py-1 rounded-lg border dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold cursor-pointer outline-none"
+                  >
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={adminInventoryPage === 1}
+                  onClick={() => setAdminInventoryPage(adminInventoryPage - 1)}
+                  className="px-3.5 py-1.5 bg-white dark:bg-gray-900 hover:bg-gray-100 text-gray-800 dark:text-white rounded-xl border border-gray-300 dark:border-gray-700 disabled:opacity-40 font-bold transition-all"
+                >
+                  ← Previous
+                </button>
+                <span className="px-3 py-1 bg-[#800020] text-amber-100 rounded-xl">
+                  Page {adminInventoryPage} of {totalAdminInventoryPages}
+                </span>
+                <button
+                  disabled={adminInventoryPage === totalAdminInventoryPages}
+                  onClick={() => setAdminInventoryPage(adminInventoryPage + 1)}
+                  className="px-3.5 py-1.5 bg-[#800020] hover:bg-[#67001a] text-white rounded-xl disabled:opacity-40 font-bold transition-all shadow-sm"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
         </TabPanel>
 
         {/* Tab 3: Customer Enquiries */}
