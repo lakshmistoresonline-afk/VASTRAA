@@ -57,6 +57,14 @@ function CustomerLogin() {
         toast.success("Welcome back to Vastraa!");
       }
 
+      const ALLOWED_ADMIN_EMAILS = [
+        "admin@gmail.com",
+        "lakshmistoresonline@gmail.com",
+        "admin@vastraa.com",
+        "admin@lakshmistores.com",
+        "aliali@gmail.com"
+      ];
+
       sessionStorage.setItem("show_onboarding_modal", "true");
       localStorage.setItem("user", JSON.stringify({
         user: {
@@ -66,7 +74,12 @@ function CustomerLogin() {
           whatsapp: isRegistering ? cleanPhone : (cleanEmail === "test1@gmail.com" ? "9746998783" : "9746998785")
         }
       }));
-      navigate(from, { replace: true });
+
+      if (ALLOWED_ADMIN_EMAILS.includes(cleanEmail)) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       console.error("Customer auth error:", err.message);
       toast.error("Authentication failed: " + err.message);

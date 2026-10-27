@@ -31,6 +31,7 @@ function DashboardTab() {
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Kanchipuram Pure Soft Silk Sarees');
   const [selectedPriceFilter, setSelectedPriceFilter] = useState('');
   const [activeQuickTab, setActiveQuickTab] = useState('SOFT');
+  const [adminSortPrice, setAdminSortPrice] = useState(''); // '', 'asc', 'desc'
 
   const [adminInventoryPage, setAdminInventoryPage] = useState(1);
   const [adminItemsPerPage, setAdminItemsPerPage] = useState(25);
@@ -281,9 +282,15 @@ function DashboardTab() {
     return true;
   }) : [];
 
+  if (adminSortPrice === 'asc') {
+    filteredInventory.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+  } else if (adminSortPrice === 'desc') {
+    filteredInventory.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+  }
+
   useEffect(() => {
     setAdminInventoryPage(1);
-  }, [searchTerm, selectedCategoryFilter, selectedPriceFilter, adminItemsPerPage]);
+  }, [searchTerm, selectedCategoryFilter, selectedPriceFilter, adminSortPrice, adminItemsPerPage]);
 
   const totalAdminInventoryPages = Math.ceil(filteredInventory.length / adminItemsPerPage);
   const adminStartIndex = (adminInventoryPage - 1) * adminItemsPerPage;
@@ -291,7 +298,7 @@ function DashboardTab() {
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-      <Tabs defaultIndex={0}>
+      <Tabs defaultIndex={2}>
 
         {/* Tab Headers */}
         <div className="bg-gray-100/80 dark:bg-gray-950 p-4 border-b border-gray-200 dark:border-gray-800">
@@ -485,22 +492,33 @@ function DashboardTab() {
               </div>
             </div>
 
-            {/* Quick Filter Buttons */}
-            <div className="md:col-span-2 flex gap-1.5 justify-end">
+            {/* Quick Filter Buttons & Sort Toggle */}
+            <div className="md:col-span-2 flex items-center gap-1.5 justify-end">
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedCategoryFilter('Kanchipuram Pure Wedding Silk Sarees');
-                  setActiveQuickTab('BRIDAL');
+                  if (!adminSortPrice) setAdminSortPrice('asc');
+                  else if (adminSortPrice === 'asc') setAdminSortPrice('desc');
+                  else setAdminSortPrice('');
                 }}
-                className={`px-3.5 py-3 rounded-2xl font-bold transition-all text-xs border ${
-                  selectedCategoryFilter === 'Kanchipuram Pure Wedding Silk Sarees'
-                    ? 'bg-[#800020] text-amber-100 shadow-md border-[#C6A15B]/40'
+                title="Click to toggle sorting: Low to High → High to Low → Default Order"
+                className={`px-3 py-3 rounded-2xl font-bold transition-all text-xs border flex items-center gap-1 ${
+                  adminSortPrice === 'asc'
+                    ? 'bg-[#800020] text-amber-100 border-[#C6A15B]/40 ring-2 ring-[#C6A15B]/30'
+                    : adminSortPrice === 'desc'
+                    ? 'bg-[#4A071B] text-amber-100 border-[#C6A15B]/40 ring-2 ring-[#C6A15B]/30'
                     : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-[#E9E1D5] dark:border-gray-700'
                 }`}
               >
-                Bridal Silks
+                <span>
+                  {adminSortPrice === 'asc'
+                    ? 'Low ➔ High ↑'
+                    : adminSortPrice === 'desc'
+                    ? 'High ➔ Low ↓'
+                    : 'Sort Price ↕'}
+                </span>
               </button>
+
               <button
                 type="button"
                 onClick={() => {

@@ -45,6 +45,7 @@ const MyState = (props) => {
   const [searchKey, setSearchKey] = useState('');
   const [filterType, setFilterType] = useState('Kanchipuram Pure Soft Silk Sarees');
   const [filterPrice, setFilterPrice] = useState('');
+  const [sortPrice, setSortPrice] = useState(''); // '', 'asc', 'desc'
 
   // Initial Sync from Google Photos Catalogue
   const performCatalogueSync = async (options = {}) => {
@@ -252,6 +253,8 @@ const MyState = (props) => {
       setFilterType,
       filterPrice,
       setFilterPrice,
+      sortPrice,
+      setSortPrice,
       storeInfo: STORE_INFO
     }}>
       {props.children}

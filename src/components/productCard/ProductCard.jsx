@@ -164,14 +164,14 @@ function SingleProductCard({ item }) {
 
 function ProductCard(props) {
   const context = useContext(myContext);
-  const { product, searchKey, filterType, filterPrice } = context;
+  const { product, searchKey, filterType, filterPrice, sortPrice } = context;
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = props.itemsPerPage || 24;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchKey, filterType, filterPrice]);
+  }, [searchKey, filterType, filterPrice, sortPrice]);
 
   // If item is passed directly as prop
   if (props.item) {
@@ -201,6 +201,12 @@ function ProductCard(props) {
     if (filterPrice === 'above_20000') return p > 20000;
     return true;
   }) : [];
+
+  if (sortPrice === 'asc') {
+    filteredProducts.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+  } else if (sortPrice === 'desc') {
+    filteredProducts.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+  }
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;

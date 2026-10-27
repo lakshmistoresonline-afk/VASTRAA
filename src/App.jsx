@@ -90,7 +90,19 @@ export default App;
 
 export const ProtectedRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user'));
+  const location = useLocation();
+  const allowedAdmins = [
+    "admin@gmail.com",
+    "lakshmistoresonline@gmail.com",
+    "admin@vastraa.com",
+    "admin@lakshmistores.com",
+    "aliali@gmail.com"
+  ];
+
   if (user) {
+    if (user.user && allowedAdmins.includes(user.user.email) && location.pathname === '/') {
+      return <Navigate to="/dashboard" replace />;
+    }
     return children;
   } else {
     return <Navigate to="/login" replace />;
