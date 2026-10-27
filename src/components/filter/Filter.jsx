@@ -17,7 +17,7 @@ function Filter() {
     syncStats
   } = context;
 
-  const [activeTab, setActiveTab] = useState('BRIDAL');
+  const [activeTab, setActiveTab] = useState('SOFT');
 
   const scrollToResults = () => {
     const el = document.getElementById('catalogue-results');

@@ -28,9 +28,9 @@ function DashboardTab() {
   } = context;
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Kanchipuram Pure Wedding Silk Sarees');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Kanchipuram Pure Soft Silk Sarees');
   const [selectedPriceFilter, setSelectedPriceFilter] = useState('');
-  const [activeQuickTab, setActiveQuickTab] = useState('BRIDAL');
+  const [activeQuickTab, setActiveQuickTab] = useState('SOFT');
 
   const [adminInventoryPage, setAdminInventoryPage] = useState(1);
   const [adminItemsPerPage, setAdminItemsPerPage] = useState(25);

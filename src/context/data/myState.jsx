@@ -43,7 +43,7 @@ const MyState = (props) => {
 
   // Filters
   const [searchKey, setSearchKey] = useState('');
-  const [filterType, setFilterType] = useState('Kanchipuram Pure Wedding Silk Sarees');
+  const [filterType, setFilterType] = useState('Kanchipuram Pure Soft Silk Sarees');
   const [filterPrice, setFilterPrice] = useState('');
 
   // Initial Sync from Google Photos Catalogue
