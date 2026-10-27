@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, deleteFromCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
-import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX, FiShare2 } from 'react-icons/fi';
+import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX, FiShare2, FiZoomIn } from 'react-icons/fi';
 import { addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import SareeImageThumbnail from '../../components/SareeImageThumbnail';
@@ -23,6 +23,7 @@ function ProductInfo() {
 
   const [saree, setSaree] = useState(null);
   const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
+  const [imageZoomModalOpen, setImageZoomModalOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerMessage, setCustomerMessage] = useState('');
@@ -117,15 +118,23 @@ function ProductInfo() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
 
-            {/* Left Column: Image */}
+            {/* Left Column: Image with Click-to-Zoom Inspection */}
             <div className="lg:col-span-6">
-              <div className="aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C6A15B]/30 bg-gray-100 dark:bg-gray-800">
+              <div
+                onClick={() => setImageZoomModalOpen(true)}
+                className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C6A15B]/30 bg-gray-100 dark:bg-gray-800 cursor-pointer"
+              >
                 <SareeImageThumbnail
                   id={saree.id}
                   src={saree.imageUrl}
                   alt={saree.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-amber-100 gap-2 font-bold text-xs backdrop-blur-[2px]">
+                  <FiZoomIn className="w-8 h-8 text-[#C6A15B]" />
+                  <span>Click to Inspect High-Res Zari & Weave</span>
+                </div>
               </div>
             </div>
 
@@ -319,6 +328,41 @@ function ProductInfo() {
             </form>
 
           </div>
+        </div>
+      )}
+
+      {/* Item 2: High-Resolution Saree Image Zoom Inspection Modal */}
+      {imageZoomModalOpen && saree && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden">
+          <div className="w-full max-w-4xl flex justify-between items-center text-white pb-3 border-b border-gray-800">
+            <div>
+              <span className="text-xs font-bold text-[#C6A15B] uppercase tracking-wider block">
+                High-Resolution Saree Inspection View
+              </span>
+              <h3 className="font-serif font-bold text-lg text-amber-50">
+                {saree.title} (ID: {saree.id})
+              </h3>
+            </div>
+            <button
+              onClick={() => setImageZoomModalOpen(false)}
+              className="p-2 text-gray-300 hover:text-white bg-gray-800/80 rounded-xl"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="relative max-w-3xl max-h-[80vh] overflow-auto rounded-3xl mt-4 border-2 border-[#C6A15B]/40 shadow-2xl bg-gray-950">
+            <SareeImageThumbnail
+              id={saree.id}
+              src={saree.imageUrl}
+              alt={saree.title}
+              className="w-full h-auto object-contain cursor-zoom-in transition-transform duration-300 hover:scale-125"
+            />
+          </div>
+
+          <p className="text-xs text-amber-200/80 pt-3 font-medium">
+            💡 Hover over saree photo to inspect fine zari threads and border weave in detail.
+          </p>
         </div>
       )}
 

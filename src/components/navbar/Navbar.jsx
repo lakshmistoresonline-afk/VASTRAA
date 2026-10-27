@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const context = useContext(myContext);
-  const { storeInfo, mode, toggleMode } = context;
+  const { storeInfo, mode, toggleMode, enquiries } = context;
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -25,8 +25,34 @@ const Navbar = () => {
                   user?.user?.email === "admin@lakshmistores.com" ||
                   user?.user?.email === "aliali@gmail.com";
 
+  const userEmail = user?.user?.email?.trim().toLowerCase();
+  const userUid = user?.user?.uid;
+
+  const hasReadyQuotation = (!isAdmin && user && enquiries) ? enquiries.some(e =>
+    e.status === 'QUOTATION_READY' &&
+    ((userEmail && e.customerEmail?.trim().toLowerCase() === userEmail) || (userUid && e.customerUid === userUid))
+  ) : false;
+
   return (
     <div className="sticky top-0 z-50 w-full shadow-md bg-[#211A19] dark:bg-gray-950">
+      {/* Active Quotation Notification Banner */}
+      {hasReadyQuotation && (
+        <div className="bg-[#800020] text-amber-100 text-xs py-2 px-4 border-b border-[#C6A15B] shadow-lg animate-pulse">
+          <div className="container mx-auto flex justify-between items-center">
+            <span className="font-bold flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+              ✨ Your Vastraa Saree Order Quotation is Ready for Review!
+            </span>
+            <Link
+              to="/purchase-journey"
+              className="bg-[#C6A15B] text-gray-950 font-extrabold px-3.5 py-1 rounded-xl hover:bg-white transition-colors text-[11px] shadow-sm"
+            >
+              Review Quotation →
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Top Announcement Bar */}
       <div className="bg-[#4A071B] text-[#C6A15B] text-[11px] sm:text-xs py-2 px-4 border-b border-[#C6A15B]/30">
         <div className="container mx-auto flex justify-between items-center">

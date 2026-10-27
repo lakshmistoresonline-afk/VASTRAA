@@ -6,11 +6,20 @@ import myContext from '../../context/data/myContext';
 
 function MobileBottomBar() {
   const context = useContext(myContext);
-  const { mode, toggleMode } = context;
+  const { mode, toggleMode, enquiries } = context;
 
   const location = useLocation();
   const cartItems = useSelector((state) => state.cart);
   const currentPath = location.pathname;
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userEmail = user?.user?.email?.trim().toLowerCase();
+  const userUid = user?.user?.uid;
+
+  const hasReadyQuotation = (user && enquiries) ? enquiries.some(e =>
+    e.status === 'QUOTATION_READY' &&
+    ((userEmail && e.customerEmail?.trim().toLowerCase() === userEmail) || (userUid && e.customerUid === userUid))
+  ) : false;
 
   const isActive = (path) => currentPath === path;
 
@@ -56,11 +65,18 @@ function MobileBottomBar() {
 
       <Link
         to="/purchase-journey"
-        className={`flex flex-col items-center gap-1 px-2.5 py-1 rounded-xl transition-all ${
+        className={`flex flex-col items-center gap-1 px-2.5 py-1 rounded-xl relative transition-all ${
           isActive('/purchase-journey') ? 'text-[#E5C158] bg-[#4A071B]' : 'text-gray-400 hover:text-white'
         }`}
       >
-        <FiTruck className="w-5 h-5" />
+        <div className="relative">
+          <FiTruck className="w-5 h-5" />
+          {hasReadyQuotation && (
+            <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-gray-950 text-[9px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white animate-pulse">
+              !
+            </span>
+          )}
+        </div>
         <span>Journey</span>
       </Link>
 
