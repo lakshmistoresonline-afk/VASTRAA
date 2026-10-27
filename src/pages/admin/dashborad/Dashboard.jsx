@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import myContext from '../../../context/data/myContext';
 import Layout from '../../../components/layout/Layout';
 import DashboardTab from './DashboardTab';
-import { FiGrid, FiImage, FiCheckCircle, FiMessageCircle, FiTrendingUp, FiShoppingBag, FiDollarSign, FiAward, FiShield } from 'react-icons/fi';
+import { FiGrid, FiImage, FiCheckCircle, FiMessageCircle, FiTrendingUp, FiShoppingBag, FiDollarSign, FiAward, FiShield, FiBarChart2 } from 'react-icons/fi';
 
 function Dashboard() {
   const context = useContext(myContext);
@@ -11,7 +11,7 @@ function Dashboard() {
   const totalSarees = product ? product.length : 0;
   const totalEnquiries = enquiries ? enquiries.length : 0;
 
-  // Item E: Calculate Sales Revenue Analytics
+  // Calculate Sales Revenue Analytics
   const confirmedOrders = enquiries ? enquiries.filter(e =>
     e.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' ||
     e.status === 'READY_FOR_DISPATCH' ||
@@ -26,6 +26,28 @@ function Dashboard() {
   const averageOrderValue = confirmedOrders.length > 0
     ? Math.round(totalGrossRevenue / confirmedOrders.length)
     : 0;
+
+  // Item 3: Category-Wise Revenue Breakdown Calculation
+  const categoryRevenues = catalogues.map((cat) => {
+    const catOrders = confirmedOrders.filter(enq => {
+      const items = enq.quotationDetails?.items || enq.cartItems || [];
+      return items.some(item => {
+        const liveItem = product?.find(p => p.id === item.id);
+        return liveItem?.catalogueCode === cat.code || enq.categoryName?.includes(cat.name);
+      });
+    });
+
+    const revenue = catOrders.reduce((sum, enq) => sum + (enq.quotationDetails?.finalPayable || 0), 0);
+    const count = catOrders.length;
+    const sharePct = totalGrossRevenue > 0 ? Math.round((revenue / totalGrossRevenue) * 100) : 0;
+
+    return {
+      ...cat,
+      revenue,
+      count,
+      sharePct
+    };
+  });
 
   return (
     <Layout>
@@ -117,8 +139,8 @@ function Dashboard() {
 
           </div>
 
-          {/* Item E: Sales Revenue Analytics & Monthly Summary Bar */}
-          <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-lg space-y-4">
+          {/* Sales Revenue Analytics & Monthly Summary Bar */}
+          <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-lg space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 rounded-2xl text-xl font-bold">
@@ -139,7 +161,7 @@ function Dashboard() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
               <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
                 <span className="text-gray-500 uppercase tracking-wider text-[10px] font-bold block">
                   Confirmed Gross Revenue
@@ -170,6 +192,47 @@ function Dashboard() {
                 <p className="text-[10px] text-gray-500 font-semibold">Pipeline Completion Ratio</p>
               </div>
             </div>
+
+            {/* Item 3: Category-Wise Revenue Breakdown Chart */}
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-serif font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                  <FiBarChart2 className="text-[#800020] dark:text-[#E5C158]" />
+                  <span>Category-Wise Revenue Share (Catalogues A–I)</span>
+                </span>
+                <span className="text-[10px] font-bold text-gray-400">
+                  {catalogues.length} Collections Tracked
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                {categoryRevenues.slice(0, 6).map((cat) => (
+                  <div key={cat.id} className="bg-gray-50 dark:bg-gray-800 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-1.5">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
+                        Cat {cat.code} - {cat.name}
+                      </span>
+                      <span className="font-mono font-extrabold text-[#800020] dark:text-[#E5C158]">
+                        ₹{cat.revenue.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#800020] dark:bg-[#C6A15B] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(5, cat.sharePct)}%` }}
+                      ></div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[10px] text-gray-500">
+                      <span>{cat.count} Confirmed Orders</span>
+                      <span className="font-bold">{cat.sharePct}% Revenue Share</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
 
           {/* Main Dashboard Tabs Component */}
