@@ -100,7 +100,7 @@ export const ProtectedRoute = ({ children }) => {
   ];
 
   if (user) {
-    if (user.user && allowedAdmins.includes(user.user.email) && location.pathname === '/') {
+    if (user.user && allowedAdmins.includes(user.user.email) && location.pathname === '/' && !location.search.includes('preview=true')) {
       return <Navigate to="/dashboard" replace />;
     }
     return children;

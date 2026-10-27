@@ -313,7 +313,7 @@ function DashboardTab() {
               📩 Order Processing Pipeline ({enquiries ? enquiries.length : 0})
             </Tab>
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
-              ⚙️ Store Settings
+              ⚙️ Store Settings & Revenue Analytics
             </Tab>
           </TabList>
         </div>
@@ -953,12 +953,16 @@ function DashboardTab() {
           )}
         </TabPanel>
 
-        {/* Tab 4: Store Settings */}
+        {/* Tab 4: Store Settings & Revenue Analytics */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-            Store & Payment Configuration
+            Store Settings & Revenue Analytics
           </h2>
+
           <div className="bg-gray-50 dark:bg-gray-800/60 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-4 text-xs">
+            <h3 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider">
+              Store & Payment Configuration
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <span className="text-gray-500 block font-bold">Store Brand Name:</span>
@@ -980,6 +984,60 @@ function DashboardTab() {
                 <span className="text-gray-500 block font-bold">Verified UPI ID:</span>
                 <span className="text-gray-900 dark:text-white font-semibold text-emerald-600 dark:text-emerald-400">srinathrajkiran007-2@okaxis</span>
               </div>
+            </div>
+          </div>
+
+          {/* Category-Wise Revenue Breakdown Chart inside Tab 4 */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-4 text-xs shadow-sm">
+            <h3 className="font-serif font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+              <FiTrendingUp className="text-[#800020] dark:text-[#E5C158]" />
+              <span>Catalogue Collection Revenue Performance (A–I)</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {catalogues.map((cat) => {
+                const confirmedOrders = enquiries ? enquiries.filter(e =>
+                  (e.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || e.status === 'READY_FOR_DISPATCH' || e.status === 'DISPATCHED' || e.trackingDetails)
+                ) : [];
+
+                const totalGrossRevenue = confirmedOrders.reduce((sum, order) => sum + (order.quotationDetails?.finalPayable || 0), 0);
+
+                const catOrders = confirmedOrders.filter(enq => {
+                  const items = enq.quotationDetails?.items || enq.cartItems || [];
+                  return items.some(item => {
+                    const liveItem = product?.find(p => p.id === item.id);
+                    return liveItem?.catalogueCode === cat.code || enq.categoryName?.includes(cat.name);
+                  });
+                });
+
+                const revenue = catOrders.reduce((sum, enq) => sum + (enq.quotationDetails?.finalPayable || 0), 0);
+                const sharePct = totalGrossRevenue > 0 ? Math.round((revenue / totalGrossRevenue) * 100) : 0;
+
+                return (
+                  <div key={cat.id} className="bg-gray-50 dark:bg-gray-800 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-1.5">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
+                        Cat {cat.code} - {cat.name}
+                      </span>
+                      <span className="font-mono font-extrabold text-[#800020] dark:text-[#E5C158]">
+                        ₹{revenue.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#800020] dark:bg-[#C6A15B] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(5, sharePct)}%` }}
+                      ></div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[10px] text-gray-500">
+                      <span>{catOrders.length} Confirmed Orders</span>
+                      <span className="font-bold">{sharePct}% Share</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </TabPanel>
