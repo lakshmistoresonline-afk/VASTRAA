@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck, FiUserCheck, FiTrendingUp, FiEdit3, FiFilter } from 'react-icons/fi';
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
+import SareeImageThumbnail from '../../../components/SareeImageThumbnail';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
@@ -538,12 +539,11 @@ function DashboardTab() {
                   return (
                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-4">
-                        <img
-                          src={item.imageUrl || FALLBACK_SAREE_IMG}
+                        <SareeImageThumbnail
+                          id={item.id}
+                          src={item.imageUrl}
                           alt={item.title}
-                          onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
                           className="w-48 h-64 sm:w-56 sm:h-72 object-cover rounded-2xl border-3 border-[#C6A15B] dark:border-gray-700 shadow-xl hover:scale-110 hover:z-20 transition-all duration-300 cursor-pointer"
-                          loading="lazy"
                         />
                       </td>
                       <td className="px-5 py-3">
@@ -827,11 +827,11 @@ function DashboardTab() {
                                   const liveP = product ? product.find(p => p.id === ci.id) : null;
                                   const imgUrl = liveP?.imageUrl || ci.imageUrl || FALLBACK_SAREE_IMG;
                                   return (
-                                    <img
+                                    <SareeImageThumbnail
                                       key={idx}
+                                      id={ci.id}
                                       src={imgUrl}
-                                      alt=""
-                                      onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+                                      alt={ci.title}
                                       className="w-28 h-40 sm:w-32 sm:h-44 object-cover rounded-2xl border-2 border-[#C6A15B] dark:border-gray-700 shadow-md hover:scale-110 transition-transform duration-300 cursor-pointer"
                                       title={ci.title}
                                     />
@@ -845,10 +845,10 @@ function DashboardTab() {
                                 const liveP = product ? product.find(p => p.id === enq.sareeId) : null;
                                 const imgUrl = liveP?.imageUrl || enq.imageUrl || FALLBACK_SAREE_IMG;
                                 return (
-                                  <img
+                                  <SareeImageThumbnail
+                                    id={enq.sareeId}
                                     src={imgUrl}
-                                    alt=""
-                                    onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
+                                    alt={enq.sareeTitle}
                                     className="w-28 h-40 sm:w-32 sm:h-44 object-cover rounded-2xl border-2 border-[#C6A15B] dark:border-gray-700 shadow-md hover:scale-110 transition-transform duration-300 cursor-pointer"
                                   />
                                 );

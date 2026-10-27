@@ -5,7 +5,7 @@ import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiCheckCircle } from 'react-icons/fi';
-import { getSafeSareeImage } from '../../services/googlePhotosService';
+import SareeImageThumbnail from '../SareeImageThumbnail';
 
 function SingleProductCard({ item }) {
   const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus } = item || {};
@@ -27,13 +27,12 @@ function SingleProductCard({ item }) {
 
       {/* Top Image & Badge Container */}
       <div className="relative overflow-hidden aspect-[3/4] bg-gray-100 dark:bg-gray-800">
-        <img
-          onClick={() => navigate(`/productinfo/${id}`)}
-          src={imageUrl || getSafeSareeImage(id)}
+        <SareeImageThumbnail
+          id={id}
+          src={imageUrl}
           alt={title}
-          onError={(e) => { e.target.onerror = null; e.target.src = getSafeSareeImage(id); }}
+          onClick={() => navigate(`/productinfo/${id}`)}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
-          loading="lazy"
         />
 
         {/* Catalogue & Stock Badge */}

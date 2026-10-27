@@ -8,6 +8,7 @@ import { addDoc, collection, getDocs } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { FiShoppingBag, FiTrash2, FiSend, FiCheckCircle, FiMessageCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import SareeImageThumbnail from '../../components/SareeImageThumbnail';
 
 function Cart() {
   const context = useContext(myContext);
@@ -206,7 +207,8 @@ function Cart() {
                     return (
                       <div key={id || index} className="bg-white dark:bg-gray-900 rounded-2xl border border-[#E9E1D5] dark:border-gray-800 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-sm">
                         <div className="flex items-center gap-4">
-                          <img
+                          <SareeImageThumbnail
+                            id={id}
                             src={imageUrl}
                             alt={title}
                             className="w-20 h-24 object-cover rounded-xl border border-gray-200 dark:border-gray-700 flex-shrink-0"

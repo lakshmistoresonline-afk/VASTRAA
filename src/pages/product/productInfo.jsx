@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX } from 'react-icons/fi';
 import { addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
+import SareeImageThumbnail from '../../components/SareeImageThumbnail';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
@@ -119,10 +120,10 @@ function ProductInfo() {
             {/* Left Column: Image */}
             <div className="lg:col-span-6">
               <div className="aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C6A15B]/30 bg-gray-100 dark:bg-gray-800">
-                <img
-                  src={saree.imageUrl || FALLBACK_SAREE_IMG}
+                <SareeImageThumbnail
+                  id={saree.id}
+                  src={saree.imageUrl}
                   alt={saree.title}
-                  onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
                   className="w-full h-full object-cover"
                 />
               </div>
