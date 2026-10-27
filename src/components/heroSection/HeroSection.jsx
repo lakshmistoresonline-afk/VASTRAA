@@ -2,10 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShield, FiTruck, FiAward } from 'react-icons/fi';
 import extractedData from '../../data/extractedSarees.json';
+import SareeImageThumbnail from '../SareeImageThumbnail';
 
 const HeroSection = () => {
   // Use actual verified individual saree photo from Catalogue A (Zero models / 100% saree fabric)
-  const heroSareeUrl = extractedData.A?.[0]?.imageUrl || "https://lh3.googleusercontent.com/pw/AP1GczO5uQ7JjyrEhAQYwqx_rnj_gHyjFNRYd7tskFvyG_Nzdnb4r6E20YcRSW3AxSY8YUNfesFS9A7kfJdIf8Bhpnx5fNOfFQ-4OTLId8_mmjQAD_Zxf-Na=w1024-h1024";
+  const heroSareeUrl = extractedData.A?.[0]?.imageUrl || "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
   return (
     <section className="relative bg-[#FAF7F0] dark:bg-gray-950 transition-colors border-b border-[#E9E1D5] dark:border-gray-800">
@@ -16,7 +17,8 @@ const HeroSection = () => {
 
           {/* Background Saree-Only Fabric Photograph (No Models/People) */}
           <div className="absolute inset-0 z-0">
-            <img
+            <SareeImageThumbnail
+              id="hero_saree_banner"
               src={heroSareeUrl}
               alt="Vastraa - Pure Kanchipuram Handloom Silk Saree Weave"
               className="w-full h-full object-cover object-center filter brightness-95"
