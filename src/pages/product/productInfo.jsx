@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, deleteFromCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
-import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX } from 'react-icons/fi';
+import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX, FiShare2 } from 'react-icons/fi';
 import { addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import SareeImageThumbnail from '../../components/SareeImageThumbnail';
@@ -214,9 +214,21 @@ function ProductInfo() {
                     className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
                   >
                     <FiMessageCircle className="w-4 h-4" />
-                    <span>WhatsApp</span>
+                    <span>WhatsApp Us</span>
                   </a>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const shareText = `✨ Check out this exquisite saree from Vastraa!\n🌸 ${saree.title} (${saree.categoryName})\n💰 Price: ₹${saree.price ? Number(saree.price).toLocaleString() : 'Enquiry'}\n👉 View Details: ${window.location.href}`;
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+                  }}
+                  className="w-full bg-[#FAF7F0] dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-[#F3EFE6] font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-[#E9E1D5] dark:border-gray-700 transition-colors mt-2"
+                >
+                  <FiShare2 className="w-4 h-4 text-emerald-600" />
+                  <span>Share Saree Link with Family on WhatsApp</span>
+                </button>
               </div>
 
             </div>

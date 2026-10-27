@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FiShoppingBag, FiCheckCircle } from 'react-icons/fi';
+import { FiShoppingBag, FiCheckCircle, FiShare2, FiMessageCircle } from 'react-icons/fi';
 import SareeImageThumbnail from '../SareeImageThumbnail';
 
 function SingleProductCard({ item }) {
-  const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus } = item || {};
+  const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus, description } = item || {};
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -21,6 +21,12 @@ function SingleProductCard({ item }) {
   };
 
   const isConfirmedStock = stockStatus === 'CONFIRMED_AVAILABLE';
+
+  const handleShareWhatsApp = (e) => {
+    e.stopPropagation();
+    const shareText = `✨ Look at this beautiful handloom silk saree from Vastraa!\n🌸 ${title} (${categoryName})\n💰 Price: ₹${price ? Number(price).toLocaleString() : 'Enquiry'}\n👉 View Saree Details: ${window.location.origin}/productinfo/${id}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+  };
 
   return (
     <div className="glass-card bg-white dark:bg-gray-900 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 shadow-md hover:shadow-xl transition-all overflow-hidden flex flex-col justify-between group">
@@ -46,6 +52,16 @@ function SingleProductCard({ item }) {
             {isConfirmedStock ? '✓ In Stock' : '? Check Stock'}
           </span>
         </div>
+
+        {/* Item C: WhatsApp Share Floating Button */}
+        <button
+          onClick={handleShareWhatsApp}
+          type="button"
+          title="Share saree on WhatsApp"
+          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110 border border-emerald-300/40"
+        >
+          <FiShare2 className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Saree Details */}
@@ -72,26 +88,35 @@ function SingleProductCard({ item }) {
         </div>
 
         {/* Actions CTA */}
-        <div className="pt-1">
+        <div className="pt-1 flex gap-2">
           {isInCart ? (
             <button
               onClick={() => navigate('/cart')}
               type="button"
-              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+              className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
             >
               <FiCheckCircle className="w-4 h-4 text-emerald-300" />
-              <span>Already in Cart · View Cart</span>
+              <span>In Cart · View Bag</span>
             </button>
           ) : (
             <button
               onClick={() => addCart(item)}
               type="button"
-              className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3.5 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
+              className="flex-1 bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3.5 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
             >
               <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
-              <span>Add to Shopping Bag</span>
+              <span>Add to Bag</span>
             </button>
           )}
+
+          <button
+            onClick={handleShareWhatsApp}
+            type="button"
+            className="p-3.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 rounded-xl border border-emerald-200 dark:border-emerald-800 transition-colors"
+            title="Share with Family on WhatsApp"
+          >
+            <FiMessageCircle className="w-4 h-4" />
+          </button>
         </div>
 
       </div>
@@ -116,12 +141,15 @@ function ProductCard(props) {
     return <SingleProductCard item={props.item} />;
   }
 
-  // Otherwise render catalogue grid with search & filter
+  // Item B: Multi-Attribute Saree Search (Color, Fabric, Category, ID, Title, Description)
   const filteredProducts = product ? product.filter((obj) => {
     if (!searchKey) return true;
-    return obj.title?.toLowerCase().includes(searchKey.toLowerCase()) ||
-           obj.categoryName?.toLowerCase().includes(searchKey.toLowerCase()) ||
-           obj.id?.toLowerCase().includes(searchKey.toLowerCase());
+    const term = searchKey.toLowerCase().trim();
+    return (obj.title?.toLowerCase() || '').includes(term) ||
+           (obj.categoryName?.toLowerCase() || '').includes(term) ||
+           (obj.id?.toLowerCase() || '').includes(term) ||
+           (obj.description?.toLowerCase() || '').includes(term) ||
+           (obj.catalogueCode?.toLowerCase() || '').includes(term);
   }).filter((obj) => {
     if (!filterType) return true;
     return obj.categoryName?.toLowerCase().includes(filterType.toLowerCase()) ||

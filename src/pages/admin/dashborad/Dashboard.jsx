@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import myContext from '../../../context/data/myContext';
 import Layout from '../../../components/layout/Layout';
 import DashboardTab from './DashboardTab';
-import { FiGrid, FiImage, FiCheckCircle, FiMessageCircle, FiTrendingUp, FiShoppingBag, FiLayers } from 'react-icons/fi';
+import { FiGrid, FiImage, FiCheckCircle, FiMessageCircle, FiTrendingUp, FiShoppingBag, FiDollarSign, FiAward, FiShield } from 'react-icons/fi';
 
 function Dashboard() {
   const context = useContext(myContext);
@@ -10,6 +10,22 @@ function Dashboard() {
 
   const totalSarees = product ? product.length : 0;
   const totalEnquiries = enquiries ? enquiries.length : 0;
+
+  // Item E: Calculate Sales Revenue Analytics
+  const confirmedOrders = enquiries ? enquiries.filter(e =>
+    e.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' ||
+    e.status === 'READY_FOR_DISPATCH' ||
+    e.status === 'DISPATCHED' ||
+    e.trackingDetails
+  ) : [];
+
+  const totalGrossRevenue = confirmedOrders.reduce((sum, order) => {
+    return sum + (order.quotationDetails?.finalPayable || 0);
+  }, 0);
+
+  const averageOrderValue = confirmedOrders.length > 0
+    ? Math.round(totalGrossRevenue / confirmedOrders.length)
+    : 0;
 
   return (
     <Layout>
@@ -50,7 +66,7 @@ function Dashboard() {
                 <p className="text-2xl font-serif font-extrabold text-gray-900 dark:text-white mt-0.5">
                   {catalogues.length} Catalogues
                 </p>
-                <p className="text-[10px] text-gray-400">A, B & C Collections</p>
+                <p className="text-[10px] text-gray-400">A through I Collections</p>
               </div>
             </div>
 
@@ -90,15 +106,70 @@ function Dashboard() {
               </div>
               <div>
                 <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
-                  Enquiries
+                  Pipeline Requests
                 </span>
                 <p className="text-2xl font-serif font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
-                  {totalEnquiries} Requests
+                  {totalEnquiries} Orders
                 </p>
-                <p className="text-[10px] text-gray-400">Customer Price Requests</p>
+                <p className="text-[10px] text-gray-400">Active Order Requests</p>
               </div>
             </div>
 
+          </div>
+
+          {/* Item E: Sales Revenue Analytics & Monthly Summary Bar */}
+          <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-lg space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 rounded-2xl text-xl font-bold">
+                  <FiTrendingUp />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-gray-900 dark:text-white">
+                    Sales Revenue & Fulfillment Analytics
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Gross revenue calculations from verified customer payments & completed dispatches.
+                  </p>
+                </div>
+              </div>
+
+              <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3.5 py-1.5 rounded-full text-xs font-bold border border-emerald-300/40">
+                ✓ Live Payment Sync
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs pt-1">
+              <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
+                <span className="text-gray-500 uppercase tracking-wider text-[10px] font-bold block">
+                  Confirmed Gross Revenue
+                </span>
+                <p className="text-2xl font-serif font-extrabold text-[#800020] dark:text-[#E5C158]">
+                  ₹{totalGrossRevenue.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-emerald-600 font-semibold">From {confirmedOrders.length} Verified Orders</p>
+              </div>
+
+              <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
+                <span className="text-gray-500 uppercase tracking-wider text-[10px] font-bold block">
+                  Average Order Value (AOV)
+                </span>
+                <p className="text-2xl font-serif font-extrabold text-indigo-600 dark:text-indigo-400">
+                  ₹{averageOrderValue.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-gray-500 font-semibold">Per Confirmed Customer Order</p>
+              </div>
+
+              <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
+                <span className="text-gray-500 uppercase tracking-wider text-[10px] font-bold block">
+                  Order Conversion Rate
+                </span>
+                <p className="text-2xl font-serif font-extrabold text-emerald-600 dark:text-emerald-400">
+                  {totalEnquiries > 0 ? Math.round((confirmedOrders.length / totalEnquiries) * 100) : 0}%
+                </p>
+                <p className="text-[10px] text-gray-500 font-semibold">Pipeline Completion Ratio</p>
+              </div>
+            </div>
           </div>
 
           {/* Main Dashboard Tabs Component */}
