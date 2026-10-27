@@ -22,6 +22,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/ReactToastify.css';
 import ProductInfo from './pages/product/productInfo';
 import AllProducts from './pages/allProducts/AllProducts';
+import Wishlist from './pages/wishlist/Wishlist';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -44,6 +45,7 @@ const App = () => {
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="/purchase-journey" element={<ProtectedRoute><PurchaseJourney /></ProtectedRoute>} />
           <Route path="/allproducts" element={<ProtectedRoute><AllProducts /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
           <Route path="/productinfo/:id" element={<ProtectedRoute><ProductInfo /></ProtectedRoute>} />
 
           {/* Authentication Routes */}

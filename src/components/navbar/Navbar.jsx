@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useState } from 'react';
-import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser, FiShield, FiExternalLink } from 'react-icons/fi';
+import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser, FiShield, FiExternalLink, FiSun, FiMoon, FiHeart } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { Dialog, Transition } from '@headlessui/react';
@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const context = useContext(myContext);
-  const { storeInfo } = context;
+  const { storeInfo, mode, toggleMode } = context;
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -135,6 +135,16 @@ const Navbar = () => {
 
               {!isAdmin && (
                 <>
+                  {/* Wishlist Button */}
+                  <Link
+                    to="/wishlist"
+                    className="relative flex items-center gap-1.5 bg-[#302625] hover:bg-[#4A071B] text-[#C6A15B] hover:text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all border border-[#C6A15B]/30"
+                    title="View Saved Favorites"
+                  >
+                    <FiHeart className="w-4 h-4 text-rose-500 fill-current" />
+                    <span className="hidden lg:inline">Wishlist</span>
+                  </Link>
+
                   {/* Shopping Cart Button */}
                   <Link
                     to="/cart"
@@ -159,6 +169,16 @@ const Navbar = () => {
                   </a>
                 </>
               )}
+
+              {/* Theme Toggle Button */}
+              <button
+                type="button"
+                onClick={toggleMode}
+                title={mode === 'dark' ? "Switch to Light Luxury Theme" : "Switch to Dark Theme"}
+                className="p-2.5 rounded-xl bg-[#302625] text-[#C6A15B] hover:text-white border border-[#C6A15B]/30 transition-all flex items-center justify-center"
+              >
+                {mode === 'dark' ? <FiSun className="w-4 h-4 text-amber-300" /> : <FiMoon className="w-4 h-4 text-[#C6A15B]" />}
+              </button>
 
               {user ? (
                 <div className="flex items-center gap-2">

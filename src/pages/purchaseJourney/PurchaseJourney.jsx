@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, getDocsFromServer } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
-import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle } from 'react-icons/fi';
+import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle, FiSearch } from 'react-icons/fi';
 import UpiQrCode from '../../components/payment/UpiQrCode';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
@@ -18,6 +18,8 @@ function PurchaseJourney() {
   const [myEnquiries, setMyEnquiries] = useState([]);
   const [showGuide, setShowGuide] = useState(false);
   const [utrInput, setUtrInput] = useState({});
+  const [journeySearchTerm, setJourneySearchTerm] = useState('');
+  const [journeyStatusFilter, setJourneyStatusFilter] = useState('');
   const navigate = useNavigate();
 
   const authUser = JSON.parse(localStorage.getItem('user'));
@@ -290,9 +292,68 @@ function PurchaseJourney() {
 
         {/* Active Requests & Full Order / Quotation Tracker Section */}
         <div id="requests-section" className="space-y-6">
-          <h3 className="font-serif font-bold text-xl text-gray-900 dark:text-white">
-            Your Active Requests & Quotations ({myEnquiries.length})
-          </h3>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h3 className="font-serif font-bold text-xl text-gray-900 dark:text-white">
+              Your Active Requests & Quotations ({myEnquiries.length})
+            </h3>
+          </div>
+
+          {/* Item 3: Customer Request Search & Status Filter Bar */}
+          {myEnquiries.length > 0 && (
+            <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 shadow-md flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+              {/* Search Input */}
+              <div className="relative w-full md:w-72">
+                <input
+                  type="text"
+                  value={journeySearchTerm}
+                  onChange={(e) => setJourneySearchTerm(e.target.value)}
+                  placeholder="Search by saree title or ref..."
+                  className="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-[#FAF7F0] dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
+                />
+                <FiSearch className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+              </div>
+
+              {/* Status Filter Pills */}
+              <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setJourneyStatusFilter('')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all text-[11px] ${
+                    !journeyStatusFilter ? 'bg-[#800020] text-amber-100 shadow-sm' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  All ({myEnquiries.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setJourneyStatusFilter('READY')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all text-[11px] ${
+                    journeyStatusFilter === 'READY' ? 'bg-[#800020] text-amber-100 shadow-sm' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Ready for Review
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setJourneyStatusFilter('AWAITING_PAYMENT')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all text-[11px] ${
+                    journeyStatusFilter === 'AWAITING_PAYMENT' ? 'bg-[#800020] text-amber-100 shadow-sm' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Awaiting Payment
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setJourneyStatusFilter('DISPATCHED')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all text-[11px] ${
+                    journeyStatusFilter === 'DISPATCHED' ? 'bg-[#800020] text-amber-100 shadow-sm' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Dispatched & Tracked
+                </button>
+              </div>
+            </div>
+          )}
 
           {myEnquiries.length === 0 ? (
             <div className="bg-white dark:bg-gray-900 p-12 rounded-3xl border border-[#E9E1D5] dark:border-gray-800 text-center space-y-4 shadow-sm">
@@ -309,7 +370,20 @@ function PurchaseJourney() {
             </div>
           ) : (
             <div className="space-y-6">
-              {myEnquiries.map((enq) => {
+              {myEnquiries.filter((enq) => {
+                if (!journeySearchTerm) return true;
+                const term = journeySearchTerm.toLowerCase().trim();
+                return (enq.sareeTitle || '').toLowerCase().includes(term) ||
+                       (enq.message || '').toLowerCase().includes(term) ||
+                       (enq.id || '').toLowerCase().includes(term);
+              }).filter((enq) => {
+                if (!journeyStatusFilter) return true;
+                const s = enq.status || 'Pending';
+                if (journeyStatusFilter === 'READY') return s === 'QUOTATION_READY';
+                if (journeyStatusFilter === 'AWAITING_PAYMENT') return s === 'QUOTATION_ACCEPTED' || s === 'PAYMENT_PENDING';
+                if (journeyStatusFilter === 'DISPATCHED') return s === 'DISPATCHED' || Boolean(enq.trackingDetails);
+                return true;
+              }).map((enq) => {
                 const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                 const status = enq.status || 'Pending';
                 const hasTracking = Boolean(enq.trackingDetails);

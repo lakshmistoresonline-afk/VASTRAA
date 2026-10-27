@@ -7,18 +7,28 @@ import { CATALOGUES, STORE_INFO } from '../../data/catalogues';
 import { syncAllCatalogues, revalidateItemStock } from '../../services/stockSyncService';
 
 const MyState = (props) => {
-  const [mode, setMode] = useState('light');
+  const [mode, setMode] = useState(localStorage.getItem('theme') || 'light');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (mode === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#111827';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = '#FAF7F0';
+    }
+  }, [mode]);
 
   const toggleMode = () => {
     if (mode === 'light') {
       setMode('dark');
-      document.body.style.backgroundColor = 'rgb(17, 24, 39)';
+      localStorage.setItem('theme', 'dark');
     } else {
       setMode('light');
-      document.body.style.backgroundColor = 'white';
+      localStorage.setItem('theme', 'light');
     }
-  }
+  };
 
   // Google Photos Synced Inventory
   const [product, setProduct] = useState([]);

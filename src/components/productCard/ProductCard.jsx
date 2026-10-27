@@ -4,12 +4,35 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FiShoppingBag, FiCheckCircle, FiShare2, FiMessageCircle } from 'react-icons/fi';
+import { FiShoppingBag, FiCheckCircle, FiShare2, FiMessageCircle, FiHeart } from 'react-icons/fi';
 import SareeImageThumbnail from '../SareeImageThumbnail';
 
 function SingleProductCard({ item }) {
   const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus, description } = item || {};
   const navigate = useNavigate();
+
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    setIsWishlisted(list.some(p => p.id === id));
+  }, [id]);
+
+  const toggleWishlist = (e) => {
+    e.stopPropagation();
+    const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    if (isWishlisted) {
+      const updated = list.filter(p => p.id !== id);
+      localStorage.setItem('wishlist', JSON.stringify(updated));
+      setIsWishlisted(false);
+      toast.info(`Removed "${title}" from your Wishlist`);
+    } else {
+      const updated = [...list, item];
+      localStorage.setItem('wishlist', JSON.stringify(updated));
+      setIsWishlisted(true);
+      toast.success(`Saved "${title}" to your Wishlist ❤️`);
+    }
+  };
 
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
@@ -53,12 +76,26 @@ function SingleProductCard({ item }) {
           </span>
         </div>
 
+        {/* Item 2: Wishlist Heart Floating Button */}
+        <button
+          onClick={toggleWishlist}
+          type="button"
+          title={isWishlisted ? "Remove from Wishlist" : "Save to Wishlist"}
+          className={`absolute top-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 border ${
+            isWishlisted
+              ? 'bg-rose-600 text-white border-rose-400'
+              : 'bg-white/80 dark:bg-gray-900/80 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:text-rose-600'
+          }`}
+        >
+          <FiHeart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+        </button>
+
         {/* Item C: WhatsApp Share Floating Button */}
         <button
           onClick={handleShareWhatsApp}
           type="button"
           title="Share saree on WhatsApp"
-          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110 border border-emerald-300/40"
+          className="absolute top-14 right-3 z-10 w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110 border border-emerald-300/40"
         >
           <FiShare2 className="w-4 h-4" />
         </button>
