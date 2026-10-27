@@ -129,7 +129,7 @@ export const CATALOGUES = [
 
 export const STORE_INFO = {
   name: "Vastraa",
-  coBrand: "A Co-Brand of Lakshmi Stores",
+  coBrand: "",
   parentCompany: "Lakshmi Stores",
   location: "Round West, Thrissur, Kerala, India",
   pinCode: "680001",

@@ -36,7 +36,7 @@ const Navbar = () => {
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs">
             <span className="flex items-center gap-1 text-amber-200">
-              <FiCheckCircle className="text-emerald-400" /> Verified Showroom Collections
+              <FiCheckCircle className="text-emerald-400" /> Verified Online Collections
             </span>
             <a
               href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}`}
@@ -74,7 +74,7 @@ const Navbar = () => {
                   {storeInfo?.name || "Vastraa"} {isAdmin && <span className="text-xs text-[#C6A15B] font-mono font-normal">| Admin Portal</span>}
                 </h1>
                 <p className="text-[10px] font-sans uppercase tracking-widest text-[#C6A15B] font-bold">
-                  {storeInfo?.coBrand || "A Co-Brand of Lakshmi Stores"} • Online Silk Store
+                  Online Silk Store
                 </p>
               </div>
             </Link>
@@ -233,7 +233,7 @@ const Navbar = () => {
                     </div>
                     <div>
                       <span className="text-lg font-serif font-bold text-white block leading-tight">Vastraa</span>
-                      <span className="text-[10px] text-[#C6A15B]">A Co-Brand of Lakshmi Stores</span>
+                      <span className="text-[10px] text-[#C6A15B]">Online Silk Store</span>
                     </div>
                   </div>
                   <button

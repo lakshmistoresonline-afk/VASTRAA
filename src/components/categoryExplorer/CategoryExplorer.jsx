@@ -24,7 +24,7 @@ function CategoryExplorer() {
               Handloom Weaves & Collections
             </span>
             <h2 className="text-2xl sm:text-3xl font-serif font-extrabold text-[#24211F] dark:text-white">
-              Explore by Category & Showroom Tradition
+              Explore by Category & Online Collections
             </h2>
           </div>
           <Link
@@ -124,7 +124,7 @@ function CategoryExplorer() {
               <FiAward />
             </div>
             <div>
-              <h5 className="font-bold text-[#24211F] dark:text-white">Showroom Legacy</h5>
+              <h5 className="font-bold text-[#24211F] dark:text-white">Online Collections Legacy</h5>
               <p className="text-[11px] text-gray-500">Lakshmi Stores, Round West, Thrissur</p>
             </div>
           </div>

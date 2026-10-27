@@ -77,19 +77,19 @@ function OnboardingPopup({ isOpen, onClose }) {
                 <div className="bg-gray-900/90 p-3 rounded-xl border border-gray-800 space-y-0.5">
                   <span className="w-5 h-5 rounded-full bg-[#650A25] text-[#C6A15B] font-bold flex items-center justify-center text-[10px] border border-[#C6A15B]/40">2</span>
                   <h4 className="font-bold text-white text-[11px]">Submit Cart</h4>
-                  <p className="text-[10px] text-gray-400">Add favourites to your cart and submit for showroom review.</p>
+                  <p className="text-[10px] text-gray-400">Add favourites to your cart and submit for online review.</p>
                 </div>
 
                 <div className="bg-gray-900/90 p-3 rounded-xl border border-gray-800 space-y-0.5">
                   <span className="w-5 h-5 rounded-full bg-[#650A25] text-[#C6A15B] font-bold flex items-center justify-center text-[10px] border border-[#C6A15B]/40">3</span>
-                  <h4 className="font-bold text-white text-[11px]">Showroom Review & Quote</h4>
-                  <p className="text-[10px] text-gray-400">Showroom confirms availability and prepares quotation.</p>
+                  <h4 className="font-bold text-white text-[11px]">Online Stock Review</h4>
+                  <p className="text-[10px] text-gray-400">Store team verifies physical stock availability for selected sarees.</p>
                 </div>
 
                 <div className="bg-gray-900/90 p-3 rounded-xl border border-gray-800 space-y-0.5">
                   <span className="w-5 h-5 rounded-full bg-[#650A25] text-[#C6A15B] font-bold flex items-center justify-center text-[10px] border border-[#C6A15B]/40">4</span>
-                  <h4 className="font-bold text-white text-[11px]">Quotation Acceptance</h4>
-                  <p className="text-[10px] text-gray-400">Review items and prices, then accept or decline quotation.</p>
+                  <h4 className="font-bold text-white text-[11px]">Order Acceptance</h4>
+                  <p className="text-[10px] text-gray-400">Review verified in-stock items, total order summary, and confirm delivery address.</p>
                 </div>
 
                 <div className="bg-gray-900/90 p-3 rounded-xl border border-gray-800 space-y-0.5">

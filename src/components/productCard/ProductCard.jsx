@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import myContext from '../../context/data/myContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart, deleteFromCart } from '../../redux/cartSlice';
+import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiCheckCircle } from 'react-icons/fi';
@@ -9,9 +9,6 @@ import { FiShoppingBag, FiCheckCircle } from 'react-icons/fi';
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
 function SingleProductCard({ item }) {
-  const context = useContext(myContext);
-  const { storeInfo } = context;
-
   const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus } = item || {};
   const navigate = useNavigate();
 
@@ -107,7 +104,7 @@ function SingleProductCard({ item }) {
 
 function ProductCard(props) {
   const context = useContext(myContext);
-  const { product, searchKey, filterType } = context;
+  const { product, searchKey, filterType, filterPrice } = context;
 
   // If item is passed directly as prop
   if (props.item) {
@@ -124,6 +121,15 @@ function ProductCard(props) {
     if (!filterType) return true;
     return obj.categoryName?.toLowerCase().includes(filterType.toLowerCase()) ||
            obj.catalogueCode?.toLowerCase() === filterType.toLowerCase();
+  }).filter((obj) => {
+    if (!filterPrice) return true;
+    const p = Number(obj.price) || 0;
+    if (filterPrice === 'under_3000') return p < 3000;
+    if (filterPrice === '3000_6000') return p >= 3000 && p <= 6000;
+    if (filterPrice === '6000_15000') return p > 6000 && p <= 15000;
+    if (filterPrice === '15000_20000') return p > 15000 && p <= 20000;
+    if (filterPrice === 'above_20000') return p > 20000;
+    return true;
   }) : [];
 
   return (

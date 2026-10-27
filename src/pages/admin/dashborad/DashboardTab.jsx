@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
-import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck, FiUserCheck, FiTrendingUp, FiEdit3 } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck, FiUserCheck, FiTrendingUp, FiEdit3, FiFilter } from 'react-icons/fi';
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 
@@ -27,6 +27,10 @@ function DashboardTab() {
   } = context;
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Kanchipuram Pure Wedding Silk Sarees');
+  const [selectedPriceFilter, setSelectedPriceFilter] = useState('');
+  const [activeQuickTab, setActiveQuickTab] = useState('BRIDAL');
+
   const [enquiryViewMode, setEnquiryViewMode] = useState('kanban'); // 'kanban' or 'table'
   const [quotationModalEnquiry, setQuotationModalEnquiry] = useState(null);
   const [paymentVerifyModalEnquiry, setPaymentVerifyModalEnquiry] = useState(null);
@@ -55,7 +59,7 @@ function DashboardTab() {
   }, []);
 
   const handleSyncClick = async () => {
-    toast.info("Syncing showroom catalogues...");
+    toast.info("Syncing online catalogues...");
     await triggerSync();
     toast.success("Catalogue sync complete!");
   };
@@ -225,11 +229,26 @@ function DashboardTab() {
     }
   };
 
-  const filteredInventory = product ? product.filter((p) =>
-    p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.id.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const filteredInventory = product ? product.filter((p) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return p.title.toLowerCase().includes(term) ||
+           p.categoryName.toLowerCase().includes(term) ||
+           p.id.toLowerCase().includes(term);
+  }).filter((p) => {
+    if (!selectedCategoryFilter) return true;
+    return p.categoryName.toLowerCase().includes(selectedCategoryFilter.toLowerCase()) ||
+           p.catalogueCode?.toLowerCase() === selectedCategoryFilter.toLowerCase();
+  }).filter((p) => {
+    if (!selectedPriceFilter) return true;
+    const pr = Number(p.price) || 0;
+    if (selectedPriceFilter === 'under_3000') return pr < 3000;
+    if (selectedPriceFilter === '3000_6000') return pr >= 3000 && pr <= 6000;
+    if (selectedPriceFilter === '6000_15000') return pr > 6000 && pr <= 15000;
+    if (selectedPriceFilter === '15000_20000') return pr > 15000 && pr <= 20000;
+    if (selectedPriceFilter === 'above_20000') return pr > 20000;
+    return true;
+  }) : [];
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -239,13 +258,13 @@ function DashboardTab() {
         <div className="bg-gray-100/80 dark:bg-gray-950 p-4 border-b border-gray-200 dark:border-gray-800">
           <TabList className="flex flex-wrap gap-2 text-xs font-extrabold">
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
-              📸 Showroom Albums ({catalogues.length})
+              📸 Online Albums ({catalogues.length})
             </Tab>
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
               👗 Live Inventory ({product ? product.length : 0})
             </Tab>
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
-              📩 Quotation Pipeline & Enquiries ({enquiries ? enquiries.length : 0})
+              📩 Order Processing Pipeline ({enquiries ? enquiries.length : 0})
             </Tab>
             <Tab className="px-5 py-3 rounded-2xl cursor-pointer outline-none transition-all selected:bg-[#800020] selected:text-white bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 shadow-sm">
               ⚙️ Store Settings
@@ -253,12 +272,12 @@ function DashboardTab() {
           </TabList>
         </div>
 
-        {/* Tab 1: Showroom Catalogues */}
+        {/* Tab 1: Online Catalogues */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-                Showroom Catalogue Sources
+                Online Catalogue Sources
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Last Verified Sync: {lastVerifiedAt ? new Date(lastVerifiedAt).toLocaleString() : 'Just now'}
@@ -304,7 +323,6 @@ function DashboardTab() {
                 <tr>
                   <th className="px-5 py-4">Code</th>
                   <th className="px-5 py-4">Catalogue Category</th>
-                  <th className="px-5 py-4">Price Range</th>
                   <th className="px-5 py-4">Album Source URLs</th>
                   <th className="px-5 py-4 text-right">Items Synced</th>
                 </tr>
@@ -319,9 +337,6 @@ function DashboardTab() {
                       </td>
                       <td className="px-5 py-4 font-bold text-gray-900 dark:text-white">
                         {cat.name}
-                      </td>
-                      <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300">
-                        {cat.indicativePriceRange}
                       </td>
                       <td className="px-5 py-4 max-w-xs truncate">
                         {cat.albums.map((url, i) => (
@@ -351,20 +366,118 @@ function DashboardTab() {
         {/* Tab 2: Live Inventory */}
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-              Live Synced Saree Inventory ({filteredInventory.length} Sarees)
-            </h2>
-
-            <div className="relative w-full sm:w-72">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Filter by Saree ID or Category..."
-                className="w-full pl-9 pr-4 py-2.5 border rounded-2xl text-xs dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-[#800020]"
-              />
-              <FiSearch className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+            <div>
+              <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+                Live Synced Saree Inventory ({filteredInventory.length} Sarees)
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Filter and manage live prices across all online collections.
+              </p>
             </div>
+          </div>
+
+          {/* Admin Live Inventory Filter Toolbar (Matching Screenshot) */}
+          <div className="bg-[#FAF7F0] dark:bg-gray-800 p-5 rounded-3xl border border-[#E9E1D5] dark:border-gray-700 grid grid-cols-1 md:grid-cols-12 gap-4 items-end text-xs shadow-xs">
+
+            {/* Select Catalogue */}
+            <div className="md:col-span-3 space-y-1.5">
+              <label className="block font-bold text-[#211A19] dark:text-gray-300 uppercase tracking-wider text-[11px] flex items-center gap-1">
+                <FiFilter className="text-[#800020] dark:text-[#C6A15B]" /> SELECT CATALOGUE
+              </label>
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => {
+                  setSelectedCategoryFilter(e.target.value);
+                  setActiveQuickTab('CUSTOM');
+                }}
+                className="w-full font-bold px-3.5 py-3 rounded-2xl border border-[#E9E1D5] dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020] cursor-pointer shadow-xs"
+              >
+                {catalogues.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    Cat {cat.code} - {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Price Range Filter */}
+            <div className="md:col-span-3 space-y-1.5">
+              <label className="block font-bold text-[#211A19] dark:text-gray-300 uppercase tracking-wider text-[11px]">
+                ₹ SELECT PRICE RANGE
+              </label>
+              <select
+                value={selectedPriceFilter}
+                onChange={(e) => {
+                  setSelectedPriceFilter(e.target.value);
+                  setActiveQuickTab('CUSTOM');
+                }}
+                className="w-full font-bold px-3.5 py-3 rounded-2xl border border-[#E9E1D5] dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020] cursor-pointer shadow-xs"
+              >
+                <option value="">All Prices</option>
+                <option value="under_3000">Under ₹3,000</option>
+                <option value="3000_6000">₹3,000 – ₹6,000</option>
+                <option value="6000_15000">₹6,000 – ₹15,000</option>
+                <option value="15000_20000">₹15,000 – ₹20,000</option>
+                <option value="above_20000">Above ₹20,000</option>
+              </select>
+            </div>
+
+            {/* Search by Code or Category */}
+            <div className="md:col-span-4 space-y-1.5">
+              <label className="block font-bold text-[#211A19] dark:text-gray-300 uppercase tracking-wider text-[11px] flex items-center gap-1">
+                <FiSearch className="text-[#800020] dark:text-[#C6A15B]" /> SEARCH BY CODE OR CATEGORY
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="e.g. A-001, Kanchipuram, Wedding..."
+                  className="w-full font-medium pl-3.5 pr-8 py-3 rounded-2xl border border-[#E9E1D5] dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020] shadow-xs"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 font-bold"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Filter Buttons */}
+            <div className="md:col-span-2 flex gap-1.5 justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategoryFilter('Kanchipuram Pure Wedding Silk Sarees');
+                  setActiveQuickTab('BRIDAL');
+                }}
+                className={`px-3.5 py-3 rounded-2xl font-bold transition-all text-xs border ${
+                  selectedCategoryFilter === 'Kanchipuram Pure Wedding Silk Sarees'
+                    ? 'bg-[#800020] text-amber-100 shadow-md border-[#C6A15B]/40'
+                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-[#E9E1D5] dark:border-gray-700'
+                }`}
+              >
+                Bridal Silks
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategoryFilter('Kanchipuram Pure Soft Silk Sarees');
+                  setActiveQuickTab('SOFT');
+                }}
+                className={`px-3.5 py-3 rounded-2xl font-bold transition-all text-xs border ${
+                  selectedCategoryFilter === 'Kanchipuram Pure Soft Silk Sarees'
+                    ? 'bg-[#800020] text-amber-100 shadow-md border-[#C6A15B]/40'
+                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-[#E9E1D5] dark:border-gray-700'
+                }`}
+              >
+                Soft Silks
+              </button>
+            </div>
+
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800 max-h-[70vh] overflow-y-auto">
@@ -374,7 +487,6 @@ function DashboardTab() {
                   <th className="px-5 py-4">Saree Photo</th>
                   <th className="px-5 py-4">Saree ID / Title</th>
                   <th className="px-5 py-4">Catalogue Category</th>
-                  <th className="px-5 py-4">Indicative Range</th>
                   <th className="px-5 py-4">Showcase Price</th>
                   <th className="px-5 py-4">Stock Status</th>
                   <th className="px-5 py-4 text-right">Action</th>
@@ -387,12 +499,12 @@ function DashboardTab() {
 
                   return (
                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-4">
                         <img
                           src={item.imageUrl || FALLBACK_SAREE_IMG}
                           alt={item.title}
                           onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                          className="w-12 h-16 object-cover rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                          className="w-32 h-44 sm:w-36 sm:h-48 object-cover rounded-2xl border-2 border-[#C6A15B] dark:border-gray-700 shadow-lg hover:scale-125 hover:z-20 transition-all duration-300 cursor-pointer"
                           loading="lazy"
                         />
                       </td>
@@ -402,9 +514,6 @@ function DashboardTab() {
                       </td>
                       <td className="px-5 py-3 font-bold text-[#800020] dark:text-[#E5C158]">
                         Cat {item.catalogueCode} - {item.categoryName}
-                      </td>
-                      <td className="px-5 py-3">
-                        {item.indicativePriceRange}
                       </td>
                       <td className="px-5 py-3 font-extrabold text-[#800020] dark:text-[#E5C158]">
                         {item.price ? `₹${Number(item.price).toLocaleString()}` : 'Not Set'}
@@ -445,7 +554,7 @@ function DashboardTab() {
         <TabPanel className="p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
-              Quotation Pipeline & Customer Requests ({enquiries ? enquiries.length : 0})
+              Order Processing & Fulfillment Pipeline ({enquiries ? enquiries.length : 0})
             </h2>
 
             {/* View Mode Toggle: Kanban vs Table */}
@@ -480,12 +589,12 @@ function DashboardTab() {
             <div className="flex overflow-x-auto gap-5 pb-6 pt-2 px-1 snap-x scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
               {['Pending Review', 'QUOTATION_DRAFT', 'QUOTATION_READY', 'PAYMENT_PENDING', 'PAYMENT_VERIFIED_ORDER_CONFIRMED', 'DISPATCHED'].map((colStatus, cIdx) => {
                 const colTitles = {
-                  'Pending Review': '1. Pending Review',
-                  'QUOTATION_DRAFT': '2. Quotation Drafted',
-                  'QUOTATION_READY': '3. Published (Ready)',
-                  'PAYMENT_PENDING': '4. Awaiting Payment',
-                  'PAYMENT_VERIFIED_ORDER_CONFIRMED': '5. Ready for Dispatch',
-                  'DISPATCHED': '6. Dispatched'
+                  'Pending Review': '1. Pending Stock Review',
+                  'QUOTATION_DRAFT': '2. Stock Verified',
+                  'QUOTATION_READY': '3. Ready for Payment',
+                  'PAYMENT_PENDING': '4. Awaiting Payment Verification',
+                  'PAYMENT_VERIFIED_ORDER_CONFIRMED': '5. Confirmed & Ready for Dispatch',
+                  'DISPATCHED': '6. Dispatched & Tracked'
                 };
 
                 const headerBorders = {
@@ -573,7 +682,7 @@ function DashboardTab() {
                                     className="bg-[#800020] hover:bg-[#67001a] text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm flex items-center gap-1.5"
                                   >
                                     <FiFileText className="text-[#D4AF37] w-3.5 h-3.5" />
-                                    <span>Review & Quote</span>
+                                    <span>Verify Stock & Confirm</span>
                                   </button>
                                 )}
 
@@ -614,7 +723,7 @@ function DashboardTab() {
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
                   {enquiries.map((enq) => {
                     const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
-                    const whatsappMsg = `Hello ${enq.customerName || 'Customer'}, regarding your enquiry for ${enq.sareeTitle || 'Saree'} (ID: ${enq.sareeId}) at Vastraa (Lakshmi Stores): `;
+                    const whatsappMsg = `Hello ${enq.customerName || 'Customer'}, regarding your enquiry for ${enq.sareeTitle || 'Saree'} (ID: ${enq.sareeId}) at Vastraa: `;
                     const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
                     const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'READY_FOR_DISPATCH';
                     const isDispatched = enq.status === 'DISPATCHED' || enq.trackingDetails;
@@ -642,7 +751,7 @@ function DashboardTab() {
                                       src={imgUrl}
                                       alt=""
                                       onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                                      className="w-16 h-20 object-cover rounded-xl border shadow-sm"
+                                      className="w-28 h-40 sm:w-32 sm:h-44 object-cover rounded-2xl border-2 border-[#C6A15B] dark:border-gray-700 shadow-md hover:scale-110 transition-transform duration-300 cursor-pointer"
                                       title={ci.title}
                                     />
                                   );
@@ -659,7 +768,7 @@ function DashboardTab() {
                                     src={imgUrl}
                                     alt=""
                                     onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                                    className="w-20 h-28 object-cover rounded-2xl border shadow-md"
+                                    className="w-28 h-40 sm:w-32 sm:h-44 object-cover rounded-2xl border-2 border-[#C6A15B] dark:border-gray-700 shadow-md hover:scale-110 transition-transform duration-300 cursor-pointer"
                                   />
                                 );
                               })()}
@@ -757,11 +866,7 @@ function DashboardTab() {
                 <span className="text-gray-900 dark:text-white font-semibold text-sm">{storeInfo?.name}</span>
               </div>
               <div>
-                <span className="text-gray-500 block font-bold">Co-Brand Association:</span>
-                <span className="text-gray-900 dark:text-white font-semibold text-sm">{storeInfo?.coBrand}</span>
-              </div>
-              <div>
-                <span className="text-gray-500 block font-bold">Showroom Location:</span>
+                <span className="text-gray-500 block font-bold">Online Store Location:</span>
                 <span className="text-gray-900 dark:text-white font-semibold">{storeInfo?.location}</span>
               </div>
               <div>
@@ -864,7 +969,7 @@ function DashboardTab() {
                           src={itemImgUrl}
                           alt=""
                           onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                          className="w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-2xl shadow-md border border-gray-200 flex-shrink-0"
+                          className="w-24 h-32 sm:w-28 sm:h-36 object-cover rounded-2xl shadow-md border-2 border-[#E9E1D5] dark:border-gray-700 flex-shrink-0"
                         />
                         <div>
                           <span className="font-bold text-gray-900 dark:text-white block text-sm">{item.title}</span>
@@ -1187,9 +1292,6 @@ function DashboardTab() {
                     className="w-full text-xs pl-7 pr-3 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-bold"
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">
-                  Catalogue Range: {editPriceModalItem.indicativePriceRange}
-                </p>
               </div>
             </div>
 

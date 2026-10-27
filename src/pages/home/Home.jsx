@@ -43,7 +43,7 @@ const Home = () => {
                 <FiCheckCircle />
               </div>
               <div>
-                <h4 className="font-serif font-bold text-sm text-[#211A19] dark:text-white">Direct Showroom Assistance</h4>
+                <h4 className="font-serif font-bold text-sm text-[#211A19] dark:text-white">Direct Online Assistance</h4>
                 <p className="text-[11px] text-[#77716A] dark:text-gray-400">Instant WhatsApp & online enquiry</p>
               </div>
             </div>

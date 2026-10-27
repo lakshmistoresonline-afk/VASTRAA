@@ -76,7 +76,7 @@ function ProductInfo() {
     try {
       setLoading(true);
       await addDoc(collection(fireDB, 'enquiries'), enquiryData);
-      toast.success("Availability enquiry sent to showroom successfully!");
+      toast.success("Availability enquiry sent to online store successfully!");
       setEnquiryModalOpen(false);
       setCustomerMessage('');
     } catch (err) {
@@ -137,7 +137,7 @@ function ProductInfo() {
                     Cat {saree.catalogueCode || 'A'} • {saree.categoryName}
                   </span>
                   <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">
-                    ✓ Verified Showroom Stock
+                    ✓ Verified Online Stock
                   </span>
                 </div>
 
@@ -238,7 +238,7 @@ function ProductInfo() {
 
             <div>
               <span className="text-xs font-bold text-[#800020] dark:text-[#E5C158] uppercase">
-                Showroom Saree Enquiry
+                Online Saree Enquiry
               </span>
               <h3 className="font-serif font-bold text-lg text-gray-900 dark:text-white mt-0.5 line-clamp-1">
                 {saree.title}
@@ -300,7 +300,7 @@ function ProductInfo() {
                   type="submit"
                   className="bg-[#800020] hover:bg-[#67001a] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all"
                 >
-                  Send Enquiry to Showroom
+                  Send Enquiry to Online Store
                 </button>
               </div>
             </form>

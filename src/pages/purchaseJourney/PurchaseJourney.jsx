@@ -136,7 +136,7 @@ function PurchaseJourney() {
     if (status === 'QUOTATION_READY' && activeEnq.quotationDetails) {
       primaryActionText = "Review Quotation Below";
       primaryActionRoute = "#requests-section";
-      primaryActionSub = "Showroom confirmed prices ready for your acceptance";
+      primaryActionSub = "Online store confirmed prices ready for your acceptance";
     } else if (status === 'QUOTATION_ACCEPTED') {
       primaryActionText = "Complete Payment Below";
       primaryActionRoute = "#requests-section";
@@ -156,7 +156,7 @@ function PurchaseJourney() {
     } else {
       primaryActionText = "View Request Status";
       primaryActionRoute = "#requests-section";
-      primaryActionSub = "Showroom reviewing availability and prices";
+      primaryActionSub = "Online store reviewing availability and prices";
     }
   } else if (cartItems.length > 0) {
     primaryActionText = "Continue to Cart";
@@ -252,25 +252,25 @@ function PurchaseJourney() {
               <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">1</span>
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">Explore Sarees</h4>
-                <p className="text-gray-500">Browse our 9 live handloom silk saree catalogues (A–I) curated from authentic showroom collections.</p>
+                <p className="text-gray-500">Browse our 9 live handloom silk saree catalogues (A–I) curated from authentic online collections.</p>
               </div>
 
               <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">2</span>
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">Submit Cart</h4>
-                <p className="text-gray-500">Add favorite sarees to your cart and submit your bag for showroom review. Cart submission does not require upfront payment.</p>
+                <p className="text-gray-500">Add favorite sarees to your cart and submit your bag for online review. Cart submission does not require upfront payment.</p>
               </div>
 
               <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">3</span>
-                <h4 className="font-bold text-gray-900 dark:text-white text-sm">Showroom Review & Quote</h4>
-                <p className="text-gray-500">Our team inspects physical availability, confirms unit prices, applies any cart discounts, and publishes a formal quotation.</p>
+                <h4 className="font-bold text-gray-900 dark:text-white text-sm">Online Stock Review</h4>
+                <p className="text-gray-500">Our team inspects physical saree availability, applies any cart discounts, and confirms order totals.</p>
               </div>
 
               <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">
                 <span className="w-6 h-6 rounded-full bg-[#800020] text-[#D4AF37] font-bold flex items-center justify-center text-xs">4</span>
-                <h4 className="font-bold text-gray-900 dark:text-white text-sm">Quotation Acceptance</h4>
-                <p className="text-gray-500">Review available items, confirmed prices, and net payable totals. Click Accept to confirm your delivery address.</p>
+                <h4 className="font-bold text-gray-900 dark:text-white text-sm">Order Acceptance</h4>
+                <p className="text-gray-500">Review available items, confirmed order totals, and click Accept to confirm your delivery address.</p>
               </div>
 
               <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border space-y-1.5 shadow-xs">

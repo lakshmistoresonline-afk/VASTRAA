@@ -143,7 +143,7 @@ function Cart() {
                   Reference ID: <span className="font-mono font-bold text-[#800020] dark:text-[#E5C158]">{requestRef}</span>
                 </p>
                 <p className="text-xs text-[#77716A] dark:text-gray-300 leading-relaxed pt-2">
-                  Thank you, <span className="font-bold">{customerName}</span>. Our showroom team has received your enquiry for your selected sarees and will publish your formal quotation shortly.
+                  Thank you, <span className="font-bold">{customerName}</span>. Our online store team has received your enquiry for your selected sarees and will publish your formal quotation shortly.
                 </p>
               </div>
 

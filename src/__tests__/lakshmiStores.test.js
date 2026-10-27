@@ -3,16 +3,15 @@ import { CATALOGUES, STORE_INFO } from '../data/catalogues';
 import { resolveAlbumPhotos, checkImageUrlValidity } from '../services/googlePhotosService';
 import { syncAllCatalogues, revalidateItemStock, canDirectCheckout } from '../services/stockSyncService';
 
-describe('Vastraa (Co-Brand of Lakshmi Stores) - Live Catalogue Test Suite', () => {
+describe('Vastraa - Live Catalogue Test Suite', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   // Test Case 1: Vastraa Branding and Store Contact Details
-  it('1. Vastraa brand name, co-brand details, and phone number +91 97469 98785 configured', () => {
+  it('1. Vastraa brand name and phone number +91 97469 98785 configured', () => {
     expect(STORE_INFO.name).toBe("Vastraa");
-    expect(STORE_INFO.coBrand).toBe("A Co-Brand of Lakshmi Stores");
     expect(STORE_INFO.phone).toBe("+91 97469 98785");
     expect(STORE_INFO.whatsappFormatted).toBe("919746998785");
   });

@@ -2,20 +2,19 @@ import React, { useContext } from 'react';
 import myContext from '../../../context/data/myContext';
 import Layout from '../../../components/layout/Layout';
 import DashboardTab from './DashboardTab';
-import { FiCheckCircle, FiGrid, FiImage, FiInbox } from 'react-icons/fi';
+import { FiGrid, FiImage, FiCheckCircle, FiMessageCircle, FiTrendingUp, FiShoppingBag, FiLayers } from 'react-icons/fi';
 
 function Dashboard() {
   const context = useContext(myContext);
   const { product, catalogues, syncStats, enquiries, storeInfo } = context;
 
   const totalSarees = product ? product.length : 0;
-  const inStockCount = syncStats ? syncStats.confirmedAvailable : totalSarees;
   const totalEnquiries = enquiries ? enquiries.length : 0;
 
   return (
     <Layout>
-      <section className="py-10 bg-gray-50 dark:bg-gray-950 min-h-screen transition-colors">
-        <div className="container px-5 mx-auto max-w-7xl space-y-8">
+      <div className="min-h-screen bg-[#FAF7F0] dark:bg-gray-950 py-10 px-4 transition-colors">
+        <div className="container mx-auto max-w-7xl space-y-8">
 
           {/* Header Banner */}
           <div className="maroon-gradient text-white p-8 rounded-3xl shadow-xl border-b-4 border-[#D4AF37] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -24,7 +23,7 @@ function Dashboard() {
                 Lakshmi Stores Thrissur • Owner Admin Portal
               </span>
               <h1 className="text-3xl sm:text-4xl font-serif font-extrabold text-amber-50 mt-2">
-                Google Photos Live Stock Dashboard
+                Online Live Inventory Dashboard
               </h1>
               <p className="text-xs sm:text-sm text-amber-200/80 mt-1">
                 📍 {storeInfo?.location || "Round West, Thrissur, Kerala"}
@@ -33,7 +32,7 @@ function Dashboard() {
 
             <div className="bg-black/40 backdrop-blur-md border border-amber-300/30 px-5 py-3 rounded-2xl text-xs flex items-center gap-2.5">
               <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Google Photos API Status: <strong className="text-emerald-300">Connected & Active</strong></span>
+              <span>Online Cloud Feed Status: <strong className="text-emerald-300">Connected & Active</strong></span>
             </div>
           </div>
 
@@ -66,7 +65,7 @@ function Dashboard() {
                 <p className="text-2xl font-serif font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
                   {totalSarees} Photos
                 </p>
-                <p className="text-[10px] text-gray-400">Google Photos Album Feed</p>
+                <p className="text-[10px] text-gray-400">Online Live Inventory Feed</p>
               </div>
             </div>
 
@@ -79,7 +78,7 @@ function Dashboard() {
                   In-Stock Verified
                 </span>
                 <p className="text-2xl font-serif font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">
-                  {inStockCount} Sarees
+                  {syncStats ? syncStats.confirmedAvailable : totalSarees} Sarees
                 </p>
                 <p className="text-[10px] text-gray-400">Confirmed Available</p>
               </div>
@@ -87,7 +86,7 @@ function Dashboard() {
 
             <div className="glass-card p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm flex items-center gap-4">
               <div className="p-3.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl">
-                <FiInbox className="w-7 h-7" />
+                <FiMessageCircle className="w-7 h-7" />
               </div>
               <div>
                 <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
@@ -102,11 +101,11 @@ function Dashboard() {
 
           </div>
 
-          {/* Admin Tabs */}
+          {/* Main Dashboard Tabs Component */}
           <DashboardTab />
 
         </div>
-      </section>
+      </div>
     </Layout>
   );
 }

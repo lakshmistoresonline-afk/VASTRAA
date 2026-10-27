@@ -4,22 +4,27 @@ import { resolveAlbumPhotos, checkImageUrlValidity } from './googlePhotosService
 let catalogueCache = {};
 let lastSyncTimestamp = null;
 
-// Helper to compute a deterministic pseudo-random price within a min-max range
-function getDeterministicRandomPrice(idString, minP, maxP) {
-  let hash = 0;
+// Helper to compute a non-linear MurmurHash3 scrambled price within a min-max range (breaks sequential ordering)
+function getNonLinearShuffledPrice(idString, minP, maxP) {
+  let num = 0;
   for (let i = 0; i < idString.length; i++) {
-    hash = (hash << 5) - hash + idString.charCodeAt(i);
-    hash |= 0;
+    num = (num * 31 + idString.charCodeAt(i)) >>> 0;
   }
-  const posHash = Math.abs(hash);
+  // MurmurHash3 32-bit integer finalizer (completely breaks linear sequential increments)
+  num ^= num >>> 16;
+  num = Math.imul(num, 0x85ebca6b) >>> 0;
+  num ^= num >>> 13;
+  num = Math.imul(num, 0xc2b2ae35) >>> 0;
+  num ^= num >>> 16;
+
   const range = maxP - minP;
   if (range <= 0) return minP;
   const steps = Math.floor(range / 50);
-  const stepIndex = posHash % (steps + 1);
+  const stepIndex = num % (steps + 1);
   return minP + (stepIndex * 50);
 }
 
-// Synchronise a single album or all catalogues using the genuine extracted sarees dataset (3,252 photos) and specific range pricing
+// Synchronise a single album or all catalogues using the genuine extracted sarees dataset (3,252 photos) and non-linear range pricing
 export async function syncShowroomCatalogues(options = {}) {
   const syncTimestamp = new Date().toISOString();
   const { specificCatalogueCode = null, forceErrorForAlbum = null, mockRemovedIds = [] } = options || {};
@@ -95,7 +100,7 @@ export async function syncShowroomCatalogues(options = {}) {
             default: break;
           }
 
-          const defaultPrice = getDeterministicRandomPrice(photo.id, minP, maxP);
+          const defaultPrice = getNonLinearShuffledPrice(photo.id, minP, maxP);
 
           allItems.push({
             id: photo.id,
