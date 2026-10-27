@@ -130,8 +130,8 @@ export const CATALOGUES = [
 export const STORE_INFO = {
   name: "Vastraa",
   coBrand: "",
-  parentCompany: "Lakshmi Stores",
-  location: "Round West, Thrissur, Kerala, India",
+  parentCompany: "",
+  location: "Online Silk Store",
   pinCode: "680001",
   tagline: "Tradition. Elegance. Trust.",
   phone: "+91 97469 98785",

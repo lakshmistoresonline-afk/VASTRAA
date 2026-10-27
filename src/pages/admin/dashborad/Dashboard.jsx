@@ -36,13 +36,13 @@ function Dashboard() {
           <div className="maroon-gradient text-white p-6 sm:p-7 rounded-3xl shadow-lg border-b-4 border-[#D4AF37] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <span className="bg-[#D4AF37] text-gray-950 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                Lakshmi Stores Thrissur • Owner Command Center
+                Vastraa Owner Command Center
               </span>
               <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-amber-50 mt-1.5">
                 Online Live Inventory & Order Management
               </h1>
               <p className="text-xs text-amber-200/80 mt-0.5">
-                📍 {storeInfo?.location || "Round West, Thrissur, Kerala"}
+                📍 {storeInfo?.location || "Online Silk Store"}
               </p>
             </div>
 

@@ -12,10 +12,10 @@ function Track() {
                 🏛️
               </div>
               <h3 className="font-serif font-bold text-lg text-gray-900 dark:text-white mb-1">
-                Authentic Lakshmi Stores
+                Authentic Handloom Weaves
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-300">
-                Directly from Round West, Thrissur's premier handloom silk destination.
+                Directly from premier handloom silk weavers.
               </p>
             </div>
 

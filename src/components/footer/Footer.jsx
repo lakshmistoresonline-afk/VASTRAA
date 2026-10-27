@@ -29,13 +29,13 @@ function Footer() {
             </div>
 
             <p className="text-xs text-gray-300 leading-relaxed max-w-xl">
-              Authentic handloom silk sarees curated directly from Lakshmi Stores master weavers. Pan India insured shipping with verified pure silk quality guarantee.
+              Authentic handloom silk sarees curated directly from master weavers. Pan India insured shipping with verified pure silk quality guarantee.
             </p>
 
             <div className="space-y-2 text-xs font-semibold pt-2 text-amber-200/90">
               <p className="flex items-center gap-2">
                 <FiMapPin className="text-[#C6A15B] w-4 h-4 flex-shrink-0" />
-                <span>Showroom Location: {storeInfo?.location || "Round West, Thrissur, Kerala"}</span>
+                <span>Store Location: {storeInfo?.location || "Online Silk Store"}</span>
               </p>
               <p className="flex items-center gap-2">
                 <FiPhone className="text-[#C6A15B] w-4 h-4 flex-shrink-0" />

@@ -180,7 +180,7 @@ function ProductInfo() {
                   Handloom Weave Guarantee
                 </h3>
                 <p>
-                  {saree.description || `Exquisite ${saree.categoryName} handloom silk saree sourced directly from Lakshmi Stores master weavers. Guaranteed pure silk luster with intricate zari pallu and matching unstitched blouse piece.`}
+                  {saree.description || `Exquisite ${saree.categoryName} handloom silk saree sourced directly from master weavers. Guaranteed pure silk luster with intricate zari pallu and matching unstitched blouse piece.`}
                 </p>
               </div>
 

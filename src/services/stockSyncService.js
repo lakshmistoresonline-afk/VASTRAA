@@ -116,7 +116,7 @@ export async function syncShowroomCatalogues(options = {}) {
             price: photo.price || defaultPrice,
             stockStatus: status,
             lastVerifiedAt: syncTimestamp,
-            description: `${catalogue.name} - Individual saree stock photo from Lakshmi Stores Google Photos catalogue.`
+            description: `${catalogue.name} - Individual saree stock photo from online catalogue.`
           });
         }
       } catch (err) {

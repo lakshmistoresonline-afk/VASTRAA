@@ -125,7 +125,7 @@ function CategoryExplorer() {
             </div>
             <div>
               <h5 className="font-bold text-[#24211F] dark:text-white">Online Collections Legacy</h5>
-              <p className="text-[11px] text-gray-500">Lakshmi Stores, Round West, Thrissur</p>
+              <p className="text-[11px] text-gray-500">Vastraa Online Collections</p>
             </div>
           </div>
 
