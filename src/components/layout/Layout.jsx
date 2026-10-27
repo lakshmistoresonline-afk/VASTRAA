@@ -20,13 +20,28 @@ function Layout({children}) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col justify-between pb-16 md:pb-0 relative">
       <div>
         <Navbar />
         <div className="content">
           {children}
         </div>
       </div>
+
+      {/* Item 3: Floating Desktop/Tablet WhatsApp Live Assistance Widget */}
+      <a
+        href="https://wa.me/919746998785?text=Hello%20Vastraa%2C%20I%20would%20like%20to%20enquire%20about%20silk%20saree%20availability."
+        target="_blank"
+        rel="noreferrer"
+        title="Chat Live with Vastraa Store Assistance"
+        className="hidden md:flex fixed bottom-8 right-8 z-40 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border-2 border-emerald-300/40 items-center gap-2.5 group text-xs font-extrabold"
+      >
+        <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-ping"></span>
+        <span className="whitespace-nowrap">
+          WhatsApp Assistance
+        </span>
+        <span className="text-base">💬</span>
+      </a>
 
       <Footer />
 

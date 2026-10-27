@@ -164,6 +164,38 @@ function Filter() {
 
         </div>
 
+        {/* Item 4: Quick Price Filter Badges / Tags */}
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-bold text-[#800020] dark:text-[#E5C158] uppercase tracking-wider text-[11px] mr-1">
+            Quick Price Tiers:
+          </span>
+
+          {[
+            { label: 'All Prices', val: '' },
+            { label: 'Under ₹3,000', val: 'under_3000' },
+            { label: '₹3,000 – ₹6,000', val: '3000_6000' },
+            { label: '₹6,000 – ₹15,000', val: '6000_15000' },
+            { label: '₹15,000 – ₹20,000', val: '15000_20000' },
+            { label: 'Above ₹20,000 (Bridal)', val: 'above_20000' }
+          ].map((tier) => (
+            <button
+              key={tier.val}
+              type="button"
+              onClick={() => {
+                setFilterPrice(tier.val);
+                scrollToResults();
+              }}
+              className={`px-3.5 py-1.5 rounded-full font-bold transition-all text-[11px] border ${
+                filterPrice === tier.val
+                  ? 'bg-[#800020] text-amber-100 border-[#C6A15B]/40 shadow-sm'
+                  : 'bg-[#FAF7F0] dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-[#E9E1D5] dark:border-gray-700 hover:border-[#800020]'
+              }`}
+            >
+              {tier.label}
+            </button>
+          ))}
+        </div>
+
       </div>
 
       {/* Catalogue Results Section */}
