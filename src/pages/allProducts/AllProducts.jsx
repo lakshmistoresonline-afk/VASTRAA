@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import Layout from '../../components/layout/Layout';
 import Filter from '../../components/filter/Filter';
-import ProductCard from '../../components/productCard/ProductCard';
 
 function AllProducts() {
   useEffect(() => {
@@ -23,8 +22,6 @@ function AllProducts() {
       </div>
 
       <Filter />
-
-      <ProductCard isPaginated={true} itemsPerPage={24} />
     </Layout>
   );
 }
