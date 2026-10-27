@@ -37,12 +37,21 @@ const App = () => {
       <Router>
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* Mandatory Auth Gate: All Storefront Routes Protected */}
+          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/order" element={<Navigate to="/purchase-journey" replace />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="/purchase-journey" element={<ProtectedRoute><PurchaseJourney /></ProtectedRoute>} />
-          <Route path="/allproducts" element={<AllProducts />} />
+          <Route path="/allproducts" element={<ProtectedRoute><AllProducts /></ProtectedRoute>} />
+          <Route path="/productinfo/:id" element={<ProtectedRoute><ProductInfo /></ProtectedRoute>} />
+
+          {/* Authentication Routes */}
+          <Route path="/login" element={<CustomerLogin />} />
+          <Route path="/admin-login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
+          {/* Admin Routes */}
           <Route
             path="/dashboard"
             element={
@@ -51,10 +60,6 @@ const App = () => {
               </ProtectedRouteForAdmin>
             }
           />
-          <Route path="/login" element={<CustomerLogin />} />
-          <Route path="/admin-login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/productinfo/:id" element={<ProductInfo />} />
           <Route
             path="/addproduct"
             element={
@@ -86,7 +91,7 @@ export const ProtectedRoute = ({ children }) => {
   if (user) {
     return children;
   } else {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 };
 
@@ -103,6 +108,6 @@ export const ProtectedRouteForAdmin = ({ children }) => {
   if (admin && admin.user && allowedAdmins.includes(admin.user.email)) {
     return children;
   } else {
-    return <Navigate to="/admin-login" />;
+    return <Navigate to="/admin-login" replace />;
   }
 };
