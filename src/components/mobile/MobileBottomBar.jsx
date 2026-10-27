@@ -60,7 +60,7 @@ function MobileBottomBar() {
             </span>
           )}
         </div>
-        <span>Bag</span>
+        <span>Cart</span>
       </Link>
 
       <Link

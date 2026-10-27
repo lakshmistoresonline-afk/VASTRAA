@@ -40,7 +40,7 @@ function SingleProductCard({ item }) {
 
   const addCart = (sareeItem) => {
     dispatch(addToCart(sareeItem));
-    toast.success(`Added "${sareeItem.title}" to your shopping bag!`);
+    toast.success(`Added "${sareeItem.title}" to your cart!`);
   };
 
   const isConfirmedStock = stockStatus === 'CONFIRMED_AVAILABLE';
@@ -133,7 +133,7 @@ function SingleProductCard({ item }) {
               className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
             >
               <FiCheckCircle className="w-4 h-4 text-emerald-300" />
-              <span>In Cart · View Bag</span>
+              <span>In Cart · View Cart</span>
             </button>
           ) : (
             <button
@@ -142,7 +142,7 @@ function SingleProductCard({ item }) {
               className="flex-1 bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3.5 px-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
             >
               <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
-              <span>Add to Bag</span>
+              <span>Add to Cart</span>
             </button>
           )}
 

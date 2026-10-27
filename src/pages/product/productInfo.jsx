@@ -39,12 +39,12 @@ function ProductInfo() {
 
   const addCart = (item) => {
     dispatch(addToCart(item));
-    toast.success(`Added "${item.title}" to your shopping bag!`);
+    toast.success(`Added "${item.title}" to your cart!`);
   };
 
   const removeCart = (item) => {
     dispatch(deleteFromCart(item));
-    toast.info(`Removed "${item.title}" from your shopping bag.`);
+    toast.info(`Removed "${item.title}" from your cart.`);
   };
 
   const handleQuickEnquirySubmit = async (e) => {
@@ -184,7 +184,7 @@ function ProductInfo() {
                 </p>
               </div>
 
-              {/* Add to Bag & WhatsApp Actions */}
+              {/* Add to Cart & WhatsApp Actions */}
               <div className="space-y-3 pt-2">
                 {isInCart ? (
                   <button
@@ -193,7 +193,7 @@ function ProductInfo() {
                     className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     <FiCheckCircle className="w-4 h-4 text-emerald-300" />
-                    <span>Already in Shopping Bag · View Cart</span>
+                    <span>Already in Cart · View Cart</span>
                   </button>
                 ) : (
                   <button
@@ -202,7 +202,7 @@ function ProductInfo() {
                     className="w-full bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold py-3.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 border border-[#C6A15B]/40"
                   >
                     <FiShoppingBag className="w-4 h-4 text-[#C6A15B]" />
-                    <span>Add to Shopping Bag</span>
+                    <span>Add to Cart</span>
                   </button>
                 )}
 

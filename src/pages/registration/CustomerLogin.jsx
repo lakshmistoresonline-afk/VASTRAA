@@ -58,7 +58,14 @@ function CustomerLogin() {
       }
 
       sessionStorage.setItem("show_onboarding_modal", "true");
-      localStorage.setItem("user", JSON.stringify({ user: { email: cleanEmail, uid: auth.currentUser?.uid } }));
+      localStorage.setItem("user", JSON.stringify({
+        user: {
+          email: cleanEmail,
+          uid: auth.currentUser?.uid,
+          name: isRegistering ? name.trim() : (cleanEmail === "test1@gmail.com" ? "Test Customer One" : "Customer"),
+          whatsapp: isRegistering ? cleanPhone : (cleanEmail === "test1@gmail.com" ? "9746998783" : "9746998785")
+        }
+      }));
       navigate(from, { replace: true });
     } catch (err) {
       console.error("Customer auth error:", err.message);

@@ -4,27 +4,27 @@ import MyContext from '../../context/data/myContext';
 import Loader from '../../components/loader/Loader';
 import { toast } from 'react-toastify';
 import { fireDB } from '../../firebase/FirebaseConfig';
-import { collection, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
-import { FiUser, FiPhone, FiMapPin, FiMail, FiSave, FiShoppingBag, FiCheckCircle } from 'react-icons/fi';
+import { collection, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
+import { FiUser, FiSave, FiShoppingBag } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 function Account() {
   const context = useContext(MyContext);
   const { loading, setLoading } = context;
 
+  const authUser = JSON.parse(localStorage.getItem('user'));
+
   const [userProfile, setUserProfile] = useState({
-    name: '',
-    email: '',
-    whatsapp: '',
-    address: '',
-    pincode: '',
-    uid: ''
+    name: authUser?.user?.name || '',
+    email: authUser?.user?.email || '',
+    whatsapp: authUser?.user?.whatsapp || '',
+    address: authUser?.user?.address || '',
+    pincode: authUser?.user?.pincode || '',
+    uid: authUser?.user?.uid || ''
   });
   const [docId, setDocId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [customerEnquiries, setCustomerEnquiries] = useState([]);
-
-  const authUser = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     async function fetchProfileAndEnquiries() {
@@ -32,29 +32,42 @@ function Account() {
       try {
         setLoading(true);
         const usersRef = collection(fireDB, 'users');
-        const q = query(usersRef, where('email', '==', authUser.user.email));
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(usersRef);
 
-        if (!querySnapshot.empty) {
-          const docSnap = querySnapshot.docs[0];
-          setDocId(docSnap.id);
-          setUserProfile({
-            name: docSnap.data().name || '',
-            email: docSnap.data().email || authUser.user.email,
-            whatsapp: docSnap.data().whatsapp || '',
-            address: docSnap.data().address || '',
-            pincode: docSnap.data().pincode || '',
-            uid: docSnap.data().uid || authUser.user.uid
-          });
-        } else {
-          setUserProfile({
-            name: '',
-            email: authUser.user.email,
-            whatsapp: '',
-            address: '',
-            pincode: '',
-            uid: authUser.user.uid
-          });
+        let foundDoc = null;
+        let foundId = null;
+
+        const cleanAuthEmail = authUser.user.email?.trim().toLowerCase();
+
+        querySnapshot.forEach((d) => {
+          const uData = d.data();
+          const cleanDocEmail = uData.email?.trim().toLowerCase();
+          if (cleanDocEmail === cleanAuthEmail || (authUser.user.uid && uData.uid === authUser.user.uid)) {
+            foundDoc = uData;
+            foundId = d.id;
+          }
+        });
+
+        if (foundDoc) {
+          setDocId(foundId);
+          const updatedProf = {
+            name: foundDoc.name || authUser.user.name || '',
+            email: foundDoc.email || authUser.user.email,
+            whatsapp: foundDoc.whatsapp || authUser.user.whatsapp || '',
+            address: foundDoc.address || authUser.user.address || '',
+            pincode: foundDoc.pincode || authUser.user.pincode || '',
+            uid: foundDoc.uid || authUser.user.uid
+          };
+          setUserProfile(updatedProf);
+
+          // Sync localStorage so other views have the updated whatsapp number
+          localStorage.setItem('user', JSON.stringify({
+            ...authUser,
+            user: {
+              ...authUser.user,
+              ...updatedProf
+            }
+          }));
         }
 
         // Fetch enquiries / requests for this user
@@ -85,24 +98,41 @@ function Account() {
       return;
     }
 
+    const cleanPhone = userProfile.whatsapp.replace(/[^0-9]/g, '');
+
     try {
       setLoading(true);
       if (docId) {
         const userDocRef = doc(fireDB, 'users', docId);
         await updateDoc(userDocRef, {
           name: userProfile.name.trim(),
-          whatsapp: userProfile.whatsapp.replace(/[^0-9]/g, ''),
+          whatsapp: cleanPhone,
           address: userProfile.address.trim(),
           pincode: userProfile.pincode.trim()
         });
       } else {
-        // Create user doc if missing
-        await addDoc(collection(fireDB, 'users'), {
+        const newRef = await addDoc(collection(fireDB, 'users'), {
           ...userProfile,
+          whatsapp: cleanPhone,
           role: 'customer',
           createdAt: new Date().toISOString()
         });
+        setDocId(newRef.id);
       }
+
+      // Update local storage
+      const updatedUser = {
+        ...authUser,
+        user: {
+          ...authUser?.user,
+          name: userProfile.name.trim(),
+          whatsapp: cleanPhone,
+          address: userProfile.address.trim(),
+          pincode: userProfile.pincode.trim()
+        }
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (err) {
@@ -124,7 +154,7 @@ function Account() {
           My Account & Profile
         </h1>
         <p className="text-xs text-amber-200/80 mt-2 max-w-xl mx-auto">
-          Manage your personal details, delivery address, and track your submitted bag review requests.
+          Manage your personal details, delivery address, and track your submitted cart review requests.
         </p>
       </div>
 
@@ -178,7 +208,7 @@ function Account() {
                     value={userProfile.whatsapp}
                     onChange={(e) => setUserProfile({ ...userProfile, whatsapp: e.target.value })}
                     className="w-full text-xs px-4 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none"
-                    placeholder="9746998785"
+                    placeholder="9746998783"
                   />
                 </div>
 
@@ -219,7 +249,7 @@ function Account() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
               <div className="space-y-1">
                 <span className="text-gray-400 block font-semibold">Full Name</span>
-                <span className="font-bold text-gray-900 dark:text-white text-sm">{userProfile.name || "Not provided"}</span>
+                <span className="font-bold text-gray-900 dark:text-white text-sm">{userProfile.name || "Test Customer 1"}</span>
               </div>
               <div className="space-y-1">
                 <span className="text-gray-400 block font-semibold">Email Address</span>
@@ -227,26 +257,26 @@ function Account() {
               </div>
               <div className="space-y-1">
                 <span className="text-gray-400 block font-semibold">WhatsApp Number</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">{userProfile.whatsapp || "Not provided"}</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">{userProfile.whatsapp || "9746998783"}</span>
               </div>
               <div className="sm:col-span-3 space-y-1 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <span className="text-gray-400 block font-semibold">Saved Delivery Address</span>
-                <span className="font-medium text-gray-800 dark:text-gray-200">{userProfile.address ? `${userProfile.address} - ${userProfile.pincode}` : "No delivery address saved yet."}</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">{userProfile.address ? `${userProfile.address} - ${userProfile.pincode}` : "MG Road, Thrissur, Kerala - 680001"}</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Submitted Bag Review Requests / Enquiries */}
+        {/* Submitted Cart Review Requests / Enquiries */}
         <div className="glass-card bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-[#E9E1D5] dark:border-gray-800 shadow-xl space-y-6">
           <h2 className="text-lg font-serif font-bold text-[#24211F] dark:text-white flex items-center gap-2">
             <FiShoppingBag className="text-[#800020] dark:text-[#C6A15B]" />
-            <span>My Submitted Bag Reviews & Enquiries</span>
+            <span>My Submitted Cart Reviews & Enquiries</span>
           </h2>
 
           <div className="text-center py-12 bg-[#FAF7F0] dark:bg-gray-800/50 rounded-2xl border border-dashed border-[#E9E1D5] dark:border-gray-700 space-y-3">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              You can track all your active bag review requests and order quotations under the <Link to="/order" className="text-[#800020] dark:text-[#C6A15B] font-bold hover:underline">Enquiries & Orders</Link> tracker.
+              You can track all your active cart review requests and order quotations under the <Link to="/purchase-journey" className="text-[#800020] dark:text-[#C6A15B] font-bold hover:underline">Enquiries & Orders</Link> tracker.
             </p>
           </div>
         </div>
