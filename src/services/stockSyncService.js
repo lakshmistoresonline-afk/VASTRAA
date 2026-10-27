@@ -4,7 +4,22 @@ import { resolveAlbumPhotos, checkImageUrlValidity } from './googlePhotosService
 let catalogueCache = {};
 let lastSyncTimestamp = null;
 
-// Synchronise a single album or all catalogues using the genuine extracted sarees dataset (3,252 photos) and specific category pricing
+// Helper to compute a deterministic pseudo-random price within a min-max range
+function getDeterministicRandomPrice(idString, minP, maxP) {
+  let hash = 0;
+  for (let i = 0; i < idString.length; i++) {
+    hash = (hash << 5) - hash + idString.charCodeAt(i);
+    hash |= 0;
+  }
+  const posHash = Math.abs(hash);
+  const range = maxP - minP;
+  if (range <= 0) return minP;
+  const steps = Math.floor(range / 50);
+  const stepIndex = posHash % (steps + 1);
+  return minP + (stepIndex * 50);
+}
+
+// Synchronise a single album or all catalogues using the genuine extracted sarees dataset (3,252 photos) and specific range pricing
 export async function syncShowroomCatalogues(options = {}) {
   const syncTimestamp = new Date().toISOString();
   const { specificCatalogueCode = null, forceErrorForAlbum = null, mockRemovedIds = [] } = options || {};
@@ -64,21 +79,23 @@ export async function syncShowroomCatalogues(options = {}) {
             unavailable++;
           }
 
-          const priceSpread = catalogue.maxPrice - catalogue.minPrice;
-          let defaultPrice = catalogue.minPrice + Math.floor(priceSpread * 0.35);
+          let minP = catalogue.minPrice;
+          let maxP = catalogue.maxPrice;
 
           switch (catalogue.code?.toUpperCase()) {
-            case 'A': defaultPrice = 21500; break;
-            case 'B': defaultPrice = 16500; break;
-            case 'C': defaultPrice = 12500; break;
-            case 'D': defaultPrice = 4500; break;
-            case 'E': defaultPrice = 3900; break;
-            case 'F': defaultPrice = 5500; break;
-            case 'G': defaultPrice = 2350; break;
-            case 'H': defaultPrice = 1950; break;
-            case 'I': defaultPrice = 1950; break;
+            case 'A': minP = 24000; maxP = 26000; break;
+            case 'B': minP = 16500; maxP = 17500; break;
+            case 'C': minP = 12500; maxP = 13500; break;
+            case 'D': minP = 4500; maxP = 5500; break;
+            case 'E': minP = 3800; maxP = 4500; break;
+            case 'F': minP = 5200; maxP = 6000; break;
+            case 'G': minP = 2300; maxP = 2950; break;
+            case 'H': minP = 1900; maxP = 2250; break;
+            case 'I': minP = 1900; maxP = 2250; break;
             default: break;
           }
+
+          const defaultPrice = getDeterministicRandomPrice(photo.id, minP, maxP);
 
           allItems.push({
             id: photo.id,
@@ -89,8 +106,8 @@ export async function syncShowroomCatalogues(options = {}) {
             catalogueCode: catalogue.code,
             categoryName: catalogue.name,
             indicativePriceRange: catalogue.indicativePriceRange,
-            minPrice: catalogue.minPrice,
-            maxPrice: catalogue.maxPrice,
+            minPrice: minP,
+            maxPrice: maxP,
             price: photo.price || defaultPrice,
             stockStatus: status,
             lastVerifiedAt: syncTimestamp,
