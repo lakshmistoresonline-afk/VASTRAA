@@ -6,6 +6,7 @@ import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFil
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 import SareeImageThumbnail from '../../../components/SareeImageThumbnail';
+import { sendAutomatedWhatsAppNotification } from '../../../services/whatsappService';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
@@ -176,16 +177,12 @@ function DashboardTab() {
       const cleanPhone = quotationModalEnquiry.phone ? quotationModalEnquiry.phone.replace(/[^0-9]/g, '') : '919746998785';
       const whatsAppMsg = `Hello ${quotationModalEnquiry.customerName || 'Valued Customer'}, your formal Vastraa quotation is ready! Net Payable: ₹${finalPayable}. Please sign in to your customer account to review availability and accept.`;
 
-      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
-        recipientPhone: cleanPhone,
+      await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: quotationModalEnquiry.customerName,
-        message: whatsAppMsg,
-        amount: finalPayable,
-        status: 'DISPATCHED_TEMPLATE',
-        createdAt: new Date().toISOString()
+        type: "QUOTATION_READY"
       });
 
-      toast.success(`Quotation published & WhatsApp template dispatched to ${quotationModalEnquiry.customerName} (${quotationModalEnquiry.phone})!`);
+      toast.success(`Quotation published & WhatsApp template dispatched to ${quotationModalEnquiry.customerName} (${cleanPhone})!`);
       setQuotationModalEnquiry(null);
       if (getEnquiriesData) getEnquiriesData();
     } catch (err) {
@@ -206,13 +203,9 @@ function DashboardTab() {
       const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
       const whatsAppMsg = `✓ Hello ${enq.customerName || 'Valued Customer'}, your payment for Vastraa order (Ref: ${enq.message ? enq.message.split('.')[0] : enq.id}) has been verified successfully! Your order is confirmed and sent for express fulfillment.`;
 
-      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
-        recipientPhone: cleanPhone,
+      await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: enq.customerName,
-        message: whatsAppMsg,
-        amount: enq.quotationDetails?.finalPayable || 0,
-        status: 'DISPATCHED_AUTOMATED',
-        createdAt: new Date().toISOString()
+        type: "PAYMENT_VERIFIED"
       });
 
       toast.success("Payment verified & automated WhatsApp confirmation sent!");
@@ -245,12 +238,9 @@ function DashboardTab() {
       const cleanPhone = trackingModalEnquiry.phone ? trackingModalEnquiry.phone.replace(/[^0-9]/g, '') : '919746998785';
       const whatsAppMsg = `📦 Hello ${trackingModalEnquiry.customerName || 'Valued Customer'}, your Vastraa silk saree order has been dispatched via ${courierName.trim()}! Tracking AWB: ${awbNumber.trim()}. Booked Date: ${courierBookedDate}. Track live in your Purchase Journey portal!`;
 
-      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
-        recipientPhone: cleanPhone,
+      await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: trackingModalEnquiry.customerName,
-        message: whatsAppMsg,
-        status: 'DISPATCHED_AUTOMATED',
-        createdAt: new Date().toISOString()
+        type: "ORDER_DISPATCHED"
       });
 
       toast.success("Shipping details saved & automated WhatsApp tracking dispatched!");

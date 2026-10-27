@@ -9,6 +9,7 @@ import { fireDB } from '../../firebase/FirebaseConfig';
 import { FiShoppingBag, FiTrash2, FiSend, FiCheckCircle, FiMessageCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import SareeImageThumbnail from '../../components/SareeImageThumbnail';
+import { sendAutomatedWhatsAppNotification } from '../../services/whatsappService';
 
 function Cart() {
   const context = useContext(myContext);
@@ -105,18 +106,10 @@ function Cart() {
       // Automated WhatsApp Dispatch to Store Hotline 9746998785
       const storeWhatsAppMsg = `🛍️ NEW ONLINE ORDER SUBMISSION!\nRef ID: ${referenceId}\nCustomer: ${customerName}\nPhone: ${cleanPhone}\nItems: ${cartItems.length} Sarees\nSubtotal: ₹${cartSubtotal}\nAddress: ${address} (${pinCode})`;
 
-      await addDoc(collection(fireDB, 'whatsapp_jobs'), {
-        recipientPhone: "919746998785",
+      await sendAutomatedWhatsAppNotification("919746998785", storeWhatsAppMsg, {
         type: "STORE_NEW_CART_SUBMISSION",
         customerName: customerName,
-        customerPhone: cleanPhone,
-        referenceId: referenceId,
-        itemsCount: cartItems.length,
-        estimatedSubtotal: cartSubtotal,
-        deliveryAddress: address,
-        message: storeWhatsAppMsg,
-        status: "DISPATCHED_AUTOMATED",
-        createdAt: new Date().toISOString()
+        autoOpenWindow: true
       });
 
       setRequestRef(referenceId);
