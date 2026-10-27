@@ -8,6 +8,7 @@ import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
 import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle, FiSearch } from 'react-icons/fi';
 import UpiQrCode from '../../components/payment/UpiQrCode';
+import { sendAutomatedWhatsAppNotification } from '../../services/whatsappService';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
@@ -117,6 +118,11 @@ function PurchaseJourney() {
         paymentReference: refText.trim(),
         paymentSubmittedAt: new Date().toISOString()
       });
+
+      // Dispatch automated WhatsApp alert to store admin 9746998785 on customer payment submission
+      const adminWhatsAppMsg = `💳 CUSTOMER PAYMENT SUBMITTED!\nCustomer: ${authUser?.user?.name || userEmail}\nPhone: ${userEmail}\nUTR/Ref: ${refText.trim()}\nPlease verify payment in Admin Control Panel!`;
+      await sendAutomatedWhatsAppNotification("919746998785", adminWhatsAppMsg, { type: "CUSTOMER_PAYMENT_SUBMITTED" });
+
       toast.success("Payment reference submitted for admin verification!");
       fetchEnquiries();
     } catch (err) {
