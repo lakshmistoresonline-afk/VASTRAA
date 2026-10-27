@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import myContext from '../../context/data/myContext';
 import { CATALOGUES } from '../../data/catalogues';
 import { Link, useNavigate } from 'react-router-dom';
@@ -44,6 +44,7 @@ function CategoryExplorer() {
             <img
               src="https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80"
               alt="Bridal Silk Saree Showcase"
+              onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_CATEGORY_IMG; }}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-8 text-white space-y-3">
