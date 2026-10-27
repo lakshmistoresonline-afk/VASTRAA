@@ -542,7 +542,7 @@ function DashboardTab() {
                           src={item.imageUrl || FALLBACK_SAREE_IMG}
                           alt={item.title}
                           onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_SAREE_IMG; }}
-                          className="w-32 h-44 sm:w-36 sm:h-48 object-cover rounded-2xl border-2 border-[#C6A15B] dark:border-gray-700 shadow-lg hover:scale-125 hover:z-20 transition-all duration-300 cursor-pointer"
+                          className="w-48 h-64 sm:w-56 sm:h-72 object-cover rounded-2xl border-3 border-[#C6A15B] dark:border-gray-700 shadow-xl hover:scale-110 hover:z-20 transition-all duration-300 cursor-pointer"
                           loading="lazy"
                         />
                       </td>
