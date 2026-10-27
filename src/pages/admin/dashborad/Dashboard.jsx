@@ -32,23 +32,23 @@ function Dashboard() {
       <div className="min-h-screen bg-[#FAF7F0] dark:bg-gray-950 py-8 px-4 transition-colors">
         <div className="container mx-auto max-w-7xl space-y-6">
 
-          {/* Compact Executive Header Banner */}
-          <div className="maroon-gradient text-white p-6 sm:p-7 rounded-3xl shadow-lg border-b-4 border-[#D4AF37] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          {/* Compact High-Contrast Executive Header Banner */}
+          <div className="bg-gradient-to-r from-[#4A071B] via-[#650A25] to-[#800020] text-white p-7 rounded-3xl shadow-xl border-b-4 border-[#C6A15B] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <span className="bg-[#D4AF37] text-gray-950 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+              <span className="bg-[#C6A15B] text-gray-950 text-[10px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
                 Vastraa Owner Command Center
               </span>
-              <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-amber-50 mt-1.5">
+              <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-white mt-2 leading-tight">
                 Online Live Inventory & Order Management
               </h1>
-              <p className="text-xs text-amber-200/80 mt-0.5">
-                📍 {storeInfo?.location || "Online Silk Store"}
+              <p className="text-xs text-amber-200 font-medium mt-1 flex items-center gap-1">
+                <span>📍 {storeInfo?.location || "Online Silk Store"}</span>
               </p>
             </div>
 
-            <div className="bg-black/40 backdrop-blur-md border border-amber-300/30 px-4 py-2.5 rounded-2xl text-xs flex items-center gap-2">
+            <div className="bg-black/50 backdrop-blur-md border border-[#C6A15B]/40 px-4 py-2.5 rounded-2xl text-xs flex items-center gap-2.5 text-white shadow-md">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Online Cloud Feed: <strong className="text-emerald-300">Connected & Active</strong></span>
+              <span>Online Cloud Feed: <strong className="text-emerald-300 font-bold">Connected & Active</strong></span>
             </div>
           </div>
 

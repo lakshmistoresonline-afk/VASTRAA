@@ -58,10 +58,34 @@ function DashboardTab() {
   const [editPriceModalItem, setEditPriceModalItem] = useState(null);
   const [newSareePrice, setNewSareePrice] = useState('');
 
+  // Item 3: Automated WhatsApp Notification Logs State
+  const [whatsappLogs, setWhatsappLogs] = useState([]);
+
+  // Item 4: Bulk Category Price Adjustment Modal State
+  const [bulkPriceModalOpen, setBulkPriceModalOpen] = useState(false);
+  const [bulkCategoryCode, setBulkCategoryCode] = useState('A');
+  const [bulkAdjustmentType, setBulkAdjustmentType] = useState('add_flat');
+  const [bulkAdjustmentAmount, setBulkAdjustmentAmount] = useState(500);
+
   useEffect(() => {
     if (getEnquiriesData) getEnquiriesData();
     if (getOrderData) getOrderData();
     if (getUserData) getUserData();
+
+    async function fetchWhatsAppLogs() {
+      try {
+        const qSnap = await getDocs(collection(fireDB, 'whatsapp_jobs'));
+        const logs = [];
+        qSnap.forEach(d => {
+          logs.push({ id: d.id, ...d.data() });
+        });
+        logs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        setWhatsappLogs(logs);
+      } catch (err) {
+        console.warn("WhatsApp logs fetch notice:", err.message);
+      }
+    }
+    fetchWhatsAppLogs();
   }, []);
 
   const handleSyncClick = async () => {
@@ -248,6 +272,52 @@ function DashboardTab() {
       if (getEnquiriesData) getEnquiriesData();
     } catch (err) {
       toast.error("Failed to save tracking details: " + err.message);
+    }
+  };
+
+  // Item 4: Handle Bulk Category Price Adjustment
+  const handleBulkPriceUpdate = async () => {
+    const targetCat = catalogues.find(c => c.code === bulkCategoryCode);
+    if (!targetCat) return;
+
+    const itemsToUpdate = product ? product.filter(p => p.catalogueCode === bulkCategoryCode) : [];
+    if (itemsToUpdate.length === 0) {
+      toast.error(`No sarees found in Catalogue Cat ${bulkCategoryCode}.`);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const val = parseFloat(bulkAdjustmentAmount) || 0;
+      let count = 0;
+
+      for (const item of itemsToUpdate) {
+        let currentP = Number(item.price) || item.minPrice || 0;
+        let newP = currentP;
+
+        if (bulkAdjustmentType === 'add_flat') newP = currentP + val;
+        else if (bulkAdjustmentType === 'sub_flat') newP = Math.max(0, currentP - val);
+        else if (bulkAdjustmentType === 'add_percent') newP = currentP + Math.round((currentP * val) / 100);
+
+        // Round to nearest 50
+        newP = Math.round(newP / 50) * 50;
+
+        try {
+          const productRef = doc(fireDB, 'products', item.id);
+          await updateDoc(productRef, { price: newP });
+        } catch {
+          await addDoc(collection(fireDB, 'products'), { ...item, price: newP });
+        }
+        count++;
+      }
+
+      toast.success(`Updated prices for ${count} sarees in Cat ${bulkCategoryCode} successfully!`);
+      setBulkPriceModalOpen(false);
+      window.location.reload();
+    } catch (err) {
+      toast.error("Bulk price update error: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -482,8 +552,17 @@ function DashboardTab() {
               </div>
             </div>
 
-            {/* Quick Filter Buttons & Sort Toggle */}
-            <div className="md:col-span-2 flex items-center gap-1.5 justify-end">
+            {/* Quick Filter Buttons, Bulk Margin Tool & Sort Toggle */}
+            <div className="md:col-span-2 flex items-center gap-1.5 justify-end flex-wrap sm:flex-nowrap">
+              <button
+                type="button"
+                onClick={() => setBulkPriceModalOpen(true)}
+                className="bg-[#800020] hover:bg-[#67001a] text-amber-100 px-3 py-3 rounded-2xl font-extrabold text-xs shadow-sm transition-all flex items-center gap-1 border border-[#C6A15B]/40 whitespace-nowrap"
+                title="Bulk Adjust Prices for a Saree Catalogue"
+              >
+                <span>Bulk Margin Tool 🏷️</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -1030,6 +1109,65 @@ function DashboardTab() {
               })}
             </div>
           </div>
+
+          {/* Item 3: Automated WhatsApp Dispatches Log Table */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-4 text-xs shadow-sm">
+            <div className="flex justify-between items-center">
+              <h3 className="font-serif font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                <FiMessageCircle className="text-emerald-600" />
+                <span>Automated WhatsApp Dispatch Logs ({whatsappLogs.length})</span>
+              </h3>
+              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-3 py-1 rounded-full">
+                ✓ Live Cloud Queue
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+              <table className="w-full text-xs text-left text-gray-600 dark:text-gray-300">
+                <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white uppercase text-[10px] tracking-wider font-extrabold sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3">Timestamp</th>
+                    <th className="px-4 py-3">Recipient Number</th>
+                    <th className="px-4 py-3">Customer / Dispatch Type</th>
+                    <th className="px-4 py-3">Message Payload Preview</th>
+                    <th className="px-4 py-3 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                  {whatsappLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                        No automated WhatsApp dispatches recorded yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    whatsappLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <td className="px-4 py-2.5 font-mono text-[11px] text-gray-400">
+                          {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Recent'}
+                        </td>
+                        <td className="px-4 py-2.5 font-bold text-blue-600 dark:text-blue-400 font-mono">
+                          +{log.recipientPhone}
+                        </td>
+                        <td className="px-4 py-2.5 font-semibold text-gray-800 dark:text-gray-200">
+                          {log.customerName || log.type || "Automated Alert"}
+                        </td>
+                        <td className="px-4 py-2.5 max-w-xs truncate text-gray-500">
+                          {log.message}
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            ✓ {log.status || "DISPATCHED"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </TabPanel>
 
       </Tabs>
@@ -1398,6 +1536,99 @@ function DashboardTab() {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Item 4: Bulk Category Price Adjustment Modal */}
+      {bulkPriceModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-gray-200 dark:border-gray-800 space-y-6 text-xs">
+            <button
+              onClick={() => setBulkPriceModalOpen(false)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+
+            <div>
+              <span className="text-xs font-bold text-[#800020] dark:text-[#E5C158] uppercase">
+                Bulk Margin Tool
+              </span>
+              <h3 className="font-serif font-bold text-lg text-gray-900 dark:text-white mt-1">
+                Bulk Category Price Adjustment
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Adjust prices across an entire catalogue collection in one click.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Select Catalogue Collection:
+                </label>
+                <select
+                  value={bulkCategoryCode}
+                  onChange={(e) => setBulkCategoryCode(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-bold"
+                >
+                  {catalogues.map((cat) => (
+                    <option key={cat.id} value={cat.code}>
+                      Cat {cat.code} - {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Adjustment Type:
+                </label>
+                <select
+                  value={bulkAdjustmentType}
+                  onChange={(e) => setBulkAdjustmentType(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-semibold"
+                >
+                  <option value="add_flat">Increase Price (+ Flat Amount in ₹)</option>
+                  <option value="sub_flat">Decrease Price (- Flat Amount in ₹)</option>
+                  <option value="add_percent">Increase Margin (+ Percentage %)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Adjustment Value ({bulkAdjustmentType === 'add_percent' ? '%' : '₹'}):
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={bulkAdjustmentAmount}
+                  onChange={(e) => setBulkAdjustmentAmount(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono font-bold"
+                  placeholder="500"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setBulkPriceModalOpen(false)}
+                className="px-5 py-3 border text-xs font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleBulkPriceUpdate}
+                className="bg-[#800020] hover:bg-[#67001a] text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all flex items-center gap-2"
+              >
+                <FiCheck className="w-4 h-4 text-[#D4AF37]" />
+                <span>Apply Bulk Price Update</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
