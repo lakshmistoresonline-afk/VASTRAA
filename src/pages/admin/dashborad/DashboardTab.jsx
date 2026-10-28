@@ -188,6 +188,8 @@ function DashboardTab() {
 
   const handlePublishQuotation = async () => {
     if (!quotationModalEnquiry) return;
+    const waPopup = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
+
     try {
       const items = quotationModalEnquiry.cartItems || [{ id: quotationModalEnquiry.sareeId, title: quotationModalEnquiry.sareeTitle, imageUrl: quotationModalEnquiry.imageUrl }];
 
@@ -229,11 +231,16 @@ function DashboardTab() {
       // Automated WhatsApp Template Dispatch on Publication
       const cleanPhone = quotationModalEnquiry.phone ? quotationModalEnquiry.phone.replace(/[^0-9]/g, '') : '919746998785';
       const whatsAppMsg = `Hello ${quotationModalEnquiry.customerName || 'Valued Customer'}, your formal Vastraa quotation is ready! Net Payable: ₹${finalPayable}. Please sign in to your customer account to review availability and accept.`;
+      const waUrl = getWhatsAppDispatchUrl(cleanPhone, whatsAppMsg);
+
+      if (waPopup && !waPopup.closed) {
+        waPopup.location.href = waUrl;
+      }
 
       await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: quotationModalEnquiry.customerName,
         type: "QUOTATION_READY",
-        autoOpenWindow: true
+        autoOpenWindow: false
       });
 
       toast.success(`Quotation published & WhatsApp template dispatched to ${quotationModalEnquiry.customerName} (${cleanPhone})!`);
@@ -246,6 +253,8 @@ function DashboardTab() {
   };
 
   const handleVerifyPaymentAndConfirmOrder = async (enq) => {
+    const waPopup = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
+
     try {
       const enqRef = doc(fireDB, 'enquiries', enq.id);
       await updateDoc(enqRef, {
@@ -256,11 +265,16 @@ function DashboardTab() {
       // Automated WhatsApp Dispatch to Customer on Payment Verification
       const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
       const whatsAppMsg = `✓ Hello ${enq.customerName || 'Valued Customer'}, your payment for Vastraa order (Ref: ${enq.message ? enq.message.split('.')[0] : enq.id}) has been verified successfully! Your order is confirmed and sent for express fulfillment.`;
+      const waUrl = getWhatsAppDispatchUrl(cleanPhone, whatsAppMsg);
+
+      if (waPopup && !waPopup.closed) {
+        waPopup.location.href = waUrl;
+      }
 
       await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: enq.customerName,
         type: "PAYMENT_VERIFIED",
-        autoOpenWindow: true
+        autoOpenWindow: false
       });
 
       toast.success("Payment verified & automated WhatsApp confirmation sent!");
@@ -277,6 +291,9 @@ function DashboardTab() {
       toast.error("Please enter both courier service name and tracking AWB number.");
       return;
     }
+
+    const waPopup = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
+
     try {
       const enqRef = doc(fireDB, 'enquiries', trackingModalEnquiry.id);
       await updateDoc(enqRef, {
@@ -292,11 +309,16 @@ function DashboardTab() {
       // Automated WhatsApp Dispatch to Customer on Order Dispatch
       const cleanPhone = trackingModalEnquiry.phone ? trackingModalEnquiry.phone.replace(/[^0-9]/g, '') : '919746998785';
       const whatsAppMsg = `📦 Hello ${trackingModalEnquiry.customerName || 'Valued Customer'}, your Vastraa silk saree order has been dispatched via ${courierName.trim()}! Tracking AWB: ${awbNumber.trim()}. Booked Date: ${courierBookedDate}. Track live in your Purchase Journey portal!`;
+      const waUrl = getWhatsAppDispatchUrl(cleanPhone, whatsAppMsg);
+
+      if (waPopup && !waPopup.closed) {
+        waPopup.location.href = waUrl;
+      }
 
       await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: trackingModalEnquiry.customerName,
         type: "ORDER_DISPATCHED",
-        autoOpenWindow: true
+        autoOpenWindow: false
       });
 
       toast.success("Shipping details saved & automated WhatsApp tracking dispatched!");

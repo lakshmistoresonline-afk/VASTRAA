@@ -100,6 +100,9 @@ function Cart() {
       status: "Pending"
     };
 
+    // Pre-allocate window synchronously on user click gesture before async network calls (Bypasses popup blocker)
+    const waPopup = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
+
     try {
       setLoading(true);
       await addDoc(collection(fireDB, 'enquiries'), enquiryInfo);
@@ -118,11 +121,16 @@ function Cart() {
 
       // Automated WhatsApp Dispatch to Store Hotline 9746998785
       const storeWhatsAppMsg = `🛍️ NEW ONLINE ORDER SUBMISSION!\nRef ID: ${referenceId}\nCustomer: ${customerName}\nPhone: ${cleanPhone}\nItems: ${cartItems.length} Sarees\nSubtotal: ₹${cartSubtotal}\nAddress: ${address} (${pinCode})`;
+      const waUrl = getWhatsAppDispatchUrl("919746998785", storeWhatsAppMsg);
+
+      if (waPopup && !waPopup.closed) {
+        waPopup.location.href = waUrl;
+      }
 
       await sendAutomatedWhatsAppNotification("919746998785", storeWhatsAppMsg, {
         type: "STORE_NEW_CART_SUBMISSION",
         customerName: customerName,
-        autoOpenWindow: true
+        autoOpenWindow: false
       });
 
       setRequestRef(referenceId);

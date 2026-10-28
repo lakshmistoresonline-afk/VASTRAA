@@ -120,6 +120,10 @@ function PurchaseJourney() {
       toast.error("Please enter your UPI reference or UTR number.");
       return;
     }
+
+    // Pre-allocate window synchronously on user click gesture before async network calls (Bypasses popup blocker)
+    const waPopup = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
+
     try {
       setLoading(true);
       const enqRef = doc(fireDB, 'enquiries', enqId);
@@ -131,9 +135,15 @@ function PurchaseJourney() {
 
       // Dispatch automated WhatsApp alert to store admin 9746998785 on customer payment submission
       const adminWhatsAppMsg = `💳 CUSTOMER PAYMENT SUBMITTED!\nCustomer: ${authUser?.user?.name || userEmail}\nPhone: ${userEmail}\nUTR/Ref: ${refText.trim()}\nPlease verify payment in Admin Control Panel!`;
+      const waUrl = getWhatsAppDispatchUrl("919746998785", adminWhatsAppMsg);
+
+      if (waPopup && !waPopup.closed) {
+        waPopup.location.href = waUrl;
+      }
+
       await sendAutomatedWhatsAppNotification("919746998785", adminWhatsAppMsg, {
         type: "CUSTOMER_PAYMENT_SUBMITTED",
-        autoOpenWindow: true
+        autoOpenWindow: false
       });
 
       toast.success("Payment reference submitted for admin verification!");
