@@ -87,6 +87,16 @@ function PurchaseJourney() {
     fetchEnquiries();
   }, [userEmail, userUid]);
 
+  useEffect(() => {
+    if (myEnquiries && myEnquiries.length > 0) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById('requests-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [myEnquiries]);
+
   const handleCustomerResponse = async (enqId, responseType) => {
     try {
       setLoading(true);
@@ -192,14 +202,14 @@ function PurchaseJourney() {
     primaryActionSub = "You have selected sarees waiting in your cart";
   }
 
-  // 6-stage helper
+  // 6-stage helper (1-based index corresponding to 6 stages: 1. Choose Sarees, 2. Submit Cart, 3. Showroom Review, 4. Quotation Acceptance, 5. Payment Verification, 6. Dispatch & Tracking)
   const getStageIndex = (status, hasTracking) => {
-    if (status === 'DISPATCHED' || hasTracking) return 5;
-    if (status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || status === 'READY_FOR_DISPATCH') return 4;
-    if (status === 'QUOTATION_ACCEPTED' || status === 'PAYMENT_PENDING') return 4;
-    if (status === 'QUOTATION_READY') return 3;
-    if (status === 'Pending' || status === 'QUOTATION_DRAFT') return 2;
-    return 1;
+    if (status === 'DISPATCHED' || hasTracking) return 6;
+    if (status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || status === 'READY_FOR_DISPATCH') return 5;
+    if (status === 'QUOTATION_ACCEPTED' || status === 'PAYMENT_PENDING') return 5;
+    if (status === 'QUOTATION_READY') return 4;
+    if (status === 'Pending' || status === 'QUOTATION_DRAFT') return 3;
+    return 2;
   };
 
   return (

@@ -67,6 +67,8 @@ function DashboardTab() {
   const [bulkAdjustmentType, setBulkAdjustmentType] = useState('add_flat');
   const [bulkAdjustmentAmount, setBulkAdjustmentAmount] = useState(500);
 
+  const kanbanRef = React.useRef(null);
+
   useEffect(() => {
     if (getEnquiriesData) getEnquiriesData();
     if (getOrderData) getOrderData();
@@ -87,6 +89,33 @@ function DashboardTab() {
     }
     fetchWhatsAppLogs();
   }, []);
+
+  // Auto-scroll Kanban board to latest active stage column
+  useEffect(() => {
+    if (enquiries && enquiries.length > 0 && kanbanRef.current) {
+      let maxActiveCol = 0;
+      enquiries.forEach((enq) => {
+        const s = enq.status || 'Pending';
+        let colIdx = 0;
+        if (s === 'DISPATCHED' || enq.trackingDetails) colIdx = 5;
+        else if (s === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || s === 'READY_FOR_DISPATCH') colIdx = 4;
+        else if (s === 'PAYMENT_PENDING' || s === 'QUOTATION_ACCEPTED') colIdx = 3;
+        else if (s === 'QUOTATION_READY') colIdx = 2;
+        else if (s === 'QUOTATION_DRAFT') colIdx = 1;
+
+        if (colIdx > maxActiveCol) maxActiveCol = colIdx;
+      });
+
+      if (maxActiveCol > 0) {
+        const timer = setTimeout(() => {
+          if (kanbanRef.current) {
+            kanbanRef.current.scrollTo({ left: maxActiveCol * 320, behavior: 'smooth' });
+          }
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [enquiries, enquiryViewMode]);
 
   const handleSyncClick = async () => {
     toast.info("Syncing online catalogues...");
@@ -779,7 +808,7 @@ function DashboardTab() {
             </div>
           ) : enquiryViewMode === 'kanban' ? (
             /* 6-STAGE HORIZONTAL SCROLLABLE KANBAN PIPELINE BOARD */
-            <div className="flex overflow-x-auto gap-5 pb-6 pt-2 px-1 snap-x scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+            <div ref={kanbanRef} className="flex overflow-x-auto gap-5 pb-6 pt-2 px-1 snap-x scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
               {['Pending Review', 'QUOTATION_DRAFT', 'QUOTATION_READY', 'PAYMENT_PENDING', 'PAYMENT_VERIFIED_ORDER_CONFIRMED', 'DISPATCHED'].map((colStatus, cIdx) => {
                 const colTitles = {
                   'Pending Review': '1. Pending Stock Review',

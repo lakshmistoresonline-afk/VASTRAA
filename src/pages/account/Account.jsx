@@ -5,8 +5,7 @@ import Loader from '../../components/loader/Loader';
 import { toast } from 'react-toastify';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { collection, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
-import { FiUser, FiSave, FiShoppingBag } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { FiUser, FiSave } from 'react-icons/fi';
 
 function Account() {
   const context = useContext(MyContext);
@@ -24,10 +23,9 @@ function Account() {
   });
   const [docId, setDocId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [customerEnquiries, setCustomerEnquiries] = useState([]);
 
   useEffect(() => {
-    async function fetchProfileAndEnquiries() {
+    async function fetchProfile() {
       if (!authUser || !authUser.user) return;
       try {
         setLoading(true);
@@ -60,7 +58,7 @@ function Account() {
           };
           setUserProfile(updatedProf);
 
-          // Sync localStorage so other views have the updated whatsapp number
+          // Sync localStorage
           localStorage.setItem('user', JSON.stringify({
             ...authUser,
             user: {
@@ -69,26 +67,13 @@ function Account() {
             }
           }));
         }
-
-        // Fetch enquiries / requests for this user
-        const enqRef = collection(fireDB, 'enquiries');
-        const enqSnap = await getDocs(enqRef);
-        const myEnquiries = [];
-        enqSnap.forEach(d => {
-          const data = d.data();
-          if (data.phone === userProfile.whatsapp || data.customerName?.toLowerCase() === userProfile.name?.toLowerCase()) {
-            myEnquiries.push({ id: d.id, ...data });
-          }
-        });
-        setCustomerEnquiries(myEnquiries);
-
       } catch (err) {
         console.error("Error fetching account data:", err);
       } finally {
         setLoading(false);
       }
     }
-    fetchProfileAndEnquiries();
+    fetchProfile();
   }, []);
 
   const handleProfileSave = async (e) => {
@@ -154,11 +139,11 @@ function Account() {
           My Account & Profile
         </h1>
         <p className="text-xs text-amber-200/80 mt-2 max-w-xl mx-auto">
-          Manage your personal details, delivery address, and track your submitted cart review requests.
+          Manage your personal details, WhatsApp contact info, and registered delivery address.
         </p>
       </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-5xl space-y-10">
+      <div className="container mx-auto px-4 py-12 max-w-4xl">
 
         {/* Profile Card */}
         <div className="glass-card bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-[#E9E1D5] dark:border-gray-800 shadow-xl space-y-6">
@@ -261,24 +246,10 @@ function Account() {
               </div>
               <div className="sm:col-span-3 space-y-1 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <span className="text-gray-400 block font-semibold">Saved Delivery Address</span>
-                <span className="font-medium text-gray-800 dark:text-gray-200">{userProfile.address ? `${userProfile.address} - ${userProfile.pincode}` : "MG Road, Thrissur, Kerala - 680001"}</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">{userProfile.address ? `${userProfile.address} - ${userProfile.pincode}` : "MG Road - 680001"}</span>
               </div>
             </div>
           )}
-        </div>
-
-        {/* Submitted Cart Review Requests / Enquiries */}
-        <div className="glass-card bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-[#E9E1D5] dark:border-gray-800 shadow-xl space-y-6">
-          <h2 className="text-lg font-serif font-bold text-[#24211F] dark:text-white flex items-center gap-2">
-            <FiShoppingBag className="text-[#800020] dark:text-[#C6A15B]" />
-            <span>My Submitted Cart Reviews & Enquiries</span>
-          </h2>
-
-          <div className="text-center py-12 bg-[#FAF7F0] dark:bg-gray-800/50 rounded-2xl border border-dashed border-[#E9E1D5] dark:border-gray-700 space-y-3">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              You can track all your active cart review requests and order quotations under the <Link to="/purchase-journey" className="text-[#800020] dark:text-[#C6A15B] font-bold hover:underline">Enquiries & Orders</Link> tracker.
-            </p>
-          </div>
         </div>
 
       </div>
