@@ -10,6 +10,7 @@ import { FiShoppingBag, FiTrash2, FiSend, FiCheckCircle, FiMessageCircle } from 
 import { Link } from 'react-router-dom';
 import SareeImageThumbnail from '../../components/SareeImageThumbnail';
 import { sendAutomatedWhatsAppNotification } from '../../services/whatsappService';
+import { sendAutomatedOrderEmail } from '../../services/emailService';
 
 function Cart() {
   const context = useContext(myContext);
@@ -103,6 +104,18 @@ function Cart() {
       setLoading(true);
       await addDoc(collection(fireDB, 'enquiries'), enquiryInfo);
 
+      // Automated Email Alert Dispatch to lakshmistoresonline@gmail.com
+      await sendAutomatedOrderEmail({
+        referenceId,
+        customerName,
+        customerEmail: user?.user?.email,
+        phone: cleanPhone,
+        cartItems,
+        cartSubtotal,
+        address,
+        pinCode
+      });
+
       // Automated WhatsApp Dispatch to Store Hotline 9746998785
       const storeWhatsAppMsg = `🛍️ NEW ONLINE ORDER SUBMISSION!\nRef ID: ${referenceId}\nCustomer: ${customerName}\nPhone: ${cleanPhone}\nItems: ${cartItems.length} Sarees\nSubtotal: ₹${cartSubtotal}\nAddress: ${address} (${pinCode})`;
 
@@ -115,7 +128,7 @@ function Cart() {
       setRequestRef(referenceId);
       setSubmittedSuccess(true);
       dispatch(clearCart());
-      toast.success("Cart submitted & automated store WhatsApp notification sent!");
+      toast.success("Cart submitted! Automated email & WhatsApp dispatch logged.");
       setLoading(false);
     } catch (error) {
       console.error("Submission error:", error);
@@ -159,15 +172,15 @@ function Cart() {
 
               <div className="pt-4 flex flex-col sm:flex-row gap-3">
                 <a
-                  href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}?text=${encodeURIComponent(
-                    `Hello Vastraa, I have submitted my shopping cart for review. Reference: ${requestRef}. Name: ${customerName}, Phone: ${phoneNumber}`
+                  href={`https://wa.me/919746998785?text=${encodeURIComponent(
+                    `🛍️ NEW ONLINE ORDER SUBMISSION!\nRef ID: ${requestRef}\nCustomer: ${customerName}\nPhone: ${phoneNumber}\nDelivery Address: ${address} (${pinCode})`
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all border border-emerald-300/40"
                 >
-                  <FiMessageCircle className="w-4 h-4" />
-                  <span>Follow up on WhatsApp</span>
+                  <FiMessageCircle className="w-4 h-4 text-amber-200" />
+                  <span>Send Order to Store on WhatsApp (+91 97469 98785)</span>
                 </a>
 
                 <Link
