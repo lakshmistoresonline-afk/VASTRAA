@@ -2,18 +2,13 @@ import { addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../firebase/FirebaseConfig';
 
 /**
- * Smart WhatsApp URL Generator for PC Browser / Mobile Devices
+ * Universal Meta WhatsApp Deep Link Generator (wa.me)
+ * Preserves pre-filled text payload across PC Web and Mobile Apps
  */
 export function getWhatsAppDispatchUrl(phone, text) {
   const clean = phone ? phone.replace(/[^0-9]/g, '') : '919746998785';
   const encoded = encodeURIComponent(text);
-  const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-  if (isMobile) {
-    return `https://api.whatsapp.com/send?phone=${clean}&text=${encoded}`;
-  } else {
-    return `https://web.whatsapp.com/send?phone=${clean}&text=${encoded}`;
-  }
+  return `https://wa.me/${clean}?text=${encoded}`;
 }
 
 /**
@@ -59,7 +54,7 @@ export async function sendAutomatedWhatsAppNotification(recipientPhone, messageP
     console.warn("WhatsApp Gateway HTTP POST notice (Fallback to direct API link):", apiErr.message);
   }
 
-  // 3. Automated Non-Blocking WhatsApp API Link Trigger
+  // 3. Universal Meta WhatsApp Deep Link Trigger (wa.me)
   const waUrl = getWhatsAppDispatchUrl(cleanPhone, messagePayload);
 
   if (options.autoOpenWindow !== false) {
