@@ -125,7 +125,7 @@ function DashboardTab() {
     toast.success("Catalogue sync complete!");
   };
 
-  const openQuotationModal = (enq) => {
+  const openQuotationModal = async (enq) => {
     setQuotationModalEnquiry(enq);
     const initialPrices = {};
     const initialAvail = {};
@@ -139,15 +139,35 @@ function DashboardTab() {
     setDiscountPercentage(0);
     setDeliveryCharge(0);
 
-    // Compute customer history & LTV in real-time from enquiries array
+    // Compute customer history, LTV & Referral Wallet Credits in real-time
+    let walletBal = 0;
+    let refCode = '';
+    let refBy = '';
+
+    try {
+      const uSnap = await getDocs(collection(fireDB, 'users'));
+      uSnap.forEach((uDoc) => {
+        const uData = uDoc.data();
+        const enqEmail = (enq.customerEmail || enq.email || '').trim().toLowerCase();
+        const cleanP = (enq.phone || '').replace(/[^0-9]/g, '');
+        if ((enqEmail && uData.email?.trim().toLowerCase() === enqEmail) || (cleanP && uData.whatsapp === cleanP)) {
+          walletBal = uData.referralWalletBalance || 0;
+          refCode = uData.referralCode || '';
+          refBy = uData.referredByCode || '';
+        }
+      });
+    } catch (uErr) {
+      console.warn("User wallet lookup notice:", uErr.message);
+    }
+
     if (enquiries && enquiries.length > 0) {
       const past = enquiries.filter(e => e.id !== enq.id && (e.phone === enq.phone || e.customerName?.toLowerCase() === enq.customerName?.toLowerCase()));
       const pastOrdersCount = past.length;
       const lifetimeValue = past.reduce((sum, e) => sum + (e.quotationDetails?.finalPayable || 0), 0);
       const isVip = pastOrdersCount > 0 || lifetimeValue > 15000;
-      setCustomerLtvInfo({ pastOrdersCount, lifetimeValue, isVip });
+      setCustomerLtvInfo({ pastOrdersCount, lifetimeValue, isVip, walletBal, refCode, refBy });
     } else {
-      setCustomerLtvInfo({ pastOrdersCount: 0, lifetimeValue: 0, isVip: false });
+      setCustomerLtvInfo({ pastOrdersCount: 0, lifetimeValue: 0, isVip: false, walletBal, refCode, refBy });
     }
   };
 
@@ -1394,16 +1414,27 @@ function DashboardTab() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-1">
+              <div className="grid grid-cols-3 gap-3 pt-1">
                 <div>
                   <span className="text-gray-500 block">Total Past Orders:</span>
                   <span className="font-extrabold text-gray-900 dark:text-white text-sm">{customerLtvInfo.pastOrdersCount} Orders</span>
                 </div>
                 <div>
-                  <span className="text-gray-500 block">Lifetime Order Value (LTV):</span>
-                  <span className="font-extrabold text-[#800020] dark:text-[#E5C158] text-sm">₹{customerLtvInfo.lifetimeValue}</span>
+                  <span className="text-gray-500 block">Lifetime Value (LTV):</span>
+                  <span className="font-extrabold text-[#800020] dark:text-[#E5C158] text-sm">₹{customerLtvInfo.lifetimeValue.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block">Available Saree Wallet:</span>
+                  <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm">₹{(customerLtvInfo.walletBal || 0).toLocaleString()}</span>
                 </div>
               </div>
+
+              {customerLtvInfo.refBy && (
+                <div className="bg-emerald-100/70 dark:bg-emerald-950/60 p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 font-bold flex justify-between items-center">
+                  <span>🎁 Customer registered via Referral Pass ({customerLtvInfo.refBy})</span>
+                  <span>5% Welcome Discount Eligible</span>
+                </div>
+              )}
 
               {/* Smart Discount Recommendation Banner */}
               <div className="pt-2 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
