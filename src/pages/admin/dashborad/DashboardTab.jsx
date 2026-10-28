@@ -64,8 +64,10 @@ function DashboardTab() {
   // Item 4: Bulk Category Price Adjustment Modal State
   const [bulkPriceModalOpen, setBulkPriceModalOpen] = useState(false);
   const [bulkCategoryCode, setBulkCategoryCode] = useState('A');
-  const [bulkAdjustmentType, setBulkAdjustmentType] = useState('add_flat');
+  const [bulkAdjustmentType, setBulkAdjustmentType] = useState('set_range'); // 'set_range', 'add_flat', 'sub_flat', 'add_percent'
   const [bulkAdjustmentAmount, setBulkAdjustmentAmount] = useState(500);
+  const [bulkMinPrice, setBulkMinPrice] = useState(24000);
+  const [bulkMaxPrice, setBulkMaxPrice] = useState(28000);
 
   const kanbanRef = React.useRef(null);
 
@@ -329,7 +331,25 @@ function DashboardTab() {
     }
   };
 
-  // Item 4: Handle Bulk Category Price Adjustment
+  function getNonLinearShuffledPrice(idString, minP, maxP) {
+    let num = 0;
+    for (let i = 0; i < idString.length; i++) {
+      num = (num * 31 + idString.charCodeAt(i)) >>> 0;
+    }
+    num ^= num >>> 16;
+    num = Math.imul(num, 0x85ebca6b) >>> 0;
+    num ^= num >>> 13;
+    num = Math.imul(num, 0xc2b2ae35) >>> 0;
+    num ^= num >>> 16;
+
+    const range = maxP - minP;
+    if (range <= 0) return minP;
+    const steps = Math.floor(range / 50);
+    const stepIndex = num % (steps + 1);
+    return minP + (stepIndex * 50);
+  }
+
+  // Item 4: Handle Bulk Category Price & Min-Max Range Adjustment
   const handleBulkPriceUpdate = async () => {
     const targetCat = catalogues.find(c => c.code === bulkCategoryCode);
     if (!targetCat) return;
@@ -349,18 +369,35 @@ function DashboardTab() {
         let currentP = Number(item.price) || item.minPrice || 0;
         let newP = currentP;
 
-        if (bulkAdjustmentType === 'add_flat') newP = currentP + val;
-        else if (bulkAdjustmentType === 'sub_flat') newP = Math.max(0, currentP - val);
-        else if (bulkAdjustmentType === 'add_percent') newP = currentP + Math.round((currentP * val) / 100);
+        if (bulkAdjustmentType === 'set_range') {
+          const minP = parseFloat(bulkMinPrice) || 1000;
+          const maxP = parseFloat(bulkMaxPrice) || minP;
+          newP = getNonLinearShuffledPrice(item.id, minP, maxP);
+        } else if (bulkAdjustmentType === 'add_flat') {
+          newP = currentP + val;
+        } else if (bulkAdjustmentType === 'sub_flat') {
+          newP = Math.max(0, currentP - val);
+        } else if (bulkAdjustmentType === 'add_percent') {
+          newP = currentP + Math.round((currentP * val) / 100);
+        }
 
         // Round to nearest 50
         newP = Math.round(newP / 50) * 50;
 
         try {
           const productRef = doc(fireDB, 'products', item.id);
-          await updateDoc(productRef, { price: newP });
+          await updateDoc(productRef, {
+            price: newP,
+            minPrice: bulkAdjustmentType === 'set_range' ? parseFloat(bulkMinPrice) : item.minPrice,
+            maxPrice: bulkAdjustmentType === 'set_range' ? parseFloat(bulkMaxPrice) : item.maxPrice
+          });
         } catch {
-          await addDoc(collection(fireDB, 'products'), { ...item, price: newP });
+          await addDoc(collection(fireDB, 'products'), {
+            ...item,
+            price: newP,
+            minPrice: bulkAdjustmentType === 'set_range' ? parseFloat(bulkMinPrice) : item.minPrice,
+            maxPrice: bulkAdjustmentType === 'set_range' ? parseFloat(bulkMaxPrice) : item.maxPrice
+          });
         }
         count++;
       }
@@ -1673,25 +1710,57 @@ function DashboardTab() {
                   onChange={(e) => setBulkAdjustmentType(e.target.value)}
                   className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-semibold"
                 >
+                  <option value="set_range">Set Min–Max Price Range (₹)</option>
                   <option value="add_flat">Increase Price (+ Flat Amount in ₹)</option>
                   <option value="sub_flat">Decrease Price (- Flat Amount in ₹)</option>
                   <option value="add_percent">Increase Margin (+ Percentage %)</option>
                 </select>
               </div>
 
-              <div>
-                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
-                  Adjustment Value ({bulkAdjustmentType === 'add_percent' ? '%' : '₹'}):
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={bulkAdjustmentAmount}
-                  onChange={(e) => setBulkAdjustmentAmount(e.target.value)}
-                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono font-bold"
-                  placeholder="500"
-                />
-              </div>
+              {bulkAdjustmentType === 'set_range' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      New Minimum Price (₹):
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={bulkMinPrice}
+                      onChange={(e) => setBulkMinPrice(e.target.value)}
+                      className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono font-bold"
+                      placeholder="24000"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      New Maximum Price (₹):
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={bulkMaxPrice}
+                      onChange={(e) => setBulkMaxPrice(e.target.value)}
+                      className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono font-bold"
+                      placeholder="32000"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Adjustment Value ({bulkAdjustmentType === 'add_percent' ? '%' : '₹'}):
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={bulkAdjustmentAmount}
+                    onChange={(e) => setBulkAdjustmentAmount(e.target.value)}
+                    className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono font-bold"
+                    placeholder="500"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
