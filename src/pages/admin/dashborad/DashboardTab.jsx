@@ -324,6 +324,42 @@ function DashboardTab() {
     }
   };
 
+  // Stage-Specific Drafted WhatsApp Message Generator
+  const getStageSpecificWhatsAppMessage = (enq) => {
+    const customerName = enq.customerName || 'Valued Customer';
+    const status = enq.status || 'Pending';
+    const orderRef = enq.message ? enq.message.split('.')[0] : (enq.id || 'VASTRAA-ORDER');
+
+    if (status === 'QUOTATION_READY' && enq.quotationDetails) {
+      const amount = enq.quotationDetails.finalPayable || 0;
+      return `Hello ${customerName}, your formal Vastraa quotation for ${orderRef} is ready! Net Payable: ₹${amount.toLocaleString()}. Please sign in to your customer account under "Purchase Journey" to review and accept.`;
+    }
+
+    if (status === 'QUOTATION_ACCEPTED') {
+      const amount = enq.quotationDetails?.finalPayable || 0;
+      return `Hello ${customerName}, your quotation for Vastraa order ${orderRef} (Net Payable: ₹${amount.toLocaleString()}) has been accepted! Please complete payment via our store UPI QR code and submit your UTR reference in your account.`;
+    }
+
+    if (status === 'PAYMENT_PENDING') {
+      const utr = enq.paymentReference || 'Submitted';
+      return `Hello ${customerName}, we received your UPI/UTR payment reference (${utr}) for Vastraa order ${orderRef}. Our accounts team is currently verifying the payment.`;
+    }
+
+    if (status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || status === 'READY_FOR_DISPATCH') {
+      return `✓ Hello ${customerName}, your payment for Vastraa order ${orderRef} has been verified successfully! Your order is confirmed and sent for express handloom packing and dispatch.`;
+    }
+
+    if (status === 'DISPATCHED' || enq.trackingDetails) {
+      const courier = enq.trackingDetails?.courierName || 'Express Courier';
+      const awb = enq.trackingDetails?.awbNumber || 'In Transit';
+      const date = enq.trackingDetails?.courierBookedDate || 'Today';
+      return `📦 Hello ${customerName}, your Vastraa silk saree order ${orderRef} has been dispatched via ${courier}! Tracking AWB: ${awb}. Booked Date: ${date}. Track live in your Purchase Journey portal!`;
+    }
+
+    // Default Stage 1 / Stage 2 (Pending Stock Review)
+    return `Hello ${customerName}, we have received your Vastraa saree review request (${enq.sareeTitle || orderRef}). Our showroom team is currently verifying live stock availability and preparing your quotation.`;
+  };
+
   const filteredInventory = product ? product.filter((p) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
@@ -844,11 +880,11 @@ function DashboardTab() {
                                 )}
 
                                 <a
-                                  href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello ${enq.customerName}, regarding your Vastraa request: `)}`}
+                                  href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(getStageSpecificWhatsAppMessage(enq))}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm flex items-center gap-1"
-                                  title="WhatsApp Customer"
+                                  title="WhatsApp Customer Stage Pre-Filled Draft"
                                 >
                                   <FiMessageCircle className="w-3.5 h-3.5" />
                                   <span>WhatsApp</span>
@@ -985,11 +1021,11 @@ function DashboardTab() {
                             </button>
                           )}
                           <a
-                            href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`}
+                            href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(getStageSpecificWhatsAppMessage(enq))}`}
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl font-bold text-[11px] shadow-sm transition-all"
-                            title="Chat with customer on WhatsApp"
+                            title="Chat with customer on WhatsApp (Stage Pre-Filled Draft)"
                           >
                             <FiMessageCircle className="w-3.5 h-3.5" />
                             <span>WhatsApp</span>
