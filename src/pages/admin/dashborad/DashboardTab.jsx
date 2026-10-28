@@ -485,11 +485,11 @@ function DashboardTab() {
             </div>
           </div>
 
-          {/* Admin Live Inventory Filter Toolbar (Matching Screenshot) */}
-          <div className="bg-[#FAF7F0] dark:bg-gray-800 p-5 rounded-3xl border border-[#E9E1D5] dark:border-gray-700 grid grid-cols-1 md:grid-cols-12 gap-4 items-end text-xs shadow-xs">
+          {/* Admin Live Inventory Filter Toolbar */}
+          <div className="bg-[#FAF7F0] dark:bg-gray-800 p-5 rounded-3xl border border-[#E9E1D5] dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end text-xs shadow-xs">
 
             {/* Select Catalogue */}
-            <div className="md:col-span-3 space-y-1.5">
+            <div className="lg:col-span-3 space-y-1.5">
               <label className="block font-bold text-[#211A19] dark:text-gray-300 uppercase tracking-wider text-[11px] flex items-center gap-1">
                 <FiFilter className="text-[#800020] dark:text-[#C6A15B]" /> SELECT CATALOGUE
               </label>
@@ -511,7 +511,7 @@ function DashboardTab() {
             </div>
 
             {/* Price Range Filter */}
-            <div className="md:col-span-3 space-y-1.5">
+            <div className="lg:col-span-3 space-y-1.5">
               <label className="block font-bold text-[#211A19] dark:text-gray-300 uppercase tracking-wider text-[11px]">
                 ₹ SELECT PRICE RANGE
               </label>
@@ -533,7 +533,7 @@ function DashboardTab() {
             </div>
 
             {/* Search by Code or Category */}
-            <div className="md:col-span-4 space-y-1.5">
+            <div className="lg:col-span-3 space-y-1.5">
               <label className="block font-bold text-[#211A19] dark:text-gray-300 uppercase tracking-wider text-[11px] flex items-center gap-1">
                 <FiSearch className="text-[#800020] dark:text-[#C6A15B]" /> SEARCH BY CODE OR CATEGORY
               </label>
@@ -542,8 +542,8 @@ function DashboardTab() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="e.g. A-001, Kanchipuram, Wedding..."
-                  className="w-full font-medium pl-3.5 pr-8 py-3 rounded-2xl border border-[#E9E1D5] dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020] shadow-xs"
+                  placeholder="e.g. A-001, Kanchipuram..."
+                  className="w-full font-medium pl-3.5 pr-8 py-3 rounded-2xl border border-[#E9E1D5] dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020] shadow-xs text-xs"
                 />
                 {searchTerm && (
                   <button
@@ -556,12 +556,12 @@ function DashboardTab() {
               </div>
             </div>
 
-            {/* Quick Filter Buttons, Bulk Margin Tool & Sort Toggle */}
-            <div className="md:col-span-2 flex items-center gap-1.5 justify-end flex-wrap sm:flex-nowrap">
+            {/* Action Buttons: Bulk Margin Tool & Sort Toggle */}
+            <div className="lg:col-span-3 flex items-center gap-2 justify-start lg:justify-end flex-wrap sm:flex-nowrap">
               <button
                 type="button"
                 onClick={() => setBulkPriceModalOpen(true)}
-                className="bg-[#800020] hover:bg-[#67001a] text-amber-100 px-3 py-3 rounded-2xl font-extrabold text-xs shadow-sm transition-all flex items-center gap-1 border border-[#C6A15B]/40 whitespace-nowrap"
+                className="bg-[#800020] hover:bg-[#67001a] text-amber-100 px-3.5 py-3 rounded-2xl font-extrabold text-xs shadow-sm transition-all flex items-center gap-1 border border-[#C6A15B]/40 whitespace-nowrap flex-shrink-0"
                 title="Bulk Adjust Prices for a Saree Catalogue"
               >
                 <span>Bulk Margin Tool 🏷️</span>
@@ -575,7 +575,7 @@ function DashboardTab() {
                   else setAdminSortPrice('');
                 }}
                 title="Click to toggle sorting: Low to High → High to Low → Default Order"
-                className={`px-3 py-3 rounded-2xl font-bold transition-all text-xs border flex items-center gap-1 ${
+                className={`px-3.5 py-3 rounded-2xl font-extrabold text-xs transition-all flex items-center gap-1 border shadow-sm flex-shrink-0 whitespace-nowrap ${
                   adminSortPrice === 'asc'
                     ? 'bg-[#800020] text-amber-100 border-[#C6A15B]/40 ring-2 ring-[#C6A15B]/30'
                     : adminSortPrice === 'desc'
@@ -590,21 +590,6 @@ function DashboardTab() {
                     ? 'High ➔ Low ↓'
                     : 'Sort Price ↕'}
                 </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedCategoryFilter('Kanchipuram Pure Soft Silk Sarees');
-                  setActiveQuickTab('SOFT');
-                }}
-                className={`px-3.5 py-3 rounded-2xl font-bold transition-all text-xs border ${
-                  selectedCategoryFilter === 'Kanchipuram Pure Soft Silk Sarees'
-                    ? 'bg-[#800020] text-amber-100 shadow-md border-[#C6A15B]/40'
-                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-[#E9E1D5] dark:border-gray-700'
-                }`}
-              >
-                Soft Silks
               </button>
             </div>
 
