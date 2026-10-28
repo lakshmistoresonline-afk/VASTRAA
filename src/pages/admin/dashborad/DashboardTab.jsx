@@ -204,7 +204,7 @@ function DashboardTab() {
       await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: quotationModalEnquiry.customerName,
         type: "QUOTATION_READY",
-        autoOpenWindow: false
+        autoOpenWindow: true
       });
 
       toast.success(`Quotation published & WhatsApp template dispatched to ${quotationModalEnquiry.customerName} (${cleanPhone})!`);
@@ -231,7 +231,7 @@ function DashboardTab() {
       await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: enq.customerName,
         type: "PAYMENT_VERIFIED",
-        autoOpenWindow: false
+        autoOpenWindow: true
       });
 
       toast.success("Payment verified & automated WhatsApp confirmation sent!");
@@ -267,7 +267,7 @@ function DashboardTab() {
       await sendAutomatedWhatsAppNotification(cleanPhone, whatsAppMsg, {
         customerName: trackingModalEnquiry.customerName,
         type: "ORDER_DISPATCHED",
-        autoOpenWindow: false
+        autoOpenWindow: true
       });
 
       toast.success("Shipping details saved & automated WhatsApp tracking dispatched!");
