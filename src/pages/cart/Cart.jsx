@@ -109,7 +109,7 @@ function Cart() {
       await sendAutomatedWhatsAppNotification("919746998785", storeWhatsAppMsg, {
         type: "STORE_NEW_CART_SUBMISSION",
         customerName: customerName,
-        autoOpenWindow: true
+        autoOpenWindow: false
       });
 
       setRequestRef(referenceId);
