@@ -252,6 +252,67 @@ function Account() {
           )}
         </div>
 
+        {/* Refer & Earn Saree Rewards Portal */}
+        <div className="glass-card bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-[#E9E1D5] dark:border-gray-800 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+            <div>
+              <span className="text-[10px] font-bold text-[#800020] dark:text-[#E5C158] uppercase tracking-wider block">
+                Two-Sided Referral Program
+              </span>
+              <h2 className="text-lg font-serif font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span>🎁 Refer Friends & Earn 1% Saree Credits</span>
+              </h2>
+            </div>
+
+            <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3.5 py-1.5 rounded-full text-xs font-bold border border-emerald-300/40">
+              Your Wallet: ₹{userProfile.referralWalletBalance || 0} Credits
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+            <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
+              <span className="text-gray-400 font-bold block text-[10px] uppercase">Your Invite Code</span>
+              <p className="text-lg font-mono font-extrabold text-[#800020] dark:text-[#E5C158]">
+                {userProfile.referralCode || ("REF-" + (userProfile.whatsapp || "VASTRAA"))}
+              </p>
+              <p className="text-[10px] text-gray-500">Share with family & friends</p>
+            </div>
+
+            <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
+              <span className="text-gray-400 font-bold block text-[10px] uppercase">Friend's Welcome Pass</span>
+              <p className="text-lg font-serif font-extrabold text-emerald-600 dark:text-emerald-400">
+                5% Instant Discount
+              </p>
+              <p className="text-[10px] text-gray-500">Applied automatically on their 1st order</p>
+            </div>
+
+            <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
+              <span className="text-gray-400 font-bold block text-[10px] uppercase">Your Reward Rate</span>
+              <p className="text-lg font-serif font-extrabold text-indigo-600 dark:text-indigo-400">
+                1% Order Cashback
+              </p>
+              <p className="text-[10px] text-gray-500">Credited to wallet on order confirmation</p>
+            </div>
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-emerald-50 dark:bg-emerald-950/40 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800/50">
+            <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+              💡 Invite friends to shop for handloom sarees. They get <strong className="text-emerald-700 dark:text-emerald-300">5% OFF</strong> their 1st purchase, and you earn <strong className="text-emerald-700 dark:text-emerald-300">1% Cashback Credits</strong> in your wallet!
+            </p>
+
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                `✨ Use my referral code ${userProfile.referralCode || ("REF-" + userProfile.whatsapp)} to get 5% Instant Discount on your first Kanchipuram pure silk saree at Vastraa! Shop here: ${window.location.origin}/login?ref=${userProfile.referralCode || ("REF-" + userProfile.whatsapp)}`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-5 py-3 rounded-xl text-xs shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 flex-shrink-0"
+            >
+              <span>Share Invite Link on WhatsApp 💬</span>
+            </a>
+          </div>
+        </div>
+
       </div>
     </Layout>
   );

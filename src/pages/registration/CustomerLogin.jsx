@@ -38,8 +38,13 @@ function CustomerLogin() {
       return;
     }
 
+    const searchParams = new URLSearchParams(location.search);
+    const refParam = searchParams.get('ref')?.trim().toUpperCase();
+
     try {
       setLoading(true);
+      let myRefCode = "REF-" + cleanPhone;
+
       if (isRegistering) {
         const res = await createUserWithEmailAndPassword(auth, cleanEmail, password);
         const userDoc = {
@@ -48,10 +53,14 @@ function CustomerLogin() {
           email: cleanEmail,
           whatsapp: cleanPhone,
           role: 'customer',
+          referralCode: myRefCode,
+          referralWalletBalance: 0,
+          referredByCode: refParam || null,
+          isFirstOrderCompleted: false,
           createdAt: new Date().toISOString()
         };
         await addDoc(collection(fireDB, "users"), userDoc);
-        toast.success("Customer account created successfully!");
+        toast.success("Customer account created successfully with Referral Welcome Pass!");
       } else {
         await signInWithEmailAndPassword(auth, cleanEmail, password);
         toast.success("Welcome back to Vastraa!");
@@ -71,7 +80,11 @@ function CustomerLogin() {
           email: cleanEmail,
           uid: auth.currentUser?.uid,
           name: isRegistering ? name.trim() : (cleanEmail === "test1@gmail.com" ? "Test Customer One" : "Customer"),
-          whatsapp: isRegistering ? cleanPhone : (cleanEmail === "test1@gmail.com" ? "9746998783" : "9746998785")
+          whatsapp: isRegistering ? cleanPhone : (cleanEmail === "test1@gmail.com" ? "9746998783" : "9746998785"),
+          referralCode: myRefCode,
+          referralWalletBalance: 0,
+          referredByCode: refParam || null,
+          isFirstOrderCompleted: false
         }
       }));
 

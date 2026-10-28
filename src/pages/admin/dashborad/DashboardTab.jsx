@@ -279,6 +279,71 @@ function DashboardTab() {
         autoOpenWindow: false
       });
 
+      // Referrer Reward Calculation: If customer was referred by someone, credit 1% of net payable to Referrer Wallet
+      const finalPayableAmt = enq.quotationDetails?.finalPayable || 0;
+      const cleanCustomerEmail = (enq.customerEmail || enq.email || '').trim().toLowerCase();
+
+      try {
+        const usersSnap = await getDocs(collection(fireDB, 'users'));
+        let customerUserDoc = null;
+        let customerUserDocId = null;
+
+        usersSnap.forEach((uDoc) => {
+          const uData = uDoc.data();
+          if (cleanCustomerEmail && uData.email?.trim().toLowerCase() === cleanCustomerEmail) {
+            customerUserDoc = uData;
+            customerUserDocId = uDoc.id;
+          }
+        });
+
+        if (customerUserDoc && customerUserDoc.referredByCode) {
+          const referrerCode = customerUserDoc.referredByCode.trim().toUpperCase();
+          const rewardAmount = Math.max(10, Math.round((finalPayableAmt * 1) / 100)); // 1% of net order value
+
+          let referrerDoc = null;
+          let referrerDocId = null;
+
+          usersSnap.forEach((uDoc) => {
+            const uData = uDoc.data();
+            if (uData.referralCode?.trim().toUpperCase() === referrerCode) {
+              referrerDoc = uData;
+              referrerDocId = uDoc.id;
+            }
+          });
+
+          if (referrerDoc && referrerDocId) {
+            const currentBal = Number(referrerDoc.referralWalletBalance) || 0;
+            const newBal = currentBal + rewardAmount;
+            const currentReferredCount = Number(referrerDoc.referredCount) || 0;
+
+            await updateDoc(doc(fireDB, 'users', referrerDocId), {
+              referralWalletBalance: newBal,
+              referredCount: currentReferredCount + 1
+            });
+
+            // Dispatch automated WhatsApp notification to the Referrer
+            const referrerPhone = referrerDoc.whatsapp ? referrerDoc.whatsapp.replace(/[^0-9]/g, '') : '919746998785';
+            const referrerMsg = `🎉 Congratulations ${referrerDoc.name || 'Valued Customer'}! Your friend ${enq.customerName || 'Customer'} completed a Vastraa saree order of ₹${finalPayableAmt.toLocaleString()}. 1% Saree Reward Credits (+₹${rewardAmount}) have been added to your Vastraa wallet! Total Balance: ₹${newBal.toLocaleString()}.`;
+
+            await sendAutomatedWhatsAppNotification(referrerPhone, referrerMsg, {
+              customerName: referrerDoc.name,
+              type: "REFERRAL_CREDIT_EARNED",
+              autoOpenWindow: false
+            });
+
+            console.log(`✓ Credited 1% reward (₹${rewardAmount}) to referrer ${referrerDoc.name} (${referrerCode})`);
+          }
+
+          if (customerUserDocId) {
+            await updateDoc(doc(fireDB, 'users', customerUserDocId), {
+              isFirstOrderCompleted: true
+            });
+          }
+        }
+      } catch (refErr) {
+        console.warn("Referral credit calculation notice:", refErr.message);
+      }
+
       toast.success("Payment verified & automated WhatsApp confirmation sent!");
       setPaymentVerifyModalEnquiry(null);
       if (getEnquiriesData) getEnquiriesData();

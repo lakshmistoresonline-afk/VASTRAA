@@ -34,6 +34,8 @@ function Cart() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [requestRef, setRequestRef] = useState("");
+  const [userReferralProfile, setUserReferralProfile] = useState(null);
+  const [useWalletRedemption, setUseWalletRedemption] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -46,8 +48,11 @@ function Cart() {
         querySnapshot.forEach((docSnap) => {
           const data = docSnap.data();
           if (data.email === user.user.email || data.uid === user.user.uid) {
+            setUserReferralProfile(data);
             if (data.name && !customerName) setCustomerName(data.name);
             if (data.whatsapp && !phoneNumber) setPhoneNumber(data.whatsapp);
+            if (data.address && !address) setAddress(data.address);
+            if (data.pincode && !pinCode) setPinCode(data.pincode);
           }
         });
       } catch (err) {
@@ -58,6 +63,14 @@ function Cart() {
   }, [user]);
 
   const cartSubtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+
+  const isEligibleFor5PctWelcome = userReferralProfile && userReferralProfile.referredByCode && !userReferralProfile.isFirstOrderCompleted;
+  const welcomeDiscountAmount = isEligibleFor5PctWelcome ? Math.round((cartSubtotal * 5) / 100) : 0;
+
+  const walletCreditsAvailable = userReferralProfile?.referralWalletBalance || 0;
+  const walletRedeemedAmount = (useWalletRedemption && walletCreditsAvailable > 0) ? Math.min(walletCreditsAvailable, Math.max(0, cartSubtotal - welcomeDiscountAmount)) : 0;
+
+  const estimatedFinalSubtotal = Math.max(0, cartSubtotal - welcomeDiscountAmount - walletRedeemedAmount);
 
   const submitCartForReview = async (e) => {
     e.preventDefault();
@@ -273,15 +286,44 @@ function Cart() {
                     </div>
                     <div className="flex justify-between text-[#77716A] dark:text-gray-300">
                       <span>Estimated Subtotal:</span>
-                      <span className="font-bold text-[#800020] dark:text-[#E5C158]">₹{cartSubtotal.toLocaleString()}</span>
+                      <span className="font-bold text-[#24211F] dark:text-white">₹{cartSubtotal.toLocaleString()}</span>
                     </div>
+
+                    {isEligibleFor5PctWelcome && (
+                      <div className="flex justify-between text-emerald-700 dark:text-emerald-400 font-bold">
+                        <span>🎁 5% Referral Welcome Pass:</span>
+                        <span>- ₹{welcomeDiscountAmount.toLocaleString()}</span>
+                      </div>
+                    )}
+
+                    {walletCreditsAvailable > 0 && (
+                      <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
+                        <label className="flex items-center gap-2 cursor-pointer font-bold text-gray-800 dark:text-gray-200">
+                          <input
+                            type="checkbox"
+                            checked={useWalletRedemption}
+                            onChange={(e) => setUseWalletRedemption(e.target.checked)}
+                            className="w-4 h-4 accent-[#800020] rounded"
+                          />
+                          <span>Redeem Saree Wallet Credits (Available: ₹{walletCreditsAvailable})</span>
+                        </label>
+                        {useWalletRedemption && (
+                          <div className="flex justify-between text-emerald-700 dark:text-emerald-400 font-bold pl-6">
+                            <span>Wallet Credit Applied:</span>
+                            <span>- ₹{walletRedeemedAmount.toLocaleString()}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex justify-between text-[#77716A] dark:text-gray-300">
                       <span>Shipping:</span>
                       <span className="font-bold text-emerald-600 uppercase">FREE (₹0)</span>
                     </div>
+
                     <div className="pt-2 border-t border-[#E9E1D5] dark:border-gray-700 flex justify-between font-extrabold text-[#24211F] dark:text-white text-sm">
                       <span>Estimated Total:</span>
-                      <span className="text-[#800020] dark:text-[#E5C158]">₹{cartSubtotal.toLocaleString()}</span>
+                      <span className="text-[#800020] dark:text-[#E5C158]">₹{estimatedFinalSubtotal.toLocaleString()}</span>
                     </div>
                   </div>
 
