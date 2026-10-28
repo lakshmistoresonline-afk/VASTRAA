@@ -2,8 +2,8 @@ import { addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../firebase/FirebaseConfig';
 
 /**
- * Automated Email Dispatch Service
- * Sends itemized order notifications directly to lakshmistoresonline@gmail.com
+ * Option 2: Automated Email Dispatch Service
+ * Sends itemized order notifications directly to lakshmistoresonline@gmail.com via direct FormSubmit HTTP Gateway
  */
 export async function sendAutomatedOrderEmail(orderData) {
   const { referenceId, customerName, customerEmail, phone, cartItems, cartSubtotal, address, pinCode } = orderData || {};
@@ -49,34 +49,31 @@ STATUS: Pending Review & Quotation
     console.warn("Firestore email_job log notice:", err.message);
   }
 
-  // 2. HTTP POST dispatch to EmailJS / REST API endpoint if configured
-  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_vastraa";
-  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_vastraa_order";
-  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-  if (publicKey) {
-    try {
-      await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          service_id: serviceId,
-          template_id: templateId,
-          user_id: publicKey,
-          template_params: {
-            to_email: "lakshmistoresonline@gmail.com",
-            subject: emailSubject,
-            message: emailBody,
-            customer_name: customerName,
-            customer_phone: phone,
-            order_ref: referenceId
-          }
-        })
-      });
-      console.log("✓ Automated Email delivered to lakshmistoresonline@gmail.com");
-    } catch (e) {
-      console.warn("Email API POST notice:", e.message);
+  // 2. Direct HTTP POST Dispatch via FormSubmit Endpoint (Delivers directly to lakshmistoresonline@gmail.com)
+  try {
+    const response = await fetch("https://formsubmit.co/ajax/lakshmistoresonline@gmail.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        _subject: emailSubject,
+        order_reference: referenceId,
+        customer_name: customerName,
+        customer_phone: phone,
+        customer_email: customerEmail || 'Not provided',
+        delivery_address: `${address} (Pincode: ${pinCode})`,
+        order_subtotal: `₹${cartSubtotal}`,
+        itemized_items: itemsListText,
+        _template: "table"
+      })
+    });
+    if (response.ok) {
+      console.log("✓ Automated Email delivered directly to lakshmistoresonline@gmail.com");
     }
+  } catch (e) {
+    console.warn("FormSubmit HTTP POST notice:", e.message);
   }
 
   return { success: true };
