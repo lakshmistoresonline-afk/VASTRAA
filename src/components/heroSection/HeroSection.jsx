@@ -33,10 +33,19 @@ const HeroSection = () => {
           {/* Left Text Content Area */}
           <div className="relative z-10 p-8 sm:p-12 lg:p-16 max-w-2xl space-y-6">
 
-            {/* Live Catalogue Tag */}
-            <div className="inline-flex items-center gap-2 bg-[#800020]/10 dark:bg-[#D4AF37]/20 border border-[#800020]/20 dark:border-[#D4AF37]/40 px-4 py-1.5 rounded-full text-xs font-bold text-[#800020] dark:text-[#E5C158] backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>HANDLOOM SILK WEAVES</span>
+            {/* Live Catalogue Tag + Referral Offer Badge */}
+            <div className="flex flex-wrap gap-2 items-center">
+              <div className="inline-flex items-center gap-2 bg-[#800020]/10 dark:bg-[#D4AF37]/20 border border-[#800020]/20 dark:border-[#D4AF37]/40 px-4 py-1.5 rounded-full text-xs font-bold text-[#800020] dark:text-[#E5C158] backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>HANDLOOM SILK WEAVES</span>
+              </div>
+
+              <Link
+                to="/account"
+                className="inline-flex items-center gap-1.5 bg-emerald-600/10 dark:bg-emerald-500/20 border border-emerald-600/30 text-emerald-800 dark:text-emerald-300 px-3.5 py-1.5 rounded-full text-xs font-extrabold hover:underline"
+              >
+                <span>🎁 5% Friend Welcome Pass • Earn 1% Saree Credits</span>
+              </Link>
             </div>
 
             {/* Headline */}

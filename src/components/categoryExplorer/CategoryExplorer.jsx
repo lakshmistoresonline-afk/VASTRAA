@@ -97,6 +97,30 @@ function CategoryExplorer() {
 
         </div>
 
+        {/* Homepage Referral & Welcome Offers Banner */}
+        <div className="bg-gradient-to-r from-[#4A071B] via-[#650A25] to-[#800020] text-amber-50 p-6 sm:p-8 rounded-3xl shadow-xl border-b-4 border-[#C6A15B] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <span className="bg-[#C6A15B] text-gray-950 font-black px-3.5 py-1 rounded-full text-[10px] uppercase tracking-wider">
+              Exclusive Member Loyalty Offers
+            </span>
+            <h3 className="text-2xl font-serif font-extrabold text-white">
+              🎁 Refer Friends & Earn 1% Saree Credits + 5% Friend Welcome Pass
+            </h3>
+            <p className="text-xs text-amber-200/90 leading-relaxed">
+              Invite your friends to shop for handloom sarees! Your friend gets an instant <strong className="text-white">5% OFF Welcome Pass</strong> on their 1st saree order, and you earn <strong className="text-white">1% Order Cashback</strong> credited directly to your Vastraa Saree Wallet.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0 w-full md:w-auto">
+            <Link
+              to="/account"
+              className="bg-[#C6A15B] hover:bg-white text-gray-950 font-extrabold px-6 py-3.5 rounded-xl text-xs shadow-lg transition-all text-center flex items-center justify-center gap-1.5"
+            >
+              <span>Get Your Referral Link 💬</span>
+            </Link>
+          </div>
+        </div>
+
         {/* Store Trust Badges */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6 border-t border-[#E9E1D5] dark:border-gray-800 text-xs">
           <div className="flex items-center gap-3.5 bg-white dark:bg-gray-900 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-800 shadow-sm">
