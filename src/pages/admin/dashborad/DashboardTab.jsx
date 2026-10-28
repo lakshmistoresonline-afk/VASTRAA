@@ -829,15 +829,15 @@ function DashboardTab() {
               No customer availability enquiries or bag reviews received yet.
             </div>
           ) : enquiryViewMode === 'kanban' ? (
-            /* 6-STAGE HORIZONTAL SCROLLABLE KANBAN PIPELINE BOARD */
-            <div ref={kanbanRef} className="flex overflow-x-auto gap-5 pb-6 pt-2 px-1 snap-x scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+            /* ALL 6 PIPELINE STAGES VISIBLE ON ONE PAGE WITHOUT SCROLLING */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 pb-6 pt-2 px-1">
               {['Pending Review', 'QUOTATION_DRAFT', 'QUOTATION_READY', 'PAYMENT_PENDING', 'PAYMENT_VERIFIED_ORDER_CONFIRMED', 'DISPATCHED'].map((colStatus, cIdx) => {
                 const colTitles = {
-                  'Pending Review': '1. Pending Stock Review',
+                  'Pending Review': '1. Pending Stock',
                   'QUOTATION_DRAFT': '2. Stock Verified',
-                  'QUOTATION_READY': '3. Ready for Payment',
-                  'PAYMENT_PENDING': '4. Awaiting Payment Verification',
-                  'PAYMENT_VERIFIED_ORDER_CONFIRMED': '5. Confirmed & Ready for Dispatch',
+                  'QUOTATION_READY': '3. Ready Payment',
+                  'PAYMENT_PENDING': '4. Awaiting Payment',
+                  'PAYMENT_VERIFIED_ORDER_CONFIRMED': '5. Confirmed & Ready',
                   'DISPATCHED': '6. Dispatched & Tracked'
                 };
 
@@ -861,20 +861,27 @@ function DashboardTab() {
                   return false;
                 });
 
+                // Sort order entries in each stage by latest timestamp first
+                colEnquiries.sort((a, b) => {
+                  const tA = new Date(a.updatedAt || a.paymentSubmittedAt || a.createdAt || 0).getTime();
+                  const tB = new Date(b.updatedAt || b.paymentSubmittedAt || b.createdAt || 0).getTime();
+                  return tB - tA;
+                });
+
                 return (
-                  <div key={cIdx} className={`bg-gray-50/90 dark:bg-gray-800/80 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 space-y-3 w-80 flex-shrink-0 snap-start shadow-sm ${headerBorders[colStatus]}`}>
+                  <div key={cIdx} className={`bg-gray-50/90 dark:bg-gray-800/80 rounded-2xl p-3 border border-gray-200 dark:border-gray-700 space-y-2.5 shadow-sm min-w-0 ${headerBorders[colStatus]}`}>
                     <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
-                      <h3 className="font-serif font-bold text-xs text-gray-900 dark:text-white">
+                      <h3 className="font-serif font-bold text-[11px] text-gray-900 dark:text-white truncate">
                         {colTitles[colStatus]}
                       </h3>
-                      <span className="bg-[#800020] text-[#D4AF37] px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs">
+                      <span className="bg-[#800020] text-[#D4AF37] px-2 py-0.5 rounded-full text-[9px] font-extrabold shadow-xs flex-shrink-0">
                         {colEnquiries.length}
                       </span>
                     </div>
 
-                    <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
+                    <div className="space-y-2.5 max-h-[65vh] overflow-y-auto pr-0.5">
                       {colEnquiries.length === 0 ? (
-                        <p className="text-[11px] text-gray-400 text-center py-8">No requests in this stage</p>
+                        <p className="text-[10px] text-gray-400 text-center py-6">No requests in stage</p>
                       ) : (
                         colEnquiries.map(enq => {
                           const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
@@ -893,51 +900,51 @@ function DashboardTab() {
                                 {enq.sareeTitle}
                               </div>
 
-                              <div className="pt-2.5 flex justify-between items-center border-t border-gray-100 dark:border-gray-800">
+                              <div className="pt-2 flex flex-col gap-1.5 border-t border-gray-100 dark:border-gray-800">
                                 {isDispatched ? (
                                   <button
                                     onClick={() => openTrackingModal(enq)}
-                                    className="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm flex items-center gap-1.5"
+                                    className="w-full bg-indigo-700 hover:bg-indigo-800 text-white py-1.5 px-2 rounded-xl text-[10px] font-bold shadow-xs flex items-center justify-center gap-1"
                                     title="Edit Shipping AWB / Tracking"
                                   >
-                                    <FiTruck className="text-indigo-200 w-3.5 h-3.5" />
+                                    <FiTruck className="text-indigo-200 w-3 h-3" />
                                     <span>{enq.trackingDetails ? "Edit Tracking" : "Add Tracking"}</span>
                                   </button>
                                 ) : isConfirmedOrVerified ? (
                                   <button
                                     onClick={() => openTrackingModal(enq)}
-                                    className="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm flex items-center gap-1.5"
+                                    className="w-full bg-indigo-700 hover:bg-indigo-800 text-white py-1.5 px-2 rounded-xl text-[10px] font-bold shadow-xs flex items-center justify-center gap-1"
                                     title="Add Shipping AWB / Tracking"
                                   >
-                                    <FiTruck className="text-indigo-200 w-3.5 h-3.5" />
+                                    <FiTruck className="text-indigo-200 w-3 h-3" />
                                     <span>{enq.trackingDetails ? "Edit Tracking" : "Add Tracking"}</span>
                                   </button>
                                 ) : isAwaitingPayment ? (
                                   <button
                                     onClick={() => setPaymentVerifyModalEnquiry(enq)}
-                                    className="bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm flex items-center gap-1.5"
+                                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-1.5 px-2 rounded-xl text-[10px] font-bold shadow-xs flex items-center justify-center gap-1"
                                   >
-                                    <FiShield className="text-emerald-300 w-3.5 h-3.5" />
+                                    <FiShield className="text-emerald-300 w-3 h-3" />
                                     <span>Verify Payment</span>
                                   </button>
                                 ) : (
                                   <button
                                     onClick={() => openQuotationModal(enq)}
-                                    className="bg-[#800020] hover:bg-[#67001a] text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm flex items-center gap-1.5"
+                                    className="w-full bg-[#800020] hover:bg-[#67001a] text-white py-1.5 px-2 rounded-xl text-[10px] font-bold shadow-xs flex items-center justify-center gap-1"
                                   >
-                                    <FiFileText className="text-[#D4AF37] w-3.5 h-3.5" />
-                                    <span>Verify Stock & Confirm</span>
+                                    <FiFileText className="text-[#D4AF37] w-3 h-3" />
+                                    <span>Review & Quote</span>
                                   </button>
                                 )}
 
                                 <a
-                                  href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(getStageSpecificWhatsAppMessage(enq))}`}
+                                  href={getWhatsAppDispatchUrl(cleanPhone, getStageSpecificWhatsAppMessage(enq))}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm flex items-center gap-1"
+                                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-2 rounded-xl text-[10px] font-bold shadow-xs flex items-center justify-center gap-1"
                                   title="WhatsApp Customer Stage Pre-Filled Draft"
                                 >
-                                  <FiMessageCircle className="w-3.5 h-3.5" />
+                                  <FiMessageCircle className="w-3 h-3" />
                                   <span>WhatsApp</span>
                                 </a>
                               </div>
