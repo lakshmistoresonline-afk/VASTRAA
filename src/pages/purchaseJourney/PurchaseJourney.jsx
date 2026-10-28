@@ -121,7 +121,10 @@ function PurchaseJourney() {
 
       // Dispatch automated WhatsApp alert to store admin 9746998785 on customer payment submission
       const adminWhatsAppMsg = `💳 CUSTOMER PAYMENT SUBMITTED!\nCustomer: ${authUser?.user?.name || userEmail}\nPhone: ${userEmail}\nUTR/Ref: ${refText.trim()}\nPlease verify payment in Admin Control Panel!`;
-      await sendAutomatedWhatsAppNotification("919746998785", adminWhatsAppMsg, { type: "CUSTOMER_PAYMENT_SUBMITTED" });
+      await sendAutomatedWhatsAppNotification("919746998785", adminWhatsAppMsg, {
+        type: "CUSTOMER_PAYMENT_SUBMITTED",
+        autoOpenWindow: false
+      });
 
       toast.success("Payment reference submitted for admin verification!");
       fetchEnquiries();
