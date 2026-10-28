@@ -43,7 +43,7 @@ const MyState = (props) => {
 
   // Filters
   const [searchKey, setSearchKey] = useState('');
-  const [filterType, setFilterType] = useState('Kanchipuram Pure Soft Silk Sarees');
+  const [filterType, setFilterType] = useState(''); // Default: '' (All Collections)
   const [filterPrice, setFilterPrice] = useState('');
   const [sortPrice, setSortPrice] = useState(''); // '', 'asc', 'desc'
 

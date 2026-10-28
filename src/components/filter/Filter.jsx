@@ -19,7 +19,7 @@ function Filter() {
     syncStats
   } = context;
 
-  const [activeTab, setActiveTab] = useState('SOFT');
+  const [activeTab, setActiveTab] = useState('ALL');
 
   const scrollToResults = () => {
     const el = document.getElementById('catalogue-results');
@@ -70,14 +70,15 @@ function Filter() {
               value={filterType}
               onChange={(e) => {
                 setFilterType(e.target.value);
-                setActiveTab('CUSTOM');
+                setActiveTab(e.target.value === '' ? 'ALL' : 'CUSTOM');
                 scrollToResults();
               }}
               className="w-full text-xs font-bold px-4 py-3.5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 bg-[#FAF7F0] dark:bg-gray-800 text-[#211A19] dark:text-white outline-none focus:ring-2 focus:ring-[#800020] shadow-sm cursor-pointer"
             >
+              <option value="">All Collections ({product ? product.length : 3252} Sarees)</option>
               {CATALOGUES.map((cat) => (
                 <option key={cat.id} value={cat.name}>
-                  {cat.name}
+                  Cat {cat.code} - {cat.name}
                 </option>
               ))}
             </select>
@@ -140,34 +141,34 @@ function Filter() {
           </div>
 
           {/* Quick Category Buttons */}
-          <div className="md:col-span-2 flex gap-1.5">
+          <div className="md:col-span-2 flex gap-1 font-bold text-xs">
+            <button
+              onClick={() => {
+                setFilterType('');
+                setActiveTab('ALL');
+                scrollToResults();
+              }}
+              className={`flex-1 py-3.5 px-2 rounded-2xl text-[11px] transition-all whitespace-nowrap ${
+                filterType === ''
+                  ? 'bg-[#800020] text-amber-100 shadow-md border border-[#C6A15B]/40'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+              }`}
+            >
+              All Sarees
+            </button>
             <button
               onClick={() => {
                 setFilterType(CATALOGUES[0].name);
                 setActiveTab('BRIDAL');
                 scrollToResults();
               }}
-              className={`flex-1 py-3.5 rounded-2xl text-xs font-bold transition-all ${
+              className={`flex-1 py-3.5 px-2 rounded-2xl text-[11px] transition-all whitespace-nowrap ${
                 filterType === CATALOGUES[0].name
                   ? 'bg-[#800020] text-amber-100 shadow-md border border-[#C6A15B]/40'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
               }`}
             >
               Bridal Silks
-            </button>
-            <button
-              onClick={() => {
-                setFilterType(CATALOGUES[2].name);
-                setActiveTab('SOFT');
-                scrollToResults();
-              }}
-              className={`flex-1 py-3.5 rounded-2xl text-xs font-bold transition-all ${
-                filterType === CATALOGUES[2].name
-                  ? 'bg-[#800020] text-amber-100 shadow-md border border-[#C6A15B]/40'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
-              }`}
-            >
-              Soft Silks
             </button>
           </div>
 

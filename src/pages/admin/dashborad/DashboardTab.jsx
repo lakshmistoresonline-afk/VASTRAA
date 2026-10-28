@@ -29,9 +29,9 @@ function DashboardTab() {
   } = context;
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Kanchipuram Pure Soft Silk Sarees');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(''); // Default: '' (All Collections)
   const [selectedPriceFilter, setSelectedPriceFilter] = useState('');
-  const [activeQuickTab, setActiveQuickTab] = useState('SOFT');
+  const [activeQuickTab, setActiveQuickTab] = useState('ALL');
   const [adminSortPrice, setAdminSortPrice] = useState(''); // '', 'asc', 'desc'
 
   const [adminInventoryPage, setAdminInventoryPage] = useState(1);
@@ -328,7 +328,7 @@ function DashboardTab() {
            p.categoryName.toLowerCase().includes(term) ||
            p.id.toLowerCase().includes(term);
   }).filter((p) => {
-    if (!selectedCategoryFilter) return true;
+    if (!selectedCategoryFilter || selectedCategoryFilter === '' || selectedCategoryFilter === 'All Collections') return true;
     return p.categoryName.toLowerCase().includes(selectedCategoryFilter.toLowerCase()) ||
            p.catalogueCode?.toLowerCase() === selectedCategoryFilter.toLowerCase();
   }).filter((p) => {
@@ -494,10 +494,11 @@ function DashboardTab() {
                 value={selectedCategoryFilter}
                 onChange={(e) => {
                   setSelectedCategoryFilter(e.target.value);
-                  setActiveQuickTab('CUSTOM');
+                  setActiveQuickTab(e.target.value === '' ? 'ALL' : 'CUSTOM');
                 }}
                 className="w-full font-bold px-3.5 py-3 rounded-2xl border border-[#E9E1D5] dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#800020] cursor-pointer shadow-xs"
               >
+                <option value="">All Collections ({product ? product.length : 3252} Sarees)</option>
                 {catalogues.map((cat) => (
                   <option key={cat.id} value={cat.name}>
                     Cat {cat.code} - {cat.name}

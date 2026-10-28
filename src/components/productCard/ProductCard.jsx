@@ -188,7 +188,7 @@ function ProductCard(props) {
            (obj.description?.toLowerCase() || '').includes(term) ||
            (obj.catalogueCode?.toLowerCase() || '').includes(term);
   }).filter((obj) => {
-    if (!filterType) return true;
+    if (!filterType || filterType === '' || filterType === 'All Collections') return true;
     return obj.categoryName?.toLowerCase().includes(filterType.toLowerCase()) ||
            obj.catalogueCode?.toLowerCase() === filterType.toLowerCase();
   }).filter((obj) => {
