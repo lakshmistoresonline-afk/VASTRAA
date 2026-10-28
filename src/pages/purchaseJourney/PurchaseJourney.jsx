@@ -8,7 +8,7 @@ import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
 import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle, FiSearch } from 'react-icons/fi';
 import UpiQrCode from '../../components/payment/UpiQrCode';
-import { sendAutomatedWhatsAppNotification } from '../../services/whatsappService';
+import { sendAutomatedWhatsAppNotification, getWhatsAppDispatchUrl } from '../../services/whatsappService';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
@@ -123,7 +123,7 @@ function PurchaseJourney() {
       const adminWhatsAppMsg = `💳 CUSTOMER PAYMENT SUBMITTED!\nCustomer: ${authUser?.user?.name || userEmail}\nPhone: ${userEmail}\nUTR/Ref: ${refText.trim()}\nPlease verify payment in Admin Control Panel!`;
       await sendAutomatedWhatsAppNotification("919746998785", adminWhatsAppMsg, {
         type: "CUSTOMER_PAYMENT_SUBMITTED",
-        autoOpenWindow: false
+        autoOpenWindow: true
       });
 
       toast.success("Payment reference submitted for admin verification!");
@@ -133,6 +133,23 @@ function PurchaseJourney() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getCustomerStageWhatsAppMessage = (enq) => {
+    const status = enq.status || 'Pending';
+    const ref = enq.message ? enq.message.split('.')[0] : (enq.id || 'VASTRAA-REQ');
+
+    if (status === 'QUOTATION_READY' && enq.quotationDetails) {
+      return `Hello Vastraa team, I am reviewing my quotation for ${ref} (Net Payable: ₹${enq.quotationDetails.finalPayable}). I have a question regarding my order.`;
+    }
+    if (status === 'QUOTATION_ACCEPTED' || status === 'PAYMENT_PENDING') {
+      const utr = enq.paymentReference ? ` (UTR: ${enq.paymentReference})` : '';
+      return `Hello Vastraa team, I am following up on my payment${utr} for order ${ref}. Please confirm payment receipt.`;
+    }
+    if (status === 'DISPATCHED' || enq.trackingDetails) {
+      return `Hello Vastraa team, I am following up on the courier shipment tracking for my order ${ref}.`;
+    }
+    return `Hello Vastraa team, I am following up on my saree review request ${ref} (${enq.customerName || userEmail}).`;
   };
 
   // Determine smart next action based on actual state
@@ -640,10 +657,11 @@ function PurchaseJourney() {
                     <div className="pt-2 flex justify-between items-center text-xs">
                       <span className="text-gray-400 font-mono">Ref: {enq.message ? enq.message.split('.')[0] : enq.id}</span>
                       <a
-                        href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Vastraa team, I am following up on my bag review request (${enq.customerName}).`)}`}
+                        href={getWhatsAppDispatchUrl("919746998785", getCustomerStageWhatsAppMessage(enq))}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold hover:underline"
+                        title="Contact Store Hotline on WhatsApp (Stage Pre-Filled Draft)"
                       >
                         <FiMessageCircle className="w-4 h-4" />
                         <span>Contact Store on WhatsApp</span>
