@@ -9,7 +9,7 @@ import { fireDB } from '../../firebase/FirebaseConfig';
 import { FiShoppingBag, FiTrash2, FiSend, FiCheckCircle, FiMessageCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import SareeImageThumbnail from '../../components/SareeImageThumbnail';
-import { sendAutomatedWhatsAppNotification } from '../../services/whatsappService';
+import { sendAutomatedWhatsAppNotification, getWhatsAppDispatchUrl } from '../../services/whatsappService';
 import { sendAutomatedOrderEmail } from '../../services/emailService';
 
 function Cart() {
@@ -122,7 +122,7 @@ function Cart() {
       await sendAutomatedWhatsAppNotification("919746998785", storeWhatsAppMsg, {
         type: "STORE_NEW_CART_SUBMISSION",
         customerName: customerName,
-        autoOpenWindow: false
+        autoOpenWindow: true
       });
 
       setRequestRef(referenceId);
@@ -172,9 +172,10 @@ function Cart() {
 
               <div className="pt-4 flex flex-col sm:flex-row gap-3">
                 <a
-                  href={`https://wa.me/919746998785?text=${encodeURIComponent(
+                  href={getWhatsAppDispatchUrl(
+                    "919746998785",
                     `🛍️ NEW ONLINE ORDER SUBMISSION!\nRef ID: ${requestRef}\nCustomer: ${customerName}\nPhone: ${phoneNumber}\nDelivery Address: ${address} (${pinCode})`
-                  )}`}
+                  )}
                   target="_blank"
                   rel="noreferrer"
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all border border-emerald-300/40"

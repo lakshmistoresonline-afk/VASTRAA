@@ -2,9 +2,23 @@ import { addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../firebase/FirebaseConfig';
 
 /**
+ * Smart WhatsApp URL Generator for PC Browser / Mobile Devices
+ */
+export function getWhatsAppDispatchUrl(phone, text) {
+  const clean = phone ? phone.replace(/[^0-9]/g, '') : '919746998785';
+  const encoded = encodeURIComponent(text);
+  const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    return `https://api.whatsapp.com/send?phone=${clean}&text=${encoded}`;
+  } else {
+    return `https://web.whatsapp.com/send?phone=${clean}&text=${encoded}`;
+  }
+}
+
+/**
  * 100% Automated WhatsApp Notification Engine
  * Dispatches automated messages to Store Hotline (+91 97469 98785) and Customer registered numbers
- * with zero user or admin manual intervention.
  */
 export async function sendAutomatedWhatsAppNotification(recipientPhone, messagePayload, options = {}) {
   const cleanPhone = recipientPhone ? recipientPhone.replace(/[^0-9]/g, '') : '919746998785';
@@ -46,13 +60,11 @@ export async function sendAutomatedWhatsAppNotification(recipientPhone, messageP
   }
 
   // 3. Automated Non-Blocking WhatsApp API Link Trigger
-  const encodedText = encodeURIComponent(messagePayload);
-  const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
+  const waUrl = getWhatsAppDispatchUrl(cleanPhone, messagePayload);
 
   if (options.autoOpenWindow !== false) {
     try {
       const popup = window.open(waUrl, '_blank');
-      // If popup blocker intercepted window.open due to async delay, trigger direct location fallback
       if (!popup || popup.closed || typeof popup.closed === 'undefined') {
         if (options.directRedirect === true) {
           window.location.href = waUrl;
