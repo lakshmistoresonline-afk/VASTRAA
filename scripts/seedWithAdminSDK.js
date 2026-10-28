@@ -24,7 +24,20 @@ async function runAdminSeeding() {
   }
   console.log("Cleared all old enquiries.");
 
-  // 2. Seed Admin User
+  // 2. Cleanup whatsapp_jobs & email_jobs
+  const waSnap = await db.collection("whatsapp_jobs").get();
+  for (const doc of waSnap.docs) {
+    await doc.ref.delete();
+  }
+  console.log("Cleared all old whatsapp_jobs.");
+
+  const emailSnap = await db.collection("email_jobs").get();
+  for (const doc of emailSnap.docs) {
+    await doc.ref.delete();
+  }
+  console.log("Cleared all old email_jobs.");
+
+  // 3. Seed Admin User
   const adminEmail = "admin@gmail.com";
   const adminPassword = "Admin@123";
   let adminUid = "";
@@ -51,12 +64,12 @@ async function runAdminSeeding() {
     email: adminEmail,
     role: "admin",
     whatsapp: "+919746998785",
-    address: "Round West, Thrissur, Kerala",
+    address: "Kerala, India",
     pincode: "680001",
     createdAt: new Date().toISOString()
   }, { merge: true });
 
-  // 3. Seed 5 Test Customer Users
+  // 4. Seed 5 Test Customer Users
   for (let i = 1; i <= 5; i++) {
     const testEmail = `test${i}@gmail.com`;
     const testPassword = "Test@123";
@@ -86,13 +99,13 @@ async function runAdminSeeding() {
       email: testEmail,
       role: "customer",
       whatsapp: phoneNum,
-      address: `Address for Customer ${i}, Thrissur, Kerala`,
+      address: `Address for Customer ${i}, Kerala, India`,
       pincode: "680001",
       createdAt: new Date().toISOString()
     }, { merge: true });
   }
 
-  // 4. Seed Catalogue Config Sync Status
+  // 5. Seed Catalogue Config Sync Status
   await db.collection("catalogue_config").doc("sync_status").set({
     lastVerifiedAt: new Date().toISOString(),
     totalExtracted: 3252,
@@ -100,7 +113,7 @@ async function runAdminSeeding() {
   }, { merge: true });
   console.log("Seeded catalogue sync status to Firestore.");
 
-  console.log("Firebase Admin SDK Seeding Completed Successfully! ZERO orders/enquiries seeded.");
+  console.log("Firebase Admin SDK Seeding Completed Successfully! All logs & jobs cleaned up.");
 }
 
 runAdminSeeding().catch(err => {

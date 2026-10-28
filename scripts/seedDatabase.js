@@ -14,7 +14,7 @@ const app = initializeApp(firebaseConfig);
 const fireDB = getFirestore(app);
 
 async function cleanAndSeedFirestoreData() {
-  console.log("🧹 Starting Firestore User & Order Cleanup (Preserving WhatsApp Audit Logs)...");
+  console.log("🧹 Starting Firestore Complete Cleanup (Deleting enquiries, whatsapp_jobs, email_jobs & orders)...");
 
   // 1. Delete all documents from enquiries collection
   try {
@@ -27,7 +27,29 @@ async function cleanAndSeedFirestoreData() {
     console.warn("Cleanup enquiries notice:", err.message);
   }
 
-  // 2. Delete all documents from orders collection (if any)
+  // 2. Delete all documents from whatsapp_jobs collection
+  try {
+    const jobsSnapshot = await getDocs(collection(fireDB, "whatsapp_jobs"));
+    for (const d of jobsSnapshot.docs) {
+      await deleteDoc(doc(fireDB, "whatsapp_jobs", d.id));
+      console.log(`Deleted whatsapp_job: ${d.id}`);
+    }
+  } catch (err) {
+    console.warn("Cleanup whatsapp_jobs notice:", err.message);
+  }
+
+  // 3. Delete all documents from email_jobs collection
+  try {
+    const emailSnap = await getDocs(collection(fireDB, "email_jobs"));
+    for (const d of emailSnap.docs) {
+      await deleteDoc(doc(fireDB, "email_jobs", d.id));
+      console.log(`Deleted email_job: ${d.id}`);
+    }
+  } catch (err) {
+    console.warn("Cleanup email_jobs notice:", err.message);
+  }
+
+  // 4. Delete all documents from orders collection (if any)
   try {
     const ordersSnapshot = await getDocs(collection(fireDB, "orders"));
     for (const d of ordersSnapshot.docs) {
@@ -40,7 +62,7 @@ async function cleanAndSeedFirestoreData() {
 
   console.log("🌱 Seeding ONLY Master Admin & Customer User Details in Firestore ('users' collection)...");
 
-  // 3. Seed ONLY Master Admin & Customer User Details
+  // 5. Seed ONLY Master Admin & Customer User Details
   const usersToSeed = [
     { email: "admin@gmail.com", name: "Vastraa Master Admin", role: "admin", whatsapp: "+919746998785", address: "Kerala, India", pincode: "680001", uid: "admin_uid_001" },
     { email: "test1@gmail.com", name: "Test Customer One", role: "customer", whatsapp: "9746998783", address: "Kerala, India", pincode: "680001", uid: "test_uid_001" },
@@ -65,7 +87,7 @@ async function cleanAndSeedFirestoreData() {
     console.log(`✓ Seeded user profile: ${u.email} (${u.role})`);
   }
 
-  // 4. Seed Catalogue Config Sync Status
+  // 6. Seed Catalogue Config Sync Status
   const configRef = doc(fireDB, "catalogue_config", "sync_status");
   await setDoc(configRef, {
     lastVerifiedAt: new Date().toISOString(),
@@ -74,7 +96,7 @@ async function cleanAndSeedFirestoreData() {
   }, { merge: true });
   console.log("✓ Seeded catalogue sync status.");
 
-  console.log("✨ Firestore database seeding completed! Preserved all WhatsApp audit logs in whatsapp_jobs.");
+  console.log("✨ Firestore database seeding completed! All whatsapp_jobs & email_jobs cleaned up.");
 }
 
 cleanAndSeedFirestoreData().catch(err => {
