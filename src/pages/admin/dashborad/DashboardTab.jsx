@@ -6,7 +6,7 @@ import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFil
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 import SareeImageThumbnail from '../../../components/SareeImageThumbnail';
-import { sendAutomatedWhatsAppNotification } from '../../../services/whatsappService';
+import { sendAutomatedWhatsAppNotification, getWhatsAppDispatchUrl } from '../../../services/whatsappService';
 
 const FALLBACK_SAREE_IMG = "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
