@@ -2,7 +2,7 @@
  * Vastraa - A Co-Brand of Lakshmi Stores
  * Round West, Thrissur, Kerala, India
  *
- * Google Photos Catalogue Categories & Indicative Price Ranges
+ * Google Photos Catalogue Categories & Price Ranges
  */
 
 export const CATALOGUES = [
@@ -10,9 +10,9 @@ export const CATALOGUES = [
     id: "kanchipuram-pure-wedding-silk",
     code: "A",
     name: "Kanchipuram Pure Wedding Silk Sarees",
-    indicativePriceRange: "₹13,500–₹32,500",
-    minPrice: 13500,
-    maxPrice: 32500,
+    indicativePriceRange: "₹25,200–₹27,300",
+    minPrice: 25200,
+    maxPrice: 27300,
     albums: [
       "https://photos.google.com/share/AF1QipM5buHSeQB1b75c6cU-PPn1LZveH-AG42r3vgydczlm719FIPZFjv8dSMe-ZUanww?key=RF9SUzQ3ODVSNVNVcjJtV0k3X1V1cFo3b1V0bmpR",
       "https://photos.google.com/share/AF1QipOUZyYAexal5fGBenQyi5diXX3W0Q3HpRKWWNgn93Uih-Y3qX1KaMPk7dEn5MiFDw?key=dzUtZVM2Zk5KVWhiVU9fN2x4WGhGZXhCQjcyVktn"
@@ -24,9 +24,9 @@ export const CATALOGUES = [
     id: "kanchipuram-pure-fancy-silk",
     code: "B",
     name: "Kanchipuram Pure Fancy Silk Sarees",
-    indicativePriceRange: "₹12,500–₹18,500",
-    minPrice: 12500,
-    maxPrice: 18500,
+    indicativePriceRange: "₹17,325–₹18,375",
+    minPrice: 17325,
+    maxPrice: 18375,
     albums: [
       "https://photos.google.com/share/AF1QipPpwz18816TyQUvaLH6NgO-w0GTkyguKUZgZ5HFbaDt1P8qIxHJS_qviVzw3-QsaA?key=ZDBRMS1pdTUzYlZEbnZVcno2a18td1VFVEpJTHZn",
       "https://photos.google.com/share/AF1QipN4GWZm3N0lV3OgSTHYOQ-Sn7FNoDxgERKxixJJDCcno-QeXvL9eOIBHhZticqiJA?key=TXdpN2NRdlBmTEZjMmpBdW1TOGNSR2Jua1FGdlR3"
@@ -38,9 +38,9 @@ export const CATALOGUES = [
     id: "kanchipuram-pure-soft-silk",
     code: "C",
     name: "Kanchipuram Pure Soft Silk Sarees",
-    indicativePriceRange: "₹7,500–₹13,000",
-    minPrice: 7500,
-    maxPrice: 13000,
+    indicativePriceRange: "₹13,125–₹14,175",
+    minPrice: 13125,
+    maxPrice: 14175,
     albums: [
       "https://photos.google.com/share/AF1QipPxV-MCf5356GxsAEtqby1kEdXSx2Yh_vihtiovSWjMAMugeJ5vXYU8GlIDktr_Eg?key=Y1Z2YTNaVTQ2TzJEb2p5ZmhSQl9PQ3RrOEY4elVR"
     ],
@@ -51,9 +51,9 @@ export const CATALOGUES = [
     id: "semi-silk-sarees",
     code: "D",
     name: "Semi Silk Sarees",
-    indicativePriceRange: "₹4,500–₹6,000",
-    minPrice: 4500,
-    maxPrice: 6000,
+    indicativePriceRange: "₹4,635–₹5,665",
+    minPrice: 4635,
+    maxPrice: 5665,
     albums: [
       "https://photos.google.com/share/AF1QipOU0_QV4PhyU1j8g1RenSePPwoVSp_hu0beFdrM8t1nSWGAr-tS_325RxNMPB90EA?key=WVlrNFhtVXVGMTBFd0I3TWt1TG1xT3A1b21XVkJ3"
     ],
@@ -64,9 +64,9 @@ export const CATALOGUES = [
     id: "semi-fancy-silk-sarees",
     code: "E",
     name: "Semi Fancy Silk Sarees",
-    indicativePriceRange: "₹2,500–₹4,000",
-    minPrice: 2500,
-    maxPrice: 4000,
+    indicativePriceRange: "₹3,915–₹4,635",
+    minPrice: 3915,
+    maxPrice: 4635,
     albums: [
       "https://photos.google.com/share/AF1QipPpaTrA8zA5d7F5dSfg4tclarHYZEE-B7V_LfZXjqM64zmfpEDSJA3_Kjetk0U7cw?key=bDlHcWhmS0dyWjJNRFV1TWdMbnNHc3JBMkYxNkhn"
     ],
@@ -77,9 +77,9 @@ export const CATALOGUES = [
     id: "semi-kanchipuram-art-silk",
     code: "F",
     name: "Semi Kanchipuram Art Silk Sarees",
-    indicativePriceRange: "₹3,500–₹6,000",
-    minPrice: 3500,
-    maxPrice: 6000,
+    indicativePriceRange: "₹5,460–₹6,300",
+    minPrice: 5460,
+    maxPrice: 6300,
     albums: [
       "https://photos.google.com/share/AF1QipNzEH9t3GatRzJk9nQS4VTM78LipiFDN40W62tXfOuoJKVmLSnY8lgZsVeMlc41OA?key=Z1JIUUVLR0RFOURhWjB1THcxX2gtV1MyOUdJRElR"
     ],
@@ -90,9 +90,9 @@ export const CATALOGUES = [
     id: "butta-art-silk-sarees",
     code: "G",
     name: "Butta Art Silk Sarees",
-    indicativePriceRange: "₹2,000–₹3,500",
-    minPrice: 2000,
-    maxPrice: 3500,
+    indicativePriceRange: "₹2,370–₹3,040",
+    minPrice: 2370,
+    maxPrice: 3040,
     albums: [
       "https://photos.google.com/share/AF1QipNzudmR-0rGGDlLb5eXy4gaxT5EO3FzmPSZAwwo-4Pu0njqKMt8lBkqiVUhkulZuA?key=dzhCRHgwaHI4S1FtUUZNd2FQcHRwZ0R2V2N6RFln"
     ],
@@ -103,9 +103,9 @@ export const CATALOGUES = [
     id: "semi-art-silk-sarees",
     code: "H",
     name: "Semi Art Silk Sarees",
-    indicativePriceRange: "₹1,500–₹3,000",
-    minPrice: 1500,
-    maxPrice: 3000,
+    indicativePriceRange: "₹1,955–₹2,320",
+    minPrice: 1955,
+    maxPrice: 2320,
     albums: [
       "https://photos.google.com/share/AF1QipPGf18s1b4V83e1XUT9Wj6h_2CE7r1HfgCceqCKQTD2GTgvbo_xhOXS5CNiDmiOLg?key=ZkMtODl1blppejBkd0ZzcF9VR2llMjlVR1k4ZUlB"
     ],
@@ -116,13 +116,13 @@ export const CATALOGUES = [
     id: "arts-silk-sarees",
     code: "I",
     name: "Arts Silk Sarees",
-    indicativePriceRange: "₹1,500–₹3,000",
-    minPrice: 1500,
-    maxPrice: 3000,
+    indicativePriceRange: "₹1,955–₹2,320",
+    minPrice: 1955,
+    maxPrice: 2320,
     albums: [
       "https://photos.google.com/share/AF1QipM3AE5rmOtboDdT8_mGkU5luAceaRlZUzZsDmG0JulL0-FWD7JoppsWMuKYpuXP4g?key=TlgzUHM0RkF5YlBlMzBZeTM5Rm5HbDlWdDZXa1J3"
     ],
-    description: "Rich pallu art silk sarees combining lightweight comfort with traditional Kerala grace.",
+    description: "Rich pallu art silk sarees combining lightweight comfort with traditional grace.",
     featuredImage: "https://lh3.googleusercontent.com/pw/AP1GczOzpM4YrcMNfE0b70g2UhcB78pVTTduFLzLvLUHAUhT9NGwJ5efsDjr_AY7Dr5asfjtCsjUu3ZPbj7d0oItriuOB40DJlnvuW8RmgIOKPA9gv4XBV8u=w1024-h1024"
   }
 ];
@@ -138,7 +138,6 @@ export const STORE_INFO = {
   whatsapp: "+91 97469 98785",
   whatsappFormatted: "919746998785",
   email: "contact@vastraa.com",
-  openingHours: "Mon - Sat: 9:30 AM - 8:00 PM, Sun: Closed",
-  upiId: "srinathrajkiran007-2@okaxis",
-  payeeName: "Srinath Rajkiran"
+  upiPayeeName: "Srinath Rajkiran",
+  upiId: "srinathrajkiran007-2@okaxis"
 };

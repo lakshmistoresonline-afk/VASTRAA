@@ -88,15 +88,15 @@ export async function syncShowroomCatalogues(options = {}) {
           let maxP = catalogue.maxPrice;
 
           switch (catalogue.code?.toUpperCase()) {
-            case 'A': minP = 24000; maxP = 26000; break;
-            case 'B': minP = 16500; maxP = 17500; break;
-            case 'C': minP = 12500; maxP = 13500; break;
-            case 'D': minP = 4500; maxP = 5500; break;
-            case 'E': minP = 3800; maxP = 4500; break;
-            case 'F': minP = 5200; maxP = 6000; break;
-            case 'G': minP = 2300; maxP = 2950; break;
-            case 'H': minP = 1900; maxP = 2250; break;
-            case 'I': minP = 1900; maxP = 2250; break;
+            case 'A': minP = 25200; maxP = 27300; break; // +5%
+            case 'B': minP = 17325; maxP = 18375; break; // +5%
+            case 'C': minP = 13125; maxP = 14175; break; // +5%
+            case 'F': minP = 5460; maxP = 6300; break;   // +5%
+            case 'D': minP = 4635; maxP = 5665; break;   // +3%
+            case 'E': minP = 3915; maxP = 4635; break;   // +3%
+            case 'G': minP = 2370; maxP = 3040; break;   // +3%
+            case 'H': minP = 1955; maxP = 2320; break;   // +3%
+            case 'I': minP = 1955; maxP = 2320; break;   // +3%
             default: break;
           }
 
