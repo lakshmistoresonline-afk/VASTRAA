@@ -4,13 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    <meta name="theme-color" content="#800020" />
+    <meta name="theme-color" content="#4A071B" />
+    <link rel="manifest" href="/manifest.json" />
     <title>Vastraa — Traditional Weaves • Timeless Beauty</title>
-    <meta name="description" content="Explore authentic Kanchipuram Pure Silk, Soft Silk, and Art Silk Sarees by Vastraa — A Co-Brand of Lakshmi Stores, Round West, Thrissur, Kerala." />
-    <meta name="keywords" content="Vastraa, Lakshmi Stores, Silk Sarees, Kanchipuram Silk, Thrissur, Pure Silk, Soft Silk" />
+    <meta name="description" content="Explore authentic Kanchipuram Pure Silk, Soft Silk, and Art Silk Sarees by Vastraa Online Silk Store." />
+    <meta name="keywords" content="Vastraa, Silk Sarees, Kanchipuram Silk, Pure Silk, Soft Silk" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.log('SW registration notice:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

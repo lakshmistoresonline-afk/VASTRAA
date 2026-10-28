@@ -1,11 +1,13 @@
 import React, { Fragment, useContext, useState } from 'react';
-import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser, FiShield, FiExternalLink, FiSun, FiMoon, FiHeart } from 'react-icons/fi';
+import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser, FiShield, FiExternalLink, FiSun, FiMoon, FiHeart, FiSmartphone } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import myContext from '../../context/data/myContext';
 import { Dialog, Transition } from '@headlessui/react';
 import { useSelector } from 'react-redux';
+import { usePwaInstall } from '../../hooks/usePwaInstall';
 
 const Navbar = () => {
+  const { isStandalone, promptInstall } = usePwaInstall();
   const context = useContext(myContext);
   const { storeInfo, mode, toggleMode, enquiries } = context;
   const [open, setOpen] = useState(false);
@@ -151,6 +153,17 @@ const Navbar = () => {
                     >
                       My Account
                     </Link>
+                  )}
+                  {!isStandalone && (
+                    <button
+                      type="button"
+                      onClick={promptInstall}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-amber-200 hover:text-white bg-[#4A071B] hover:bg-[#650A25] border border-[#C6A15B]/40 transition-all flex items-center gap-1.5 cursor-pointer"
+                      title="Install Vastraa App on Phone"
+                    >
+                      <FiSmartphone className="w-3.5 h-3.5 text-[#C6A15B]" />
+                      <span>Install App</span>
+                    </button>
                   )}
                 </>
               )}

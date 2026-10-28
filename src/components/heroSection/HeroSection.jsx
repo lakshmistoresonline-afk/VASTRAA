@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiShield, FiTruck, FiAward } from 'react-icons/fi';
+import { FiArrowRight, FiShield, FiTruck, FiAward, FiSmartphone } from 'react-icons/fi';
 import extractedData from '../../data/extractedSarees.json';
 import SareeImageThumbnail from '../SareeImageThumbnail';
+import { usePwaInstall } from '../../hooks/usePwaInstall';
 
 const HeroSection = () => {
+  const { isStandalone, promptInstall } = usePwaInstall();
+
   // Use actual verified individual saree photo from Catalogue A (Zero models / 100% saree fabric)
   const heroSareeUrl = extractedData.A?.[0]?.imageUrl || "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80";
 
@@ -47,15 +50,27 @@ const HeroSection = () => {
               Discover authentic Kanchipuram Pure Silk, Soft Silk, and Art Silk sarees woven for every occasion, celebration, and individual style.
             </p>
 
-            {/* Single Primary CTA */}
-            <div className="pt-2">
+            {/* Primary CTAs: Explore Collection + Install Vastraa App */}
+            <div className="pt-2 flex flex-wrap gap-3 items-center">
               <Link
                 to="/allproducts"
-                className="inline-flex bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm items-center gap-2 border border-[#C5A46D]/40"
+                className="inline-flex bg-[#800020] hover:bg-[#67001a] text-amber-100 font-extrabold px-7 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm items-center gap-2 border border-[#C5A46D]/40"
               >
                 <span>Explore the Collection</span>
                 <FiArrowRight className="w-4 h-4 text-[#C5A46D]" />
               </Link>
+
+              {!isStandalone && (
+                <button
+                  type="button"
+                  onClick={promptInstall}
+                  className="inline-flex bg-[#FAF7F0] dark:bg-gray-800 hover:bg-gray-100 text-gray-900 dark:text-white font-extrabold px-6 py-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-xs sm:text-sm items-center gap-2 border border-[#C6A15B]/40 cursor-pointer"
+                  title="Install Vastraa App directly on your phone home screen"
+                >
+                  <FiSmartphone className="w-4 h-4 text-[#800020] dark:text-[#E5C158]" />
+                  <span>Install App on Phone</span>
+                </button>
+              )}
             </div>
 
             {/* Trust Badges Bar */}
