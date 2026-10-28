@@ -20,10 +20,10 @@ function Layout({children}) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between pb-16 md:pb-0 relative">
-      <div>
+    <div className="min-h-screen flex flex-col justify-between pb-16 md:pb-0 relative overflow-x-hidden w-full max-w-full">
+      <div className="w-full max-w-full overflow-x-hidden">
         <Navbar />
-        <div className="content">
+        <div className="content w-full max-w-full">
           {children}
         </div>
       </div>

@@ -56,13 +56,13 @@ const Navbar = () => {
       )}
 
       {/* Top Announcement Bar */}
-      <div className="bg-[#4A071B] text-[#C6A15B] text-[11px] sm:text-xs py-2 px-4 border-b border-[#C6A15B]/30">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2 font-medium">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>{isAdmin ? "🔒 Admin Command Center Active" : "Timeless Silk Sarees • Pan India Express Shipping • Handloom Guarantee"}</span>
+      <div className="bg-[#4A071B] text-[#C6A15B] text-[11px] sm:text-xs py-2 px-4 border-b border-[#C6A15B]/30 overflow-hidden">
+        <div className="container mx-auto flex justify-between items-center w-full max-w-full">
+          <div className="flex items-center gap-2 font-medium truncate">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></span>
+            <span className="truncate">{isAdmin ? "🔒 Admin Command Center Active" : "Timeless Silk Sarees • Pan India Express Shipping"}</span>
           </div>
-          <div className="hidden sm:flex items-center gap-6 text-xs">
+          <div className="hidden sm:flex items-center gap-6 text-xs flex-shrink-0">
             <span className="flex items-center gap-1 text-amber-200">
               <FiCheckCircle className="text-emerald-400" /> Verified Online Collections
             </span>
@@ -79,29 +79,29 @@ const Navbar = () => {
       </div>
 
       {/* Main Opaque Navigation Bar */}
-      <header className="bg-[#211A19] dark:bg-gray-900 border-b border-[#302625] dark:border-gray-800 transition-colors">
-        <nav className="container mx-auto px-4 lg:px-8">
-          <div className="flex h-20 items-center justify-between gap-4">
+      <header className="bg-[#211A19] dark:bg-gray-900 border-b border-[#302625] dark:border-gray-800 transition-colors w-full max-w-full overflow-hidden">
+        <nav className="container mx-auto px-3 sm:px-4 lg:px-8 max-w-full">
+          <div className="flex h-20 items-center justify-between gap-2 sm:gap-4">
 
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="p-2.5 rounded-xl text-gray-200 lg:hidden hover:bg-white/10"
+              className="p-2 rounded-xl text-gray-200 lg:hidden hover:bg-white/10 flex-shrink-0"
               onClick={() => setOpen(true)}
             >
               <FiMenu className="w-6 h-6 text-[#C6A15B]" />
             </button>
 
             {/* Store Brand Logo */}
-            <Link to={isAdmin ? "/dashboard" : "/"} className="flex items-center gap-3.5 group">
-              <div className="bg-gradient-to-br from-[#650A25] to-[#4A071B] text-[#C6A15B] w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-serif font-black shadow-md border-2 border-[#C6A15B] group-hover:scale-105 transition-transform">
+            <Link to={isAdmin ? "/dashboard" : "/"} className="flex items-center gap-2 sm:gap-3.5 group min-w-0 flex-shrink">
+              <div className="bg-gradient-to-br from-[#650A25] to-[#4A071B] text-[#C6A15B] w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl font-serif font-black shadow-md border-2 border-[#C6A15B] group-hover:scale-105 transition-transform flex-shrink-0">
                 V
               </div>
-              <div>
-                <h1 className="text-2xl font-serif font-extrabold text-[#F7F0E4] leading-tight tracking-tight">
-                  {storeInfo?.name || "Vastraa"} {isAdmin && <span className="text-xs text-[#C6A15B] font-mono font-normal">| Admin Portal</span>}
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl font-serif font-extrabold text-[#F7F0E4] leading-tight tracking-tight truncate">
+                  {storeInfo?.name || "Vastraa"} {isAdmin && <span className="hidden sm:inline text-xs text-[#C6A15B] font-mono font-normal">| Admin Portal</span>}
                 </h1>
-                <p className="text-[10px] font-sans uppercase tracking-widest text-[#C6A15B] font-bold">
+                <p className="text-[9px] sm:text-[10px] font-sans uppercase tracking-widest text-[#C6A15B] font-bold truncate">
                   Online Silk Store
                 </p>
               </div>
@@ -170,7 +170,7 @@ const Navbar = () => {
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
 
               {!isAdmin && (
                 <>
