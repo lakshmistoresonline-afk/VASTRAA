@@ -60,7 +60,7 @@ const Navbar = () => {
         <div className="container mx-auto flex justify-between items-center w-full max-w-full">
           <div className="flex items-center gap-2 font-medium truncate">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></span>
-            <span className="truncate">{isAdmin ? "🔒 Admin Command Center Active" : "✨ 5% Instant Discount on Friend's 1st Order • Earn Rewards as Credits • Free Pan India Delivery"}</span>
+            <span className="truncate">{isAdmin ? "🔒 Admin Command Center Active" : "✨ Refer & Earn: Give 5% OFF to Friends, Earn Saree Credits • Free Pan India Delivery"}</span>
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs flex-shrink-0">
             <span className="flex items-center gap-1 text-amber-200">

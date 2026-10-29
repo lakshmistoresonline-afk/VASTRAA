@@ -260,7 +260,7 @@ function Account() {
                 Two-Sided Referral Program
               </span>
               <h2 className="text-lg font-serif font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>🎁 Refer Friends & Earn Reward Credits</span>
+                <span>🎁 Refer & Earn Saree Rewards</span>
               </h2>
             </div>
 
@@ -289,7 +289,7 @@ function Account() {
             <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
               <span className="text-gray-400 font-bold block text-[10px] uppercase">Your Reward Earnings</span>
               <p className="text-lg font-serif font-extrabold text-indigo-600 dark:text-indigo-400">
-                Earn Rewards as Credits
+                Earn Saree Credits
               </p>
               <p className="text-[10px] text-gray-500">Credited to wallet once friend completes 1st order</p>
             </div>
@@ -297,7 +297,7 @@ function Account() {
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-emerald-50 dark:bg-emerald-950/40 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800/50">
             <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-              💡 Invite friends to shop for handloom sarees. They get <strong className="text-emerald-700 dark:text-emerald-300">5% Instant Discount</strong> on their 1st purchase, and you <strong className="text-emerald-700 dark:text-emerald-300">Earn Rewards as Credits</strong> in your wallet as soon as they complete their 1st order!
+              💡 Invite friends to shop for handloom sarees. They get <strong className="text-emerald-700 dark:text-emerald-300">5% OFF</strong> their 1st purchase, and you <strong className="text-emerald-700 dark:text-emerald-300">Earn Saree Credits</strong> in your wallet as soon as they complete their 1st order!
             </p>
 
             <a
