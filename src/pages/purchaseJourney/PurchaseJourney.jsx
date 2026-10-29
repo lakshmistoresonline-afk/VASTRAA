@@ -75,6 +75,14 @@ function PurchaseJourney() {
           list.push({ id: d.id, ...data });
         }
       });
+
+      // Sort enquiries deterministically by newest timestamp
+      list.sort((a, b) => {
+        const tA = new Date(a.paymentSubmittedAt || a.updatedAt || a.createdAt || 0).getTime();
+        const tB = new Date(b.paymentSubmittedAt || b.updatedAt || b.createdAt || 0).getTime();
+        return tB - tA;
+      });
+
       setMyEnquiries(list);
     } catch (err) {
       console.error("Error fetching customer journey data:", err);
@@ -177,7 +185,13 @@ function PurchaseJourney() {
   let primaryActionRoute = "/allproducts";
   let primaryActionSub = "Explore our 9 Live Silk Saree Catalogues";
 
-  const activeEnq = myEnquiries.length > 0 ? myEnquiries[0] : null;
+  // Select highest priority active enquiry requiring user action
+  const activeEnq = myEnquiries.length > 0 ? (
+    myEnquiries.find(e => e.status === 'QUOTATION_READY') ||
+    myEnquiries.find(e => e.status === 'QUOTATION_ACCEPTED') ||
+    myEnquiries.find(e => e.status === 'PAYMENT_PENDING') ||
+    myEnquiries[0]
+  ) : null;
 
   if (activeEnq) {
     const status = activeEnq.status || 'Pending';

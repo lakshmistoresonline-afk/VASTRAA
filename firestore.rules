@@ -23,13 +23,23 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Users collection: Admin read/write; Owner read/write
+    // Users collection: Admin read/write; Owner read/write (Customers cannot grant themselves admin role)
     match /users/{userId} {
-      allow read, write: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
-      allow create: if isAuthenticated();
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      allow create: if isAuthenticated() && (
+        !('role' in request.resource.data) ||
+        request.resource.data.role != 'admin' ||
+        isAdmin()
+      );
+      allow update: if isAdmin() || (
+        isAuthenticated() &&
+        request.auth.uid == userId &&
+        (!('role' in request.resource.data) || request.resource.data.role == resource.data.role || isAdmin())
+      );
+      allow delete: if isAdmin();
     }
 
-    // Customer enquiries & order review requests: Customer read own; Admin full manage
+    // Customer enquiries & order review requests: Customer read/update own permitted actions; Admin full manage
     match /enquiries/{enquiryId} {
       allow create: if isAuthenticated() || (
         request.resource.data.customerName is string &&
@@ -44,7 +54,14 @@ service cloud.firestore {
           request.auth.token.email == resource.data.email
         )
       );
-      allow update, delete: if isAdmin();
+      // Customers can only update status for quote acceptance or UTR submission without altering quotation totals
+      allow update: if isAdmin() || (
+        isAuthenticated() &&
+        (request.auth.uid == resource.data.customerUid || request.auth.token.email == resource.data.customerEmail) &&
+        request.resource.data.status in ['QUOTATION_ACCEPTED', 'QUOTATION_DECLINED', 'PAYMENT_PENDING'] &&
+        (!('quotationDetails' in request.resource.data) || request.resource.data.quotationDetails == resource.data.quotationDetails)
+      );
+      allow delete: if isAdmin();
     }
 
     // Automated job logs (WhatsApp & Email): Create allowed for app notifications; Read/Manage strictly Admin
