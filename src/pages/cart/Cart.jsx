@@ -14,7 +14,7 @@ import { sendAutomatedOrderEmail } from '../../services/emailService';
 
 function Cart() {
   const context = useContext(myContext);
-  const { setLoading, storeInfo } = context;
+  const { setLoading } = context;
 
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
@@ -60,7 +60,7 @@ function Cart() {
       }
     }
     fetchCustomerProfile();
-  }, [user]);
+  }, [user?.user?.email, user?.user?.uid]);
 
   const cartSubtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
 

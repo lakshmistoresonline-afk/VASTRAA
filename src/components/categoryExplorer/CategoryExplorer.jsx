@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import myContext from '../../context/data/myContext';
 import { CATALOGUES } from '../../data/catalogues';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShield, FiTruck, FiRefreshCw, FiAward } from 'react-icons/fi';
 import SareeImageThumbnail from '../SareeImageThumbnail';
 import extractedData from '../../data/extractedSarees.json';
@@ -9,7 +9,6 @@ import extractedData from '../../data/extractedSarees.json';
 function CategoryExplorer() {
   const context = useContext(myContext);
   const { setFilterType, product } = context;
-  const navigate = useNavigate();
 
   const featuredCatalogues = CATALOGUES.slice(0, 6);
 

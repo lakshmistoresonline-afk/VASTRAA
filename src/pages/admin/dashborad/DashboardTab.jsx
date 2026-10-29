@@ -22,7 +22,6 @@ function DashboardTab() {
     getEnquiriesData,
     getOrderData,
     getUserData,
-    updateEnquiryStatus,
     deleteEnquiry,
     storeInfo,
     loading,
@@ -91,7 +90,7 @@ function DashboardTab() {
       }
     }
     fetchWhatsAppLogs();
-  }, []);
+  }, [getEnquiriesData, getOrderData, getUserData]);
 
   // Auto-scroll Kanban board to latest active stage column
   useEffect(() => {
@@ -1137,7 +1136,6 @@ function DashboardTab() {
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-800 font-medium">
                   {enquiries.map((enq) => {
                     const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
-                    const whatsappMsg = `Hello ${enq.customerName || 'Customer'}, regarding your enquiry for ${enq.sareeTitle || 'Saree'} (ID: ${enq.sareeId}) at Vastraa: `;
                     const isAwaitingPayment = enq.status === 'QUOTATION_ACCEPTED' || enq.status === 'PAYMENT_PENDING';
                     const isConfirmedOrVerified = enq.status === 'PAYMENT_VERIFIED_ORDER_CONFIRMED' || enq.status === 'READY_FOR_DISPATCH';
                     const isDispatched = enq.status === 'DISPATCHED' || enq.trackingDetails;

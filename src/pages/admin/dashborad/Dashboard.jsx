@@ -2,11 +2,11 @@ import React, { useContext } from 'react';
 import myContext from '../../../context/data/myContext';
 import Layout from '../../../components/layout/Layout';
 import DashboardTab from './DashboardTab';
-import { FiGrid, FiImage, FiCheckCircle, FiMessageCircle, FiTrendingUp, FiDollarSign } from 'react-icons/fi';
+import { FiImage, FiMessageCircle, FiTrendingUp, FiDollarSign } from 'react-icons/fi';
 
 function Dashboard() {
   const context = useContext(myContext);
-  const { product, catalogues, syncStats, enquiries, storeInfo } = context;
+  const { product, catalogues, enquiries, storeInfo } = context;
 
   const totalSarees = product ? product.length : 0;
   const totalEnquiries = enquiries ? enquiries.length : 0;

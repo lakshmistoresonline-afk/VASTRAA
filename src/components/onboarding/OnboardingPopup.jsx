@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { FiX, FiCheckCircle, FiArrowRight, FiCompass } from 'react-icons/fi';
+import { FiX, FiArrowRight, FiCompass } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 function OnboardingPopup({ isOpen, onClose }) {

@@ -78,12 +78,6 @@ export async function syncShowroomCatalogues(options = {}) {
           const isRemoved = mockRemovedIds.includes(photo.id);
           const status = isRemoved ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE';
 
-          if (status === 'CONFIRMED_AVAILABLE') {
-            confirmedAvailable++;
-          } else {
-            unavailable++;
-          }
-
           let minP = catalogue.minPrice;
           let maxP = catalogue.maxPrice;
 

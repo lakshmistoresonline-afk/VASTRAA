@@ -1,6 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useState } from 'react'
-import { toast } from 'react-toastify'
 
 export default function Modal({ name, address, pinCode, phoneNumber, setName, setAddress, setPinCode, setPhoneNumber, buyNow }) {
     let [isOpen, setIsOpen] = useState(false)

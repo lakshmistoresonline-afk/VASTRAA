@@ -34,7 +34,7 @@ const MyState = (props) => {
   const [product, setProduct] = useState([]);
   const [syncStats, setSyncStats] = useState(null);
   const [lastVerifiedAt, setLastVerifiedAt] = useState(null);
-  const [catalogues, setCatalogues] = useState(CATALOGUES);
+  const catalogues = CATALOGUES;
 
   // Customer Enquiries and Orders (Admin Data)
   const [enquiries, setEnquiries] = useState([]);
@@ -67,7 +67,7 @@ const MyState = (props) => {
   const getLocalEnquiries = () => {
     try {
       return JSON.parse(localStorage.getItem('vastraa_enquiries') || '[]');
-    } catch (_e) {
+    } catch {
       return [];
     }
   };

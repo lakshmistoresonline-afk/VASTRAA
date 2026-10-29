@@ -74,7 +74,7 @@ function Account() {
       }
     }
     fetchProfile();
-  }, []);
+  }, [authUser?.user?.email, authUser?.user?.uid, setLoading]);
 
   const handleProfileSave = async (e) => {
     e.preventDefault();

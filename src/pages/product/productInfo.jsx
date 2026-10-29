@@ -3,7 +3,7 @@ import Layout from '../../components/layout/Layout';
 import MyContext from '../../context/data/myContext';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart, deleteFromCart } from '../../redux/cartSlice';
+import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
 import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX, FiShare2, FiZoomIn } from 'react-icons/fi';
 import { addDoc, collection } from 'firebase/firestore';
@@ -40,11 +40,6 @@ function ProductInfo() {
   const addCart = (item) => {
     dispatch(addToCart(item));
     toast.success(`Added "${item.title}" to your cart!`);
-  };
-
-  const removeCart = (item) => {
-    dispatch(deleteFromCart(item));
-    toast.info(`Removed "${item.title}" from your cart.`);
   };
 
   const handleQuickEnquirySubmit = async (e) => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../../components/layout/Layout';
 import SingleProductCard from '../../components/productCard/ProductCard';
 import { Link } from 'react-router-dom';
-import { FiHeart, FiShoppingBag, FiArrowRight } from 'react-icons/fi';
+import { FiHeart, FiArrowRight } from 'react-icons/fi';
 
 function Wishlist() {
   const [wishlistItems, setWishlistItems] = useState([]);

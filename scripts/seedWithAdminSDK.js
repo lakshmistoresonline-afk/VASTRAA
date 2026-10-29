@@ -53,7 +53,7 @@ async function runSafeAdminSeeding() {
   try {
     const existingAdmin = await auth.getUserByEmail(adminEmail);
     adminUid = existingAdmin.uid;
-  } catch (_e) {
+  } catch {
     // Admin user lookup notice
   }
 

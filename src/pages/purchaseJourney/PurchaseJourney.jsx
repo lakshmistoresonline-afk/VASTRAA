@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import MyContext from '../../context/data/myContext';
 import Loader from '../../components/loader/Loader';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, getDocsFromServer } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
 import { toast } from 'react-toastify';
-import { FiShoppingBag, FiFileText, FiCheckCircle, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle, FiSearch } from 'react-icons/fi';
+import { FiShoppingBag, FiShield, FiTruck, FiHelpCircle, FiArrowRight, FiCheck, FiX, FiMessageCircle, FiSearch } from 'react-icons/fi';
 import UpiQrCode from '../../components/payment/UpiQrCode';
 import { sendAutomatedWhatsAppNotification, getWhatsAppDispatchUrl } from '../../services/whatsappService';
 
@@ -21,7 +21,6 @@ function PurchaseJourney() {
   const [utrInput, setUtrInput] = useState({});
   const [journeySearchTerm, setJourneySearchTerm] = useState('');
   const [journeyStatusFilter, setJourneyStatusFilter] = useState('');
-  const navigate = useNavigate();
 
   const authUser = JSON.parse(localStorage.getItem('user'));
   const userEmail = authUser?.user?.email?.trim().toLowerCase();
@@ -444,7 +443,6 @@ function PurchaseJourney() {
                 if (journeyStatusFilter === 'DISPATCHED') return s === 'DISPATCHED' || Boolean(enq.trackingDetails);
                 return true;
               }).map((enq) => {
-                const cleanPhone = enq.phone ? enq.phone.replace(/[^0-9]/g, '') : '919746998785';
                 const status = enq.status || 'Pending';
                 const hasTracking = Boolean(enq.trackingDetails);
                 const currentStage = getStageIndex(status, hasTracking);

@@ -8,7 +8,7 @@ import { FiShoppingBag, FiCheckCircle, FiShare2, FiMessageCircle, FiHeart } from
 import SareeImageThumbnail from '../SareeImageThumbnail';
 
 function SingleProductCard({ item }) {
-  const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus, description } = item || {};
+  const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus } = item || {};
   const navigate = useNavigate();
 
   const [isWishlisted, setIsWishlisted] = useState(false);
