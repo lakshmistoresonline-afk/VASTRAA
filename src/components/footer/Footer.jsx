@@ -55,7 +55,7 @@ function Footer() {
               Verified Online Collections Curation
             </h3>
             <p className="text-gray-300 text-xs leading-relaxed">
-              Every saree in our catalogue is handpicked for exquisite fabric lustre, pure zari, and heritage craftsmanship.
+              Every saree in our catalogue is handpicked for exquisite craftsmanship, rich weave textures, and authentic traditional design.
             </p>
             <div className="pt-3 border-t border-[#4A071B] space-y-1">
               <span className="text-[#C6A15B] font-bold block">Handloom Guarantee</span>

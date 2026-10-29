@@ -104,10 +104,10 @@ function CategoryExplorer() {
               Exclusive Member Loyalty Offers
             </span>
             <h3 className="text-2xl font-serif font-extrabold text-white">
-              🎁 Refer Friends & Earn 1% Saree Credits + 5% Friend Welcome Pass
+              🎁 Refer Friends & Earn Saree Rewards + 5% Friend Welcome Pass
             </h3>
             <p className="text-xs text-amber-200/90 leading-relaxed">
-              Invite your friends to shop for handloom sarees! Your friend gets an instant <strong className="text-white">5% OFF Welcome Pass</strong> on their 1st saree order, and you earn <strong className="text-white">1% Order Cashback</strong> credited directly to your Vastraa Saree Wallet.
+              Invite your friends to shop for handloom sarees! Your friend gets an instant <strong className="text-white">5% OFF Welcome Pass</strong> on their 1st saree order, and you earn <strong className="text-white">Saree Reward Credits</strong> in your wallet as soon as they complete their 1st order!
             </p>
           </div>
 

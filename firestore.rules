@@ -13,36 +13,57 @@ service cloud.firestore {
       );
     }
 
-    // Customer availability enquiries: Public creation with shape validation; Private admin read/manage
-    match /enquiries/{enquiryId} {
-      allow create: if request.resource.data.customerName is string &&
-                       request.resource.data.phone is string &&
-                       request.resource.data.customerName.size() > 0 &&
-                       request.resource.data.phone.size() >= 10;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // Quotation requests / Bag review submissions: Public create with shape validation; Private admin read/manage
-    match /quotation_requests/{requestId} {
-      allow create: if request.resource.data.requestReference is string &&
-                       request.resource.data.customerInfo.name is string &&
-                       request.resource.data.customerInfo.phone is string &&
-                       request.resource.data.customerInfo.name.size() > 0 &&
-                       request.resource.data.customerInfo.phone.size() >= 10;
-      allow read, update, delete: if isAdmin();
+    // Helper function to check if request is from an authenticated user
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
     // Users collection: Admin read/write; Owner read/write
     match /users/{userId} {
-      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
-      allow create: if request.auth != null;
+      allow read, write: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      allow create: if isAuthenticated();
     }
 
-    // Orders collection: Public create with valid email; Admin or owner read/delete
-    match /order/{orderId} {
-      allow create: if request.resource.data.email is string;
-      allow read: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.userid);
+    // Customer enquiries & order review requests: Customer read own; Admin full manage
+    match /enquiries/{enquiryId} {
+      allow create: if isAuthenticated() || (
+        request.resource.data.customerName is string &&
+        request.resource.data.phone is string &&
+        request.resource.data.customerName.size() > 0 &&
+        request.resource.data.phone.size() >= 10
+      );
+      allow read: if isAdmin() || (
+        isAuthenticated() && (
+          request.auth.uid == resource.data.customerUid ||
+          request.auth.token.email == resource.data.customerEmail ||
+          request.auth.token.email == resource.data.email
+        )
+      );
       allow update, delete: if isAdmin();
+    }
+
+    // Automated job logs (WhatsApp & Email): Create allowed for app notifications; Read/Manage strictly Admin
+    match /whatsapp_jobs/{jobId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /email_jobs/{jobId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Orders collection: Customer read own; Admin full manage
+    match /orders/{orderId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.customerUid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Products / Storefront inventory data: Public read; Admin write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Catalogue cache / configuration: Public read; Admin write
@@ -51,16 +72,9 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Products / Storefront data: Public read; Admin write
-    match /products/{productId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Catch-all fallback rule: Public read for storefront; Admin write
+    // Strict fallback rule: Admin read/write only for all other documents
     match /{document=**} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
   }
 }

@@ -260,7 +260,7 @@ function Account() {
                 Two-Sided Referral Program
               </span>
               <h2 className="text-lg font-serif font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>🎁 Refer Friends & Earn 1% Saree Credits</span>
+                <span>🎁 Refer Friends & Earn Saree Reward Credits</span>
               </h2>
             </div>
 
@@ -287,22 +287,22 @@ function Account() {
             </div>
 
             <div className="bg-[#FAF7F0] dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E9E1D5] dark:border-gray-700 space-y-1">
-              <span className="text-gray-400 font-bold block text-[10px] uppercase">Your Reward Rate</span>
+              <span className="text-gray-400 font-bold block text-[10px] uppercase">Your Reward Earnings</span>
               <p className="text-lg font-serif font-extrabold text-indigo-600 dark:text-indigo-400">
-                1% Order Cashback
+                Saree Reward Credits
               </p>
-              <p className="text-[10px] text-gray-500">Credited to wallet on order confirmation</p>
+              <p className="text-[10px] text-gray-500">Credited to wallet once friend completes 1st order</p>
             </div>
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-emerald-50 dark:bg-emerald-950/40 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800/50">
             <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-              💡 Invite friends to shop for handloom sarees. They get <strong className="text-emerald-700 dark:text-emerald-300">5% OFF</strong> their 1st purchase, and you earn <strong className="text-emerald-700 dark:text-emerald-300">1% Cashback Credits</strong> in your wallet!
+              💡 Invite friends to shop for handloom sarees. They get <strong className="text-emerald-700 dark:text-emerald-300">5% OFF</strong> their 1st purchase, and you earn <strong className="text-emerald-700 dark:text-emerald-300">Saree Reward Credits</strong> in your wallet as soon as they complete their 1st order!
             </p>
 
             <a
               href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                `✨ Use my referral code ${userProfile.referralCode || ("REF-" + userProfile.whatsapp)} to get 5% Instant Discount on your first Kanchipuram pure silk saree at Vastraa! Shop here: ${window.location.origin}/login?ref=${userProfile.referralCode || ("REF-" + userProfile.whatsapp)}`
+                `✨ Use my referral code ${userProfile.referralCode || ("REF-" + userProfile.whatsapp)} to get 5% Instant Discount on your first silk saree at Vastraa! Shop here: ${window.location.origin}/login?ref=${userProfile.referralCode || ("REF-" + userProfile.whatsapp)}`
               )}`}
               target="_blank"
               rel="noreferrer"
