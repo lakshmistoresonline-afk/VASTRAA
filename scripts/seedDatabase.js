@@ -13,56 +13,28 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const fireDB = getFirestore(app);
 
-async function cleanAndSeedFirestoreData() {
-  console.log("🧹 Starting Firestore Complete Cleanup (Deleting enquiries, whatsapp_jobs, email_jobs & orders)...");
+async function safeSeedFirestoreData() {
+  const isForceClean = process.argv.includes('--force-clean-test-data');
 
-  // 1. Delete all documents from enquiries collection
-  try {
-    const enqSnapshot = await getDocs(collection(fireDB, "enquiries"));
-    for (const d of enqSnapshot.docs) {
-      await deleteDoc(doc(fireDB, "enquiries", d.id));
-      console.log(`Deleted enquiry: ${d.id}`);
+  if (isForceClean) {
+    console.log("⚠️ CAUTION: Executing test data cleanup (--force-clean-test-data enabled)...");
+    try {
+      const enqSnapshot = await getDocs(collection(fireDB, "enquiries"));
+      for (const d of enqSnapshot.docs) {
+        if (d.data().isTestData === true) {
+          await deleteDoc(doc(fireDB, "enquiries", d.id));
+          console.log(`Deleted tagged test enquiry: ${d.id}`);
+        }
+      }
+    } catch (err) {
+      console.warn("Cleanup test enquiries notice:", err.message);
     }
-  } catch (err) {
-    console.warn("Cleanup enquiries notice:", err.message);
+  } else {
+    console.log("🔒 Non-destructive mode active. Production enquiries and customer records are PRESERVED.");
   }
 
-  // 2. Delete all documents from whatsapp_jobs collection
-  try {
-    const jobsSnapshot = await getDocs(collection(fireDB, "whatsapp_jobs"));
-    for (const d of jobsSnapshot.docs) {
-      await deleteDoc(doc(fireDB, "whatsapp_jobs", d.id));
-      console.log(`Deleted whatsapp_job: ${d.id}`);
-    }
-  } catch (err) {
-    console.warn("Cleanup whatsapp_jobs notice:", err.message);
-  }
+  console.log("🌱 Seeding/updating Master Admin & Customer User Details in Firestore ('users' collection)...");
 
-  // 3. Delete all documents from email_jobs collection
-  try {
-    const emailSnap = await getDocs(collection(fireDB, "email_jobs"));
-    for (const d of emailSnap.docs) {
-      await deleteDoc(doc(fireDB, "email_jobs", d.id));
-      console.log(`Deleted email_job: ${d.id}`);
-    }
-  } catch (err) {
-    console.warn("Cleanup email_jobs notice:", err.message);
-  }
-
-  // 4. Delete all documents from orders collection (if any)
-  try {
-    const ordersSnapshot = await getDocs(collection(fireDB, "orders"));
-    for (const d of ordersSnapshot.docs) {
-      await deleteDoc(doc(fireDB, "orders", d.id));
-      console.log(`Deleted order: ${d.id}`);
-    }
-  } catch (err) {
-    console.warn("Cleanup orders notice:", err.message);
-  }
-
-  console.log("🌱 Seeding ONLY Master Admin & Customer User Details in Firestore ('users' collection)...");
-
-  // 5. Seed ONLY Master Admin & Customer User Details
   const usersToSeed = [
     { email: "admin@gmail.com", name: "Vastraa Master Admin", role: "admin", whatsapp: "+919746998785", address: "Kerala, India", pincode: "680001", uid: "admin_uid_001" },
     { email: "test1@gmail.com", name: "Test Customer One", role: "customer", whatsapp: "9746998783", address: "Kerala, India", pincode: "680001", uid: "test_uid_001" },
@@ -87,7 +59,6 @@ async function cleanAndSeedFirestoreData() {
     console.log(`✓ Seeded user profile: ${u.email} (${u.role})`);
   }
 
-  // 6. Seed Catalogue Config Sync Status
   const configRef = doc(fireDB, "catalogue_config", "sync_status");
   await setDoc(configRef, {
     lastVerifiedAt: new Date().toISOString(),
@@ -96,9 +67,9 @@ async function cleanAndSeedFirestoreData() {
   }, { merge: true });
   console.log("✓ Seeded catalogue sync status.");
 
-  console.log("✨ Firestore database seeding completed! All whatsapp_jobs & email_jobs cleaned up.");
+  console.log("✨ Safe non-destructive database seeding completed!");
 }
 
-cleanAndSeedFirestoreData().catch(err => {
+safeSeedFirestoreData().catch(err => {
   console.error("Seeding error:", err);
 });

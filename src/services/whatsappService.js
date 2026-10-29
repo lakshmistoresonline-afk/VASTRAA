@@ -3,7 +3,7 @@ import { fireDB } from '../firebase/FirebaseConfig';
 
 /**
  * Universal Meta WhatsApp Deep Link Generator (wa.me)
- * Preserves pre-filled text payload across PC Web and Mobile Apps
+ * Generates user-initiated WhatsApp deep links across desktop browsers and mobile devices.
  */
 export function getWhatsAppDispatchUrl(phone, text) {
   const clean = phone ? phone.replace(/[^0-9]/g, '') : '919746998785';
@@ -12,51 +12,28 @@ export function getWhatsAppDispatchUrl(phone, text) {
 }
 
 /**
- * 100% Automated WhatsApp Notification Engine
- * Dispatches automated messages to Store Hotline (+91 97469 98785) and Customer registered numbers
+ * Secure WhatsApp Notification Service
+ * Logs notification job status in Firestore and provides user-initiated wa.me deep link fallback.
  */
 export async function sendAutomatedWhatsAppNotification(recipientPhone, messagePayload, options = {}) {
   const cleanPhone = recipientPhone ? recipientPhone.replace(/[^0-9]/g, '') : '919746998785';
+  const waUrl = getWhatsAppDispatchUrl(cleanPhone, messagePayload);
 
-  // 1. Instant Firestore Audit Log Record
+  // 1. Record truthful notification job lifecycle log in Firestore
   try {
     await addDoc(collection(fireDB, 'whatsapp_jobs'), {
       recipientPhone: cleanPhone,
       message: messagePayload,
-      type: options.type || "AUTOMATED_ORDER_DISPATCH",
+      type: options.type || "ORDER_NOTIFICATION",
       customerName: options.customerName || "Customer",
-      status: 'DISPATCHED_AUTOMATED',
+      status: 'USER_INITIATED_WA_LINK',
       createdAt: new Date().toISOString()
     });
   } catch (err) {
-    console.warn("Firestore whatsapp_job record notice:", err.message);
+    console.warn("Firestore whatsapp_job log notice:", err.message);
   }
 
-  // 2. Direct HTTP POST Dispatch to AiSensy / WhatsApp Cloud API Gateway
-  const aiSensyKey = import.meta.env.VITE_AISENSY_API_KEY || "vastraa_live_key_9746998785";
-  try {
-    const apiRes = await fetch("https://backend.aisensy.com/campaign/t1/api/v2", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        apiKey: aiSensyKey,
-        campaignName: options.campaignName || "vastraa_order_alerts",
-        destination: cleanPhone,
-        userName: options.customerName || "Vastraa Customer",
-        templateParams: [messagePayload]
-      })
-    });
-    if (apiRes.ok) {
-      console.log(`✓ Automated WhatsApp HTTP POST delivered to +${cleanPhone}`);
-      return { success: true, method: "AISENSY_HTTP_POST" };
-    }
-  } catch (apiErr) {
-    console.warn("WhatsApp Gateway HTTP POST notice (Fallback to direct API link):", apiErr.message);
-  }
-
-  // 3. Universal Meta WhatsApp Deep Link Trigger (wa.me)
-  const waUrl = getWhatsAppDispatchUrl(cleanPhone, messagePayload);
-
+  // 2. Open pre-allocated user-initiated wa.me deep link
   if (options.autoOpenWindow !== false) {
     try {
       const popup = window.open(waUrl, '_blank');
