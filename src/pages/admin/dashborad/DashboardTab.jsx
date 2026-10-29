@@ -210,15 +210,55 @@ function DashboardTab() {
 
   const handlePublishQuotation = async () => {
     if (!quotationModalEnquiry) return;
+
+    const items = quotationModalEnquiry.cartItems || [{ id: quotationModalEnquiry.sareeId, title: quotationModalEnquiry.sareeTitle, imageUrl: quotationModalEnquiry.imageUrl }];
+
+    // Validate that every available item has a valid numeric price > 0
+    let hasAvailableItem = false;
+    let hasInvalidPrice = false;
+
+    items.forEach((item, idx) => {
+      const isAvail = itemAvailabilities[idx] === true;
+      const rawP = itemPrices[idx];
+      const p = parseFloat(rawP);
+
+      if (isAvail) {
+        hasAvailableItem = true;
+        if (isNaN(p) || p <= 0) {
+          hasInvalidPrice = true;
+        }
+      }
+    });
+
+    if (!hasAvailableItem) {
+      toast.error("Please mark at least one saree as confirmed available before publishing quotation.");
+      return;
+    }
+
+    if (hasInvalidPrice) {
+      toast.error("Please enter a valid positive price (> ₹0) for all confirmed available sarees.");
+      return;
+    }
+
+    const discPct = parseFloat(discountPercentage) || 0;
+    if (isNaN(discPct) || discPct < 0 || discPct > 100) {
+      toast.error("Invalid discount percentage. Must be between 0% and 100%.");
+      return;
+    }
+
+    const shipping = parseFloat(deliveryCharge) || 0;
+    if (isNaN(shipping) || shipping < 0) {
+      toast.error("Invalid delivery charge. Cannot be negative.");
+      return;
+    }
+
     const waPopup = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
 
     try {
-      const items = quotationModalEnquiry.cartItems || [{ id: quotationModalEnquiry.sareeId, title: quotationModalEnquiry.sareeTitle, imageUrl: quotationModalEnquiry.imageUrl }];
-
       let subtotal = 0;
       const evaluatedItems = items.map((item, idx) => {
-        const isAvail = itemAvailabilities[idx] !== false;
-        const price = parseFloat(itemPrices[idx]) || 0;
+        const isAvail = itemAvailabilities[idx] === true;
+        const price = isAvail ? (parseFloat(itemPrices[idx]) || 0) : 0;
         if (isAvail) {
           subtotal += price;
         }
@@ -229,14 +269,14 @@ function DashboardTab() {
         };
       });
 
-      const discPct = parseFloat(discountPercentage) || 0;
       const discountAmt = Math.round((subtotal * discPct) / 100);
-      const shipping = parseFloat(deliveryCharge) || 0;
       const finalPayable = Math.max(0, subtotal - discountAmt + shipping);
+      const nextVersion = (quotationModalEnquiry.quotationDetails?.version || 0) + 1;
 
       const enqRef = doc(fireDB, 'enquiries', quotationModalEnquiry.id);
       await updateDoc(enqRef, {
         status: "QUOTATION_READY",
+        updatedAt: new Date().toISOString(),
         quotationDetails: {
           items: evaluatedItems,
           subtotal,
@@ -246,7 +286,7 @@ function DashboardTab() {
           deliveryCharge: shipping,
           finalPayable,
           publishedAt: new Date().toISOString(),
-          version: 1
+          version: nextVersion
         }
       });
 

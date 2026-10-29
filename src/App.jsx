@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import Home from './pages/home/Home';
 import Cart from './pages/cart/Cart';
 import Account from './pages/account/Account';
@@ -16,6 +16,7 @@ import {
   useLocation
 } from 'react-router-dom';
 import MyState from './context/data/myState';
+import { AuthProvider, AuthContext, useAuth } from './context/auth/AuthContext';
 import AddProduct from './pages/admin/pages/AddProduct';
 import UpdateProduct from './pages/admin/pages/UpdateProduct';
 import { ToastContainer } from 'react-toastify';
@@ -23,6 +24,7 @@ import 'react-toastify/ReactToastify.css';
 import ProductInfo from './pages/product/productInfo';
 import AllProducts from './pages/allProducts/AllProducts';
 import Wishlist from './pages/wishlist/Wishlist';
+import Loader from './components/loader/Loader';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -35,53 +37,55 @@ function ScrollToTop() {
 const App = () => {
   return (
     <MyState>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Mandatory Auth Gate: All Storefront Routes Protected */}
-          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/order" element={<Navigate to="/purchase-journey" replace />} />
-          <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-          <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-          <Route path="/purchase-journey" element={<ProtectedRoute><PurchaseJourney /></ProtectedRoute>} />
-          <Route path="/allproducts" element={<ProtectedRoute><AllProducts /></ProtectedRoute>} />
-          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-          <Route path="/productinfo/:id" element={<ProtectedRoute><ProductInfo /></ProtectedRoute>} />
+      <AuthProvider>
+        <Router>
+          <ScrollToTop />
+          <Routes>
+            {/* Mandatory Auth Gate: All Storefront Routes Protected */}
+            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/order" element={<Navigate to="/purchase-journey" replace />} />
+            <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+            <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+            <Route path="/purchase-journey" element={<ProtectedRoute><PurchaseJourney /></ProtectedRoute>} />
+            <Route path="/allproducts" element={<ProtectedRoute><AllProducts /></ProtectedRoute>} />
+            <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+            <Route path="/productinfo/:id" element={<ProtectedRoute><ProductInfo /></ProtectedRoute>} />
 
-          {/* Authentication Routes */}
-          <Route path="/login" element={<CustomerLogin />} />
-          <Route path="/admin-login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+            {/* Authentication Routes */}
+            <Route path="/login" element={<CustomerLogin />} />
+            <Route path="/admin-login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* Admin Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRouteForAdmin>
-                <Dashboard />
-              </ProtectedRouteForAdmin>
-            }
-          />
-          <Route
-            path="/addproduct"
-            element={
-              <ProtectedRouteForAdmin>
-                <AddProduct />
-              </ProtectedRouteForAdmin>
-            }
-          />
-          <Route
-            path="/updateproduct"
-            element={
-              <ProtectedRouteForAdmin>
-                <UpdateProduct />
-              </ProtectedRouteForAdmin>
-            }
-          />
-          <Route path="/*" element={<NoPage />} />
-        </Routes>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </Router>
+            {/* Admin Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRouteForAdmin>
+                  <Dashboard />
+                </ProtectedRouteForAdmin>
+              }
+            />
+            <Route
+              path="/addproduct"
+              element={
+                <ProtectedRouteForAdmin>
+                  <AddProduct />
+                </ProtectedRouteForAdmin>
+              }
+            />
+            <Route
+              path="/updateproduct"
+              element={
+                <ProtectedRouteForAdmin>
+                  <UpdateProduct />
+                </ProtectedRouteForAdmin>
+              }
+            />
+            <Route path="/*" element={<NoPage />} />
+          </Routes>
+          <ToastContainer position="top-right" autoClose={3000} />
+        </Router>
+      </AuthProvider>
     </MyState>
   );
 };
@@ -89,18 +93,15 @@ const App = () => {
 export default App;
 
 export const ProtectedRoute = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const { currentUser, authLoading, isAdmin } = useAuth();
   const location = useLocation();
-  const allowedAdmins = [
-    "admin@gmail.com",
-    "lakshmistoresonline@gmail.com",
-    "admin@vastraa.com",
-    "admin@lakshmistores.com",
-    "aliali@gmail.com"
-  ];
 
-  if (user) {
-    if (user.user && allowedAdmins.includes(user.user.email) && location.pathname === '/' && !location.search.includes('preview=true')) {
+  if (authLoading) {
+    return <Loader />;
+  }
+
+  if (currentUser) {
+    if (isAdmin && location.pathname === '/' && !location.search.includes('preview=true')) {
       return <Navigate to="/dashboard" replace />;
     }
     return children;
@@ -110,16 +111,13 @@ export const ProtectedRoute = ({ children }) => {
 };
 
 export const ProtectedRouteForAdmin = ({ children }) => {
-  const admin = JSON.parse(localStorage.getItem('user'));
-  const allowedAdmins = [
-    "admin@gmail.com",
-    "lakshmistoresonline@gmail.com",
-    "admin@vastraa.com",
-    "admin@lakshmistores.com",
-    "aliali@gmail.com"
-  ];
+  const { currentUser, authLoading, isAdmin } = useAuth();
 
-  if (admin && admin.user && allowedAdmins.includes(admin.user.email)) {
+  if (authLoading) {
+    return <Loader />;
+  }
+
+  if (currentUser && isAdmin) {
     return children;
   } else {
     return <Navigate to="/admin-login" replace />;
