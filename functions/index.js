@@ -15,7 +15,7 @@ const ALBUM_CONFIGS = [
     code: "A",
     catalogueId: "kanchipuram-pure-wedding-silk",
     categoryName: "Kanchipuram Pure Wedding Silk Sarees",
-    indicativePriceRange: "₹13,500–₹32,500",
+    indicativePriceRange: "₹25,200–₹27,300",
     albums: [
       "https://photos.google.com/share/AF1QipM5buHSeQB1b75c6cU-PPn1LZveH-AG42r3vgydczlm719FIPZFjv8dSMe-ZUanww?key=RF9SUzQ3ODVSNVNVcjJtV0k3X1V1cFo3b1V0bmpR",
       "https://photos.google.com/share/AF1QipOUZyYAexal5fGBenQyi5diXX3W0Q3HpRKWWNgn93Uih-Y3qX1KaMPk7dEn5MiFDw?key=dzUtZVM2Zk5KVWhiVU9fN2x4WGhGZXhCQjcyVktn"
@@ -25,7 +25,7 @@ const ALBUM_CONFIGS = [
     code: "B",
     catalogueId: "kanchipuram-pure-fancy-silk",
     categoryName: "Kanchipuram Pure Fancy Silk Sarees",
-    indicativePriceRange: "₹12,500–₹18,500",
+    indicativePriceRange: "₹17,325–₹18,375",
     albums: [
       "https://photos.google.com/share/AF1QipPpwz18816TyQUvaLH6NgO-w0GTkyguKUZgZ5HFbaDt1P8qIxHJS_qviVzw3-QsaA?key=ZDBRMS1pdTUzYlZEbnZVcno2a18td1VFVEpJTHZn",
       "https://photos.google.com/share/AF1QipN4GWZm3N0lV3OgSTHYOQ-Sn7FNoDxgERKxixJJDCcno-QeXvL9eOIBHhZticqiJA?key=TXdpN2NRdlBmTEZjMmpBdW1TOGNSR2Jua1FGdlR3"
@@ -35,7 +35,7 @@ const ALBUM_CONFIGS = [
     code: "C",
     catalogueId: "kanchipuram-pure-soft-silk",
     categoryName: "Kanchipuram Pure Soft Silk Sarees",
-    indicativePriceRange: "₹7,500–₹13,000",
+    indicativePriceRange: "₹13,125–₹14,175",
     albums: [
       "https://photos.google.com/share/AF1QipPxV-MCf5356GxsAEtqby1kEdXSx2Yh_vihtiovSWjMAMugeJ5vXYU8GlIDktr_Eg?key=Y1Z2YTNaVTQ2TzJEb2p5ZmhSQl9PQ3RrOEY4elVR"
     ]
@@ -44,7 +44,7 @@ const ALBUM_CONFIGS = [
     code: "D",
     catalogueId: "semi-silk-sarees",
     categoryName: "Semi Silk Sarees",
-    indicativePriceRange: "₹4,500–₹6,000",
+    indicativePriceRange: "₹4,635–₹5,665",
     albums: [
       "https://photos.google.com/share/AF1QipOU0_QV4PhyU1j8g1RenSePPwoVSp_hu0beFdrM8t1nSWGAr-tS_325RxNMPB90EA?key=WVlrNFhtVXVGMTBFd0I3TWt1TG1xT3A1b21XVkJ3"
     ]
@@ -53,7 +53,7 @@ const ALBUM_CONFIGS = [
     code: "E",
     catalogueId: "semi-fancy-silk-sarees",
     categoryName: "Semi Fancy Silk Sarees",
-    indicativePriceRange: "₹2,500–₹4,000",
+    indicativePriceRange: "₹3,915–₹4,635",
     albums: [
       "https://photos.google.com/share/AF1QipPpaTrA8zA5d7F5dSfg4tclarHYZEE-B7V_LfZXjqM64zmfpEDSJA3_Kjetk0U7cw?key=bDlHcWhmS0dyWjJNRFV1TWdMbnNHc3JBMkYxNkhn"
     ]
@@ -62,7 +62,7 @@ const ALBUM_CONFIGS = [
     code: "F",
     catalogueId: "semi-kanchipuram-art-silk",
     categoryName: "Semi Kanchipuram Art Silk Sarees",
-    indicativePriceRange: "₹3,500–₹6,000",
+    indicativePriceRange: "₹5,460–₹6,300",
     albums: [
       "https://photos.google.com/share/AF1QipNzEH9t3GatRzJk9nQS4VTM78LipiFDN40W62tXfOuoJKVmLSnY8lgZsVeMlc41OA?key=Z1JIUUVLR0RFOURhWjB1THcxX2gtV1MyOUdJRElR"
     ]
@@ -71,7 +71,7 @@ const ALBUM_CONFIGS = [
     code: "G",
     catalogueId: "butta-art-silk-sarees",
     categoryName: "Butta Art Silk Sarees",
-    indicativePriceRange: "₹2,000–₹3,500",
+    indicativePriceRange: "₹2,370–₹3,040",
     albums: [
       "https://photos.google.com/share/AF1QipNzudmR-0rGGDlLb5eXy4gaxT5EO3FzmPSZAwwo-4Pu0njqKMt8lBkqiVUhkulZuA?key=dzhCRHgwaHI4S1FtUUZNd2FQcHRwZ0R2V2N6RFln"
     ]
@@ -80,7 +80,7 @@ const ALBUM_CONFIGS = [
     code: "H",
     catalogueId: "semi-art-silk-sarees",
     categoryName: "Semi Art Silk Sarees",
-    indicativePriceRange: "₹1,500–₹3,000",
+    indicativePriceRange: "₹1,955–₹2,320",
     albums: [
       "https://photos.google.com/share/AF1QipPGf18s1b4V83e1XUT9Wj6h_2CE7r1HfgCceqCKQTD2GTgvbo_xhOXS5CNiDmiOLg?key=ZkMtODl1blppejBkd0ZzcF9VR2llMjlVR1k4ZUlB"
     ]
@@ -89,7 +89,7 @@ const ALBUM_CONFIGS = [
     code: "I",
     catalogueId: "arts-silk-sarees",
     categoryName: "Arts Silk Sarees",
-    indicativePriceRange: "₹1,500–₹3,000",
+    indicativePriceRange: "₹1,955–₹2,320",
     albums: [
       "https://photos.google.com/share/AF1QipM3AE5rmOtboDdT8_mGkU5luAceaRlZUzZsDmG0JulL0-FWD7JoppsWMuKYpuXP4g?key=TlgzUHM0RkF5YlBlMzBZeTM5Rm5HbDlWdDZXa1J3"
     ]
@@ -97,7 +97,7 @@ const ALBUM_CONFIGS = [
 ];
 
 /**
- * Server-side extraction of Google Photos shared album image URLs (Bypasses CORS completely)
+ * Server-side extraction of Google Photos shared album image URLs
  */
 async function extractGooglePhotosFromAlbum(albumUrl) {
   try {
@@ -188,7 +188,7 @@ async function executeInventorySync() {
 
 /**
  * HTTP Endpoint: /syncGooglePhotos
- * Triggered via HTTP request or mobile dashboard "Refresh Stock Now" button
+ * Synchronizes catalogue stock from Google Photos
  */
 export const syncGooglePhotos = onRequest({ cors: true }, async (req, res) => {
   try {
@@ -216,19 +216,35 @@ export const sendOwnerWhatsAppNotification = onRequest({ cors: true }, async (re
       return res.status(400).json({ success: false, error: "Missing required enquiry details." });
     }
 
+    let authoritativeData = { enquiryId, customerName, phone, sareeId, sareeTitle, categoryName };
+
+    // Fetch authoritative enquiry record from Firestore if enquiryId provided
+    if (enquiryId) {
+      try {
+        const enqDoc = await db.collection("enquiries").doc(enquiryId).get();
+        if (enqDoc.exists) {
+          const e = enqDoc.data();
+          authoritativeData = {
+            enquiryId,
+            customerName: e.customerName || customerName,
+            phone: e.phone || phone,
+            sareeId: e.sareeId || sareeId,
+            sareeTitle: e.sareeTitle || sareeTitle,
+            categoryName: e.categoryName || categoryName
+          };
+        }
+      } catch (fErr) {
+        console.warn("Authoritative enquiry read notice:", fErr.message);
+      }
+    }
+
     const token = process.env.WHATSAPP_API_TOKEN;
     const phoneId = process.env.WHATSAPP_PHONE_ID;
     const recipientPhone = process.env.STORE_RECIPIENT_PHONE || "919746998785";
 
     if (!token || !phoneId) {
-      // Record job as pending setup if tokens are not yet configured in environment secrets
       await db.collection("notification_jobs").add({
-        enquiryId,
-        customerName,
-        phone,
-        sareeId,
-        sareeTitle,
-        categoryName,
+        ...authoritativeData,
         status: "PENDING_SECRETS_SETUP",
         createdAt: new Date().toISOString()
       });
@@ -239,7 +255,6 @@ export const sendOwnerWhatsAppNotification = onRequest({ cors: true }, async (re
       });
     }
 
-    // Call Meta Cloud API when secrets are configured
     const metaResponse = await fetch(`https://graph.facebook.com/v18.0/${phoneId}/messages`, {
       method: "POST",
       headers: {
@@ -251,7 +266,7 @@ export const sendOwnerWhatsAppNotification = onRequest({ cors: true }, async (re
         to: recipientPhone,
         type: "text",
         text: {
-          body: `*NEW SAREE ENQUIRY — VASTRAA*\n\n*CUSTOMER*\nName: ${customerName}\nPhone: ${phone}\n\n*SAREE*\nTitle: ${sareeTitle}\nCode: ${sareeId}\nCategory: ${categoryName}\n\nEnquiry Ref: ${enquiryId || 'NEW'}`
+          body: `*NEW SAREE ENQUIRY — VASTRAA*\n\n*CUSTOMER*\nName: ${authoritativeData.customerName}\nPhone: ${authoritativeData.phone}\n\n*SAREE*\nTitle: ${authoritativeData.sareeTitle}\nCode: ${authoritativeData.sareeId}\nCategory: ${authoritativeData.categoryName}\n\nEnquiry Ref: ${authoritativeData.enquiryId || 'NEW'}`
         }
       })
     });
@@ -259,10 +274,7 @@ export const sendOwnerWhatsAppNotification = onRequest({ cors: true }, async (re
     const metaData = await metaResponse.json();
 
     await db.collection("notification_jobs").add({
-      enquiryId,
-      customerName,
-      phone,
-      sareeId,
+      ...authoritativeData,
       status: metaResponse.ok ? "SENT" : "FAILED",
       metaResponse: metaData,
       createdAt: new Date().toISOString()
