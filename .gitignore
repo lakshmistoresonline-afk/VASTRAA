@@ -7,12 +7,25 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment & Secrets
+.env
+.env.*
+*.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+*firebase-adminsdk*.json
+*serviceAccount*.json
+*.pem
+
+# Dependencies & Build Output
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# IDE & OS Files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -20,5 +33,5 @@ dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
+android/
