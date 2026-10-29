@@ -44,7 +44,7 @@ const HeroSection = () => {
                 to="/account"
                 className="inline-flex items-center gap-1.5 bg-emerald-600/10 dark:bg-emerald-500/20 border border-emerald-600/30 text-emerald-800 dark:text-emerald-300 px-3.5 py-1.5 rounded-full text-xs font-extrabold hover:underline"
               >
-                <span>🎁 5% Friend Welcome Pass • Refer & Earn Saree Rewards</span>
+                <span>🎁 5% Instant Discount on Friend's 1st Order • Earn Rewards as Credits</span>
               </Link>
             </div>
 
