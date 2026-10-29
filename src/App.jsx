@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import Home from './pages/home/Home';
 import Cart from './pages/cart/Cart';
 import Account from './pages/account/Account';
@@ -16,7 +16,7 @@ import {
   useLocation
 } from 'react-router-dom';
 import MyState from './context/data/myState';
-import { AuthProvider, AuthContext, useAuth } from './context/auth/AuthContext';
+import { AuthProvider, useAuth } from './context/auth/AuthContext';
 import AddProduct from './pages/admin/pages/AddProduct';
 import UpdateProduct from './pages/admin/pages/UpdateProduct';
 import { ToastContainer } from 'react-toastify';

@@ -3,7 +3,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
 import { FiRefreshCw, FiSearch, FiTrash2, FiExternalLink, FiMessageCircle, FiFileText, FiCheck, FiX, FiColumns, FiList, FiShield, FiTruck, FiUserCheck, FiTrendingUp, FiEdit3, FiFilter } from 'react-icons/fi';
-import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
+import { doc, updateDoc, addDoc, collection, getDocs } from 'firebase/firestore';
 import { fireDB } from '../../../firebase/FirebaseConfig';
 import SareeImageThumbnail from '../../../components/SareeImageThumbnail';
 import { sendAutomatedWhatsAppNotification, getWhatsAppDispatchUrl } from '../../../services/whatsappService';
@@ -25,7 +25,8 @@ function DashboardTab() {
     updateEnquiryStatus,
     deleteEnquiry,
     storeInfo,
-    loading
+    loading,
+    setLoading
   } = context;
 
   const [searchTerm, setSearchTerm] = useState('');
