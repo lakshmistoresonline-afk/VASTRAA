@@ -19,6 +19,16 @@ function SareeImageThumbnail({ src, alt, id, className, onClick, style, title })
     }
   };
 
+  const handleLoad = (e) => {
+    // Detect Google Photos 403 grey minus error PNG (naturalDimensions <= 100px or error graphic)
+    const img = e.target;
+    if (img && imgSrc.includes('googleusercontent.com')) {
+      if (img.naturalWidth <= 100 || img.naturalHeight <= 100) {
+        handleError();
+      }
+    }
+  };
+
   return (
     <img
       src={imgSrc}
@@ -26,6 +36,7 @@ function SareeImageThumbnail({ src, alt, id, className, onClick, style, title })
       title={title}
       onClick={onClick}
       style={style}
+      onLoad={handleLoad}
       onError={handleError}
       className={className}
       loading="lazy"
