@@ -22,12 +22,23 @@ export const SAFE_SAREE_IMAGES = [
 ].filter(Boolean);
 
 export function getSafeSareeImage(idString) {
-  if (!idString || SAFE_SAREE_IMAGES.length === 0) return SAFE_SAREE_IMAGES[0] || "";
+  if (!idString) return SAFE_SAREE_IMAGES[0] || "";
+
+  // Match item's exact category code and index to guarantee unique saree image fallback
+  const match = idString.match(/^gphoto_([A-I])_(\d+)$/i);
+  if (match) {
+    const cat = match[1].toUpperCase();
+    const idx = parseInt(match[2], 10) - 1;
+    if (extractedData[cat] && extractedData[cat][idx] && extractedData[cat][idx].imageUrl) {
+      return extractedData[cat][idx].imageUrl;
+    }
+  }
+
   let num = 0;
   for (let i = 0; i < idString.length; i++) {
     num = (num * 31 + idString.charCodeAt(i)) >>> 0;
   }
-  return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length];
+  return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || "";
 }
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
@@ -52,8 +63,30 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
 
   let items = [];
 
-  // Match directly by catalogue code if supplied
-  if (catalogueCode) {
+  // Match by share URL first to preserve album slicing for Catalogues with multiple album feeds (Cat A, Cat B)
+  if (albumUrl.includes("AF1QipM5") || albumUrl.includes("pOvLBxk4N3ojCnmp2")) {
+    items = ALBUM_A_PHOTOS.slice(0, 300);
+  } else if (albumUrl.includes("AF1QipOUZy") || albumUrl.includes("7nOr1gWP5mkjwfFu1")) {
+    items = ALBUM_A_PHOTOS.slice(300);
+  } else if (albumUrl.includes("AF1QipPpwz") || albumUrl.includes("pz6VcrL9fSlxekUu2")) {
+    items = ALBUM_B_PHOTOS.slice(0, 300);
+  } else if (albumUrl.includes("AF1QipN4") || albumUrl.includes("1CsVnqOHO82n5FZS2")) {
+    items = ALBUM_B_PHOTOS.slice(300);
+  } else if (albumUrl.includes("AF1QipPx") || albumUrl.includes("jcEruUx6uTlPrugM2")) {
+    items = ALBUM_C_PHOTOS;
+  } else if (albumUrl.includes("AF1QipOU0_")) {
+    items = ALBUM_D_PHOTOS;
+  } else if (albumUrl.includes("AF1QipPpaTrA")) {
+    items = ALBUM_E_PHOTOS;
+  } else if (albumUrl.includes("AF1QipNzEH")) {
+    items = ALBUM_F_PHOTOS;
+  } else if (albumUrl.includes("AF1QipNzudmR")) {
+    items = ALBUM_G_PHOTOS;
+  } else if (albumUrl.includes("AF1QipPGf")) {
+    items = ALBUM_H_PHOTOS;
+  } else if (albumUrl.includes("AF1QipM3AE")) {
+    items = ALBUM_I_PHOTOS;
+  } else if (catalogueCode) {
     switch (catalogueCode.toUpperCase()) {
       case 'A': items = ALBUM_A_PHOTOS; break;
       case 'B': items = ALBUM_B_PHOTOS; break;
@@ -68,32 +101,7 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
         throw new Error(`Diagnostic Error: Unrecognized catalogue code [${catalogueCode}]`);
     }
   } else {
-    // Exact match on share URL
-    if (albumUrl.includes("AF1QipM5") || albumUrl.includes("pOvLBxk4N3ojCnmp2")) {
-      items = ALBUM_A_PHOTOS.slice(0, 300);
-    } else if (albumUrl.includes("AF1QipOUZy") || albumUrl.includes("7nOr1gWP5mkjwfFu1")) {
-      items = ALBUM_A_PHOTOS.slice(300);
-    } else if (albumUrl.includes("AF1QipPpwz") || albumUrl.includes("pz6VcrL9fSlxekUu2")) {
-      items = ALBUM_B_PHOTOS.slice(0, 300);
-    } else if (albumUrl.includes("AF1QipN4") || albumUrl.includes("1CsVnqOHO82n5FZS2")) {
-      items = ALBUM_B_PHOTOS.slice(300);
-    } else if (albumUrl.includes("AF1QipPx") || albumUrl.includes("jcEruUx6uTlPrugM2")) {
-      items = ALBUM_C_PHOTOS;
-    } else if (albumUrl.includes("AF1QipOU0_")) {
-      items = ALBUM_D_PHOTOS;
-    } else if (albumUrl.includes("AF1QipPpaTrA")) {
-      items = ALBUM_E_PHOTOS;
-    } else if (albumUrl.includes("AF1QipNzEH")) {
-      items = ALBUM_F_PHOTOS;
-    } else if (albumUrl.includes("AF1QipNzudmR")) {
-      items = ALBUM_G_PHOTOS;
-    } else if (albumUrl.includes("AF1QipPGf")) {
-      items = ALBUM_H_PHOTOS;
-    } else if (albumUrl.includes("AF1QipM3AE")) {
-      items = ALBUM_I_PHOTOS;
-    } else {
-      throw new Error(`Diagnostic Error: Unrecognized album URL mapping [${albumUrl}]`);
-    }
+    throw new Error(`Diagnostic Error: Unrecognized album URL mapping [${albumUrl}]`);
   }
 
   return items.map(item => ({
