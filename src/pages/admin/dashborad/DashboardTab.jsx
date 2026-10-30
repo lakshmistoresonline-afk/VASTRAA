@@ -69,6 +69,12 @@ function DashboardTab() {
   const [bulkMinPrice, setBulkMinPrice] = useState(24000);
   const [bulkMaxPrice, setBulkMaxPrice] = useState(28000);
 
+  // Referrer Reward Credit Override & Manual Adjustment Modal States
+  const [customReferrerCreditOverride, setCustomReferrerCreditOverride] = useState('');
+  const [manualCreditModalUser, setManualCreditModalUser] = useState(null);
+  const [manualCreditAmount, setManualCreditAmount] = useState(250);
+  const [manualCreditReason, setManualCreditReason] = useState('Promotional Saree Reward Credit');
+
   const kanbanRef = React.useRef(null);
 
   useEffect(() => {
@@ -358,7 +364,8 @@ function DashboardTab() {
 
         if (customerUserDoc && customerUserDoc.referredByCode) {
           const referrerCode = customerUserDoc.referredByCode.trim().toUpperCase();
-          const rewardAmount = Math.max(10, Math.round((finalPayableAmt * 1) / 100)); // 1% of net order value
+          const defaultCalculatedReward = Math.max(10, Math.round((finalPayableAmt * 1) / 100)); // 1% of net order value
+          const rewardAmount = customReferrerCreditOverride !== '' ? parseFloat(customReferrerCreditOverride) || 0 : defaultCalculatedReward;
 
           let referrerDoc = null;
           let referrerDocId = null;
@@ -406,9 +413,48 @@ function DashboardTab() {
 
       toast.success("Payment verified & automated WhatsApp confirmation sent!");
       setPaymentVerifyModalEnquiry(null);
+      setCustomReferrerCreditOverride('');
       if (getEnquiriesData) getEnquiriesData();
     } catch (err) {
       toast.error("Failed to verify payment: " + err.message);
+    }
+  };
+
+  const handleGrantManualCredits = async (e) => {
+    e.preventDefault();
+    if (!manualCreditModalUser) return;
+    const amt = parseFloat(manualCreditAmount);
+    if (isNaN(amt)) {
+      toast.error("Please enter a valid credit amount.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const currentBal = Number(manualCreditModalUser.referralWalletBalance) || 0;
+      const newBal = Math.max(0, currentBal + amt);
+
+      const userDocRef = doc(fireDB, 'users', manualCreditModalUser.id || manualCreditModalUser.uid);
+      await updateDoc(userDocRef, {
+        referralWalletBalance: newBal
+      });
+
+      const cleanPhone = manualCreditModalUser.whatsapp ? manualCreditModalUser.whatsapp.replace(/[^0-9]/g, '') : '919746998785';
+      const msg = `🎁 Hi ${manualCreditModalUser.name || 'Valued Customer'}, Vastraa admin has ${amt >= 0 ? 'added +' : ''}₹${amt} Saree Reward Credits to your wallet (${manualCreditReason}). Your new balance is ₹${newBal}!`;
+
+      await sendAutomatedWhatsAppNotification(cleanPhone, msg, {
+        customerName: manualCreditModalUser.name,
+        type: "MANUAL_CREDIT_ADJUSTMENT",
+        autoOpenWindow: false
+      });
+
+      toast.success(`Updated wallet balance for ${manualCreditModalUser.name} to ₹${newBal}!`);
+      setManualCreditModalUser(null);
+      if (getUserData) getUserData();
+    } catch (err) {
+      toast.error("Failed to adjust wallet balance: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1464,7 +1510,23 @@ function DashboardTab() {
                 </div>
                 <div>
                   <span className="text-gray-500 block">Available Saree Wallet:</span>
-                  <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm">₹{(customerLtvInfo.walletBal || 0).toLocaleString()}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm">₹{(customerLtvInfo.walletBal || 0).toLocaleString()}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setManualCreditModalUser({
+                          name: quotationModalEnquiry.customerName,
+                          email: quotationModalEnquiry.customerEmail || quotationModalEnquiry.email,
+                          whatsapp: quotationModalEnquiry.phone,
+                          referralWalletBalance: customerLtvInfo.walletBal || 0
+                        });
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-0.5 rounded-md font-bold text-[10px] transition-all flex items-center gap-1 shadow-xs"
+                    >
+                      <span>Grant Credits 🎁</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1683,6 +1745,23 @@ function DashboardTab() {
                   {paymentVerifyModalEnquiry.paymentReference || "Awaiting UTR / Cash Transfer"}
                 </span>
               </div>
+            </div>
+
+            <div className="space-y-1 text-xs">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                Referrer Reward Credit Override (₹)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={customReferrerCreditOverride}
+                onChange={(e) => setCustomReferrerCreditOverride(e.target.value)}
+                placeholder={`Default 1%: ₹${Math.max(10, Math.round(((paymentVerifyModalEnquiry.quotationDetails?.finalPayable || 0) * 1) / 100))}`}
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-white font-mono font-bold"
+              />
+              <span className="text-[10px] text-gray-400 block mt-1">
+                Leave empty for default 1% reward (₹{Math.max(10, Math.round(((paymentVerifyModalEnquiry.quotationDetails?.finalPayable || 0) * 1) / 100))}). Or enter custom credit amount.
+              </span>
             </div>
 
             <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
@@ -1916,6 +1995,83 @@ function DashboardTab() {
                 <span>Apply Bulk Price Update</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Admin Wallet Credit Adjustment Modal */}
+      {manualCreditModalUser && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-gray-200 dark:border-gray-800 space-y-6 text-xs">
+            <button
+              onClick={() => setManualCreditModalUser(null)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white p-2"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+
+            <div>
+              <span className="text-xs font-bold text-emerald-600 uppercase flex items-center gap-1">
+                🎁 Grant Manual Wallet Credits
+              </span>
+              <h3 className="font-serif font-bold text-lg text-gray-900 dark:text-white mt-1">
+                Customer: {manualCreditModalUser.name || manualCreditModalUser.email}
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Current Wallet Balance: <strong className="text-emerald-600">₹{manualCreditModalUser.referralWalletBalance || 0}</strong>
+              </p>
+            </div>
+
+            <form onSubmit={handleGrantManualCredits} className="space-y-4">
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Credit Amount Adjustment in ₹ (+ or -):
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={manualCreditAmount}
+                  onChange={(e) => setManualCreditAmount(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-mono font-bold"
+                  placeholder="250"
+                />
+                <span className="text-[10px] text-gray-400 block mt-1">
+                  Use positive number (e.g. 250) to grant credits, or negative number (e.g. -100) to deduct.
+                </span>
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Reason / Adjustment Note:
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={manualCreditReason}
+                  onChange={(e) => setManualCreditReason(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 dark:text-white font-medium"
+                  placeholder="e.g. VIP Wedding Referral Bonus"
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setManualCreditModalUser(null)}
+                  className="px-5 py-3 border text-xs font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all flex items-center gap-2"
+                >
+                  <FiCheck className="w-4 h-4 text-emerald-300" />
+                  <span>Update Wallet Balance</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
