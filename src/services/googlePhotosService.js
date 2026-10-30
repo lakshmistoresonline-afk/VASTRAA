@@ -21,8 +21,13 @@ export const SAFE_SAREE_IMAGES = [
   extractedData.I?.[0]?.imageUrl
 ].filter(Boolean);
 
-export function getSafeSareeImage(idString) {
+export function getSafeSareeImage(idString, failedUrl = '') {
   if (!idString) return SAFE_SAREE_IMAGES[0] || "";
+
+  let num = 0;
+  for (let i = 0; i < idString.length; i++) {
+    num = (num * 31 + idString.charCodeAt(i)) >>> 0;
+  }
 
   // Match item's exact category code and index to guarantee unique saree image fallback
   const match = idString.match(/^gphoto_([A-I])_(\d+)$/i);
@@ -30,15 +35,16 @@ export function getSafeSareeImage(idString) {
     const cat = match[1].toUpperCase();
     const idx = parseInt(match[2], 10) - 1;
     if (extractedData[cat] && extractedData[cat][idx] && extractedData[cat][idx].imageUrl) {
-      return extractedData[cat][idx].imageUrl;
+      const primaryUrl = extractedData[cat][idx].imageUrl;
+      // If primaryUrl failed, fall back to safe pool to prevent infinite loop on broken URL!
+      if (failedUrl && primaryUrl === failedUrl) {
+        return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
+      }
+      return primaryUrl;
     }
   }
 
-  let num = 0;
-  for (let i = 0; i < idString.length; i++) {
-    num = (num * 31 + idString.charCodeAt(i)) >>> 0;
-  }
-  return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || "";
+  return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
 }
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
