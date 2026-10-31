@@ -3,13 +3,16 @@ import myContext from '../../context/data/myContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/auth/AuthContext';
 import { FiShoppingBag, FiCheckCircle, FiShare2, FiMessageCircle, FiHeart } from 'react-icons/fi';
 import SareeImageThumbnail from '../SareeImageThumbnail';
 
 function SingleProductCard({ item }) {
   const { id, title, categoryName, price, imageUrl, catalogueCode, stockStatus } = item || {};
   const navigate = useNavigate();
+  const location = useLocation();
+  const { currentUser } = useAuth();
 
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -39,8 +42,13 @@ function SingleProductCard({ item }) {
   const isInCart = cartItems.some(p => p.id === id);
 
   const addCart = (sareeItem) => {
-    dispatch(addToCart(sareeItem));
-    toast.success(`Added "${sareeItem.title}" to your cart!`);
+    if (currentUser) {
+      dispatch(addToCart(sareeItem));
+      toast.success(`Added "${sareeItem.title}" to your Cart!`);
+    } else {
+      toast.info("Please sign in or create an account to add sarees to your Cart!");
+      navigate("/login", { state: { from: location, itemToAdd: sareeItem } });
+    }
   };
 
   const isConfirmedStock = stockStatus === 'CONFIRMED_AVAILABLE';

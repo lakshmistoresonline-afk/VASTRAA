@@ -41,22 +41,24 @@ const App = () => {
         <Router>
           <ScrollToTop />
           <Routes>
-            {/* Mandatory Auth Gate: All Storefront Routes Protected */}
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            {/* Storefront Guest Browsing Routes (Public) */}
+            <Route path="/" element={<Home />} />
+            <Route path="/allproducts" element={<AllProducts />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/productinfo/:id" element={<ProductInfo />} />
             <Route path="/order" element={<Navigate to="/purchase-journey" replace />} />
+
+            {/* Protected Customer Routes (Action-Gated Checkout) */}
             <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
             <Route path="/purchase-journey" element={<ProtectedRoute><PurchaseJourney /></ProtectedRoute>} />
-            <Route path="/allproducts" element={<ProtectedRoute><AllProducts /></ProtectedRoute>} />
-            <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-            <Route path="/productinfo/:id" element={<ProtectedRoute><ProductInfo /></ProtectedRoute>} />
 
             {/* Authentication Routes */}
             <Route path="/login" element={<CustomerLogin />} />
             <Route path="/admin-login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
-            {/* Admin Routes */}
+            {/* Admin Command Center Routes */}
             <Route
               path="/dashboard"
               element={
@@ -93,17 +95,13 @@ const App = () => {
 export default App;
 
 export const ProtectedRoute = ({ children }) => {
-  const { currentUser, authLoading, isAdmin } = useAuth();
-  const location = useLocation();
+  const { currentUser, authLoading } = useAuth();
 
   if (authLoading) {
     return <Loader />;
   }
 
   if (currentUser) {
-    if (isAdmin && location.pathname === '/' && !location.search.includes('preview=true')) {
-      return <Navigate to="/dashboard" replace />;
-    }
     return children;
   } else {
     return <Navigate to="/login" replace />;

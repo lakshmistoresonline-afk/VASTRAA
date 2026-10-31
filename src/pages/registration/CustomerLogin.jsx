@@ -5,6 +5,8 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswor
 import { auth, fireDB } from '../../firebase/FirebaseConfig';
 import { addDoc, collection } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/cartSlice';
 import Loader from '../../components/loader/Loader';
 import { FiUser, FiLock, FiMail, FiPhone, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 
@@ -21,6 +23,7 @@ function CustomerLogin() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const from = location.state?.from?.pathname || '/';
 
   const handleCustomerAuth = async (e) => {
@@ -90,6 +93,10 @@ function CustomerLogin() {
 
       if (ALLOWED_ADMIN_EMAILS.includes(cleanEmail)) {
         navigate('/dashboard', { replace: true });
+      } else if (location.state?.itemToAdd) {
+        dispatch(addToCart(location.state.itemToAdd));
+        toast.success(`Added "${location.state.itemToAdd.title}" to your Cart!`);
+        navigate('/cart', { replace: true });
       } else {
         navigate(from, { replace: true });
       }

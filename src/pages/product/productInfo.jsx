@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import MyContext from '../../context/data/myContext';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/cartSlice';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/auth/AuthContext';
 import { FiShoppingBag, FiCheckCircle, FiMessageCircle, FiArrowLeft, FiHelpCircle, FiX, FiShare2, FiZoomIn } from 'react-icons/fi';
 import { addDoc, collection } from 'firebase/firestore';
 import { fireDB } from '../../firebase/FirebaseConfig';
@@ -18,6 +19,8 @@ function ProductInfo() {
 
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { currentUser } = useAuth();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
 
@@ -38,8 +41,13 @@ function ProductInfo() {
   const isInCart = saree ? cartItems.some(p => p.id === saree.id) : false;
 
   const addCart = (item) => {
-    dispatch(addToCart(item));
-    toast.success(`Added "${item.title}" to your cart!`);
+    if (currentUser) {
+      dispatch(addToCart(item));
+      toast.success(`Added "${item.title}" to your Cart!`);
+    } else {
+      toast.info("Please sign in or create an account to add sarees to your Cart!");
+      navigate("/login", { state: { from: location, itemToAdd: item } });
+    }
   };
 
   const handleQuickEnquirySubmit = async (e) => {
