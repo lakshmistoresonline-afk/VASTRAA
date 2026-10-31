@@ -1,10 +1,4 @@
-import React, { Fragment, useContext, useState } from 'react';
-import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser, FiShield, FiExternalLink, FiSun, FiMoon, FiHeart, FiSmartphone } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
-import myContext from '../../context/data/myContext';
-import { Dialog, Transition } from '@headlessui/react';
-import { useSelector } from 'react-redux';
-import { usePwaInstall } from '../../hooks/usePwaInstall';
+import { useAuth } from '../../context/auth/AuthContext';
 
 const Navbar = () => {
   const { isStandalone, promptInstall } = usePwaInstall();
@@ -12,16 +6,25 @@ const Navbar = () => {
   const { storeInfo, mode, toggleMode, enquiries } = context;
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { logout: firebaseLogout, isAdmin: authIsAdmin, currentUser } = useAuth();
 
   const user = JSON.parse(localStorage.getItem('user'));
   const cartItems = useSelector((state) => state.cart);
 
-  const logout = () => {
-    localStorage.clear();
-    navigate('/login');
+  const logout = async () => {
+    try {
+      await firebaseLogout();
+      setOpen(false);
+      navigate('/login');
+    } catch (err) {
+      console.error("Logout error:", err);
+      localStorage.clear();
+      navigate('/login');
+    }
   };
 
-  const isAdmin = user?.user?.email === "admin@gmail.com" ||
+  const isAdmin = authIsAdmin ||
+                  user?.user?.email === "admin@gmail.com" ||
                   user?.user?.email === "lakshmistoresonline@gmail.com" ||
                   user?.user?.email === "admin@vastraa.com" ||
                   user?.user?.email === "admin@lakshmistores.com" ||
