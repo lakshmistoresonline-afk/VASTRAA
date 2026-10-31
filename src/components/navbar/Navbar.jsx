@@ -1,3 +1,10 @@
+import React, { Fragment, useContext, useState } from 'react';
+import { FiMessageCircle, FiShoppingBag, FiMenu, FiX, FiCheckCircle, FiUser, FiShield, FiExternalLink, FiSun, FiMoon, FiHeart, FiSmartphone } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import myContext from '../../context/data/myContext';
+import { Dialog, Transition } from '@headlessui/react';
+import { useSelector } from 'react-redux';
+import { usePwaInstall } from '../../hooks/usePwaInstall';
 import { useAuth } from '../../context/auth/AuthContext';
 
 const Navbar = () => {
@@ -52,7 +59,7 @@ const Navbar = () => {
               to="/purchase-journey"
               className="bg-[#C6A15B] text-gray-950 font-extrabold px-3.5 py-1 rounded-xl hover:bg-white transition-colors text-[11px] shadow-sm"
             >
-              Review Quotation →
+              Review Quotation & Proceed →
             </Link>
           </div>
         </div>
@@ -69,90 +76,74 @@ const Navbar = () => {
             <span className="flex items-center gap-1 text-amber-200">
               <FiCheckCircle className="text-emerald-400" /> Verified Online Collections
             </span>
-            <a
-              href={`https://wa.me/${storeInfo?.whatsappFormatted || '919746998785'}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-[#C6A15B] hover:underline flex items-center gap-1 font-bold"
-            >
-              📞 Hotline: {storeInfo?.phone || "+91 97469 98785"}
-            </a>
+            <span className="text-amber-200">
+              Hotline: <strong className="text-white">+91 97469 98785</strong>
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Main Opaque Navigation Bar */}
-      <header className="bg-[#211A19] dark:bg-gray-900 border-b border-[#302625] dark:border-gray-800 transition-colors w-full max-w-full overflow-hidden">
-        <nav className="container mx-auto px-3 sm:px-4 lg:px-8 max-w-full">
-          <div className="flex h-20 items-center justify-between gap-2 sm:gap-4">
+      {/* Main Navigation Bar */}
+      <header className="relative">
+        <nav aria-label="Top" className="container mx-auto px-4 lg:px-8 max-w-7xl">
+          <div className="flex h-20 items-center justify-between">
 
-            {/* Mobile Menu Button */}
-            <button
-              type="button"
-              className="p-2 rounded-xl text-gray-200 lg:hidden hover:bg-white/10 flex-shrink-0"
-              onClick={() => setOpen(true)}
-            >
-              <FiMenu className="w-6 h-6 text-[#C6A15B]" />
-            </button>
+            {/* Left: Mobile Menu Button & Brand Logo */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="p-2 text-[#C6A15B] hover:text-white md:hidden focus:outline-none"
+                onClick={() => setOpen(true)}
+              >
+                <FiMenu className="w-6 h-6" />
+              </button>
 
-            {/* Store Brand Logo */}
-            <Link to={isAdmin ? "/dashboard" : "/"} className="flex items-center gap-2 sm:gap-3.5 group min-w-0 flex-shrink">
-              <div className="bg-gradient-to-br from-[#650A25] to-[#4A071B] text-[#C6A15B] w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl font-serif font-black shadow-md border-2 border-[#C6A15B] group-hover:scale-105 transition-transform flex-shrink-0">
-                V
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-lg sm:text-2xl font-serif font-extrabold text-[#F7F0E4] leading-tight tracking-tight truncate">
-                  {storeInfo?.name || "Vastraa"} {isAdmin && <span className="hidden sm:inline text-xs text-[#C6A15B] font-mono font-normal">| Admin Portal</span>}
-                </h1>
-                <p className="text-[9px] sm:text-[10px] font-sans uppercase tracking-widest text-[#C6A15B] font-bold truncate">
-                  Online Silk Store
-                </p>
-              </div>
-            </Link>
+              <Link to="/" className="flex items-center gap-3 group">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#800020] via-[#650A25] to-[#4A071B] flex items-center justify-center border-2 border-[#C6A15B] shadow-lg group-hover:scale-105 transition-transform">
+                  <span className="font-serif font-black text-amber-200 text-2xl tracking-tighter">V</span>
+                </div>
+                <div>
+                  <span className="font-serif font-extrabold text-xl sm:text-2xl text-amber-100 tracking-wider block leading-tight">
+                    VASTRAA
+                  </span>
+                  <span className="text-[9px] text-[#C6A15B] uppercase tracking-widest block font-medium">
+                    Lakshmi Stores • Thrissur
+                  </span>
+                </div>
+              </Link>
+            </div>
 
             {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center space-x-1 bg-[#302625] dark:bg-gray-800 p-1.5 rounded-2xl border border-[#C6A15B]/30">
-              {isAdmin ? (
+            <div className="hidden md:flex items-center gap-1 lg:gap-2">
+              <Link
+                to="/"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+              >
+                Home
+              </Link>
+              <Link
+                to="/allproducts"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+              >
+                Catalogues (A–I)
+              </Link>
+
+              {user && (
                 <>
-                  <Link
-                    to="/dashboard"
-                    className="px-5 py-2 rounded-xl text-xs font-bold bg-[#650A25] text-amber-100 shadow-md transition-all border border-[#C6A15B]/40 flex items-center gap-1.5"
-                  >
-                    <FiShield className="w-3.5 h-3.5 text-[#C6A15B]" />
-                    <span>Admin Control Panel</span>
-                  </Link>
-                  <Link
-                    to="/?preview=true"
-                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all flex items-center gap-1"
-                  >
-                    <span>View Storefront</span>
-                    <FiExternalLink className="w-3 h-3" />
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/"
-                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    to="/allproducts"
-                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
-                  >
-                    Silk Sarees
-                  </Link>
                   <Link
                     to="/purchase-journey"
-                    className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold text-amber-300 hover:text-amber-100 transition-all flex items-center gap-1 bg-[#4A071B] border border-[#C6A15B]/30"
                   >
-                    Purchase Journey
+                    <span>Purchase Journey</span>
+                    {hasReadyQuotation && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    )}
                   </Link>
-                  {user && (
+
+                  {!isAdmin && (
                     <Link
                       to="/account"
-                      className="px-5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold text-gray-200 hover:text-[#C6A15B] transition-all"
                     >
                       My Account
                     </Link>
@@ -161,7 +152,7 @@ const Navbar = () => {
                     <button
                       type="button"
                       onClick={promptInstall}
-                      className="px-4 py-2 rounded-xl text-xs font-bold text-amber-200 hover:text-white bg-[#4A071B] hover:bg-[#650A25] border border-[#C6A15B]/40 transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold text-amber-200 hover:text-white bg-[#4A071B] hover:bg-[#650A25] border border-[#C6A15B]/40 transition-all flex items-center gap-1.5 cursor-pointer"
                       title="Install Vastraa App on Phone"
                     >
                       <FiSmartphone className="w-3.5 h-3.5 text-[#C6A15B]" />
@@ -234,7 +225,7 @@ const Navbar = () => {
                   </Link>
                   <button
                     onClick={logout}
-                    className="text-xs font-bold text-gray-300 hover:text-rose-400 px-3 py-2 transition-colors"
+                    className="text-xs font-bold text-gray-300 hover:text-rose-400 px-3 py-2 transition-colors cursor-pointer"
                   >
                     Logout
                   </button>
@@ -262,9 +253,9 @@ const Navbar = () => {
         </nav>
       </header>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer Menu */}
       <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setOpen}>
+        <Dialog as="div" className="relative z-50 md:hidden" onClose={setOpen}>
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -287,16 +278,13 @@ const Navbar = () => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-[#211A19] text-white pb-12 shadow-2xl border-r border-[#C6A15B]/30">
-                <div className="flex px-5 pb-4 pt-6 justify-between items-center border-b border-[#302625]">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-[#650A25] text-[#C6A15B] w-10 h-10 rounded-lg flex items-center justify-center font-serif font-bold border border-[#C6A15B]">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-[#211A19] pb-12 shadow-2xl text-white">
+                <div className="flex px-4 pt-5 pb-2 justify-between items-center border-b border-[#C6A15B]/30">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-[#800020] border border-[#C6A15B] flex items-center justify-center font-serif font-black text-amber-200">
                       V
                     </div>
-                    <div>
-                      <span className="text-lg font-serif font-bold text-white block leading-tight">Vastraa</span>
-                      <span className="text-[10px] text-[#C6A15B]">Online Silk Store</span>
-                    </div>
+                    <span className="font-serif font-bold text-lg text-amber-100">VASTRAA</span>
                   </div>
                   <button
                     type="button"
@@ -307,56 +295,71 @@ const Navbar = () => {
                   </button>
                 </div>
 
-                <div className="space-y-3 px-5 py-6 text-sm font-semibold">
-                  {user && (
-                    <div className="bg-[#302625] p-3 rounded-xl border border-[#C6A15B]/30 text-xs text-[#C6A15B] mb-2 truncate">
-                      👤 Signed in as: <span className="font-bold text-white">{user?.user?.email}</span>
-                    </div>
-                  )}
-
-                  {isAdmin ? (
-                    <>
-                      <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#650A25] text-amber-100 font-bold border border-[#C6A15B]/40">
-                        🔑 Admin Control Panel
-                      </Link>
-                      <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                        🏠 View Storefront
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                        🏠 Home
-                      </Link>
-                      <Link to="/allproducts" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                        👗 Silk Sarees
-                      </Link>
-                      <Link to="/cart" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200 flex justify-between items-center">
-                        <span>🛍️ Shopping Cart</span>
-                        <span className="bg-[#C6A15B] text-gray-950 px-2 py-0.5 rounded-full text-xs font-extrabold">{cartItems.length}</span>
-                      </Link>
-                      <Link to="/purchase-journey" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                        🛤️ Purchase Journey
-                      </Link>
-                      {user && (
-                        <Link to="/account" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl hover:bg-white/10 text-gray-200">
-                          👤 My Account / Profile
-                        </Link>
-                      )}
-                    </>
-                  )}
+                <div className="space-y-4 px-4 py-6">
+                  <Link
+                    to="/"
+                    onClick={() => setOpen(false)}
+                    className="block px-3 py-2 rounded-xl text-sm font-bold text-gray-200 hover:bg-[#4A071B]"
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    to="/allproducts"
+                    onClick={() => setOpen(false)}
+                    className="block px-3 py-2 rounded-xl text-sm font-bold text-gray-200 hover:bg-[#4A071B]"
+                  >
+                    Browse 9 Live Catalogues (A–I)
+                  </Link>
 
                   {user ? (
-                    <button onClick={logout} className="block w-full text-left py-2.5 px-3 text-rose-400 font-bold">
-                      🚪 Logout
-                    </button>
-                  ) : (
-                    <div className="pt-2 space-y-2">
-                      <Link to="/login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl bg-[#650A25] text-amber-100 font-bold text-center">
-                        👤 Customer Sign In / Register
+                    <>
+                      <Link
+                        to="/purchase-journey"
+                        onClick={() => setOpen(false)}
+                        className="block px-3 py-2 rounded-xl text-sm font-bold text-amber-300 bg-[#4A071B] border border-[#C6A15B]/30"
+                      >
+                        Purchase Journey Portal
                       </Link>
-                      <Link to="/admin-login" onClick={() => setOpen(false)} className="block py-2.5 px-3 rounded-xl border border-[#C6A15B] text-[#C6A15B] font-bold text-center">
-                        🔑 Admin Portal Sign In
+                      {!isAdmin && (
+                        <Link
+                          to="/account"
+                          onClick={() => setOpen(false)}
+                          className="block px-3 py-2 rounded-xl text-sm font-bold text-gray-200 hover:bg-[#4A071B]"
+                        >
+                          My Account Profile
+                        </Link>
+                      )}
+                      {isAdmin && (
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setOpen(false)}
+                          className="block px-3 py-2 rounded-xl text-sm font-bold text-amber-200 bg-[#800020]"
+                        >
+                          Admin Command Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={logout}
+                        className="w-full text-left px-3 py-2 rounded-xl text-sm font-bold text-rose-400 hover:bg-rose-950/40"
+                      >
+                        Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <div className="pt-4 border-t border-gray-800 space-y-2">
+                      <Link
+                        to="/login"
+                        onClick={() => setOpen(false)}
+                        className="block w-full text-center bg-[#800020] text-amber-100 px-4 py-3 rounded-xl font-bold text-sm shadow-md"
+                      >
+                        Sign In / Register
+                      </Link>
+                      <Link
+                        to="/admin-login"
+                        onClick={() => setOpen(false)}
+                        className="block w-full text-center border border-[#C6A15B] text-[#C6A15B] px-4 py-2.5 rounded-xl font-bold text-xs"
+                      >
+                        Admin Portal
                       </Link>
                     </div>
                   )}
@@ -369,7 +372,5 @@ const Navbar = () => {
     </div>
   );
 };
-
-Navbar.displayName = 'Navbar';
 
 export default Navbar;
