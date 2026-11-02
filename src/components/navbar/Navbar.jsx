@@ -32,9 +32,7 @@ const Navbar = () => {
 
   const isAdmin = authIsAdmin ||
                   user?.user?.email === "admin@gmail.com" ||
-                  user?.user?.email === "lakshmistoresonline@gmail.com" ||
                   user?.user?.email === "admin@vastraa.com" ||
-                  user?.user?.email === "admin@lakshmistores.com" ||
                   user?.user?.email === "aliali@gmail.com";
 
   const userEmail = user?.user?.email?.trim().toLowerCase();
@@ -107,7 +105,7 @@ const Navbar = () => {
                     VASTRAA
                   </span>
                   <span className="text-[9px] text-[#C6A15B] uppercase tracking-widest block font-medium">
-                    Lakshmi Stores • Thrissur
+                    Vastraa • Thrissur
                   </span>
                 </div>
               </Link>

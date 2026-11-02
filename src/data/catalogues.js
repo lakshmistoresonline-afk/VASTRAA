@@ -1,6 +1,6 @@
 /**
- * Vastraa - A Co-Brand of Lakshmi Stores
- * Round West, Thrissur, Kerala, India
+ * Vastraa - Traditional Weaves • Timeless Beauty
+ * Thrissur, Kerala, India
  *
  * Google Photos Catalogue Categories & Price Ranges
  */

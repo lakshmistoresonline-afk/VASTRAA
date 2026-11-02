@@ -35,7 +35,7 @@ service cloud.firestore {
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
         ) ||
         request.auth.token.email == "admin@gmail.com" ||
-        request.auth.token.email == "lakshmistoresonline@gmail.com"
+        request.auth.token.email == "admin@vastraa.com"
       );
     }
 

@@ -1,6 +1,6 @@
 {
-  "name": "lakshmi-stores-functions",
-  "description": "Firebase Cloud Functions for Lakshmi Stores Google Photos Live Sync",
+  "name": "vastraa-functions",
+  "description": "Firebase Cloud Functions for Vastraa Google Photos Live Sync",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",

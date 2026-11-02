@@ -3,7 +3,7 @@ import { fireDB } from '../firebase/FirebaseConfig';
 
 /**
  * Option 2: Automated Email Dispatch Service
- * Sends itemized order notifications directly to lakshmistoresonline@gmail.com via direct FormSubmit HTTP Gateway
+ * Sends itemized order notifications directly to admin@vastraa.com via direct FormSubmit HTTP Gateway
  */
 export async function sendAutomatedOrderEmail(orderData) {
   const { referenceId, customerName, customerEmail, phone, cartItems, cartSubtotal, address, pinCode } = orderData || {};
@@ -36,7 +36,7 @@ STATUS: Pending Review & Quotation
   // 1. Log to Firestore email_jobs collection for audit
   try {
     await addDoc(collection(fireDB, 'email_jobs'), {
-      recipientEmail: "lakshmistoresonline@gmail.com",
+      recipientEmail: "admin@vastraa.com",
       subject: emailSubject,
       body: emailBody,
       referenceId,
@@ -49,9 +49,9 @@ STATUS: Pending Review & Quotation
     console.warn("Firestore email_job log notice:", err.message);
   }
 
-  // 2. Direct HTTP POST Dispatch via FormSubmit Endpoint (Delivers directly to lakshmistoresonline@gmail.com)
+  // 2. Direct HTTP POST Dispatch via FormSubmit Endpoint (Delivers directly to admin@vastraa.com)
   try {
-    const response = await fetch("https://formsubmit.co/ajax/lakshmistoresonline@gmail.com", {
+    const response = await fetch("https://formsubmit.co/ajax/admin@vastraa.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +70,7 @@ STATUS: Pending Review & Quotation
       })
     });
     if (response.ok) {
-      console.log("✓ Automated Email delivered directly to lakshmistoresonline@gmail.com");
+      console.log("✓ Automated Email delivered directly to admin@vastraa.com");
     }
   } catch (e) {
     console.warn("FormSubmit HTTP POST notice:", e.message);

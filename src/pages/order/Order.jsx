@@ -31,9 +31,7 @@ const Order = () => {
       const authUser = JSON.parse(localStorage.getItem('user'));
       const userEmail = authUser?.user?.email?.trim().toLowerCase();
       const isAdmin = userEmail === "admin@gmail.com" ||
-                      userEmail === "lakshmistoresonline@gmail.com" ||
                       userEmail === "admin@vastraa.com" ||
-                      userEmail === "admin@lakshmistores.com" ||
                       userEmail === "aliali@gmail.com";
 
       const filteredList = isAdmin ? list : list.filter(enq => {

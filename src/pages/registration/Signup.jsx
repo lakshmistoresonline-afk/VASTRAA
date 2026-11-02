@@ -57,9 +57,9 @@ function Signup() {
 
         <div className="text-center space-y-2">
           <div className="bg-[#800020] text-[#D4AF37] w-14 h-14 rounded-xl mx-auto flex items-center justify-center text-2xl font-serif font-bold shadow border border-[#D4AF37]">
-            LS
+            V
           </div>
-          <h1 className="text-2xl font-serif font-bold text-white">Lakshmi Stores</h1>
+          <h1 className="text-2xl font-serif font-bold text-white">Vastraa</h1>
           <p className="text-xs text-amber-200/80">Create Customer Account</p>
         </div>
 

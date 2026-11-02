@@ -1,5 +1,5 @@
 # System Architecture Document
-**Lakshmi Stores, Round West, Thrissur, Kerala, India**
+**Vastraa, Thrissur, Kerala, India**
 
 ## 1. High-Level System Architecture
 

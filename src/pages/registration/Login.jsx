@@ -17,9 +17,7 @@ function Login() {
 
   const ALLOWED_ADMIN_EMAILS = [
     "admin@gmail.com",
-    "lakshmistoresonline@gmail.com",
     "admin@vastraa.com",
-    "admin@lakshmistores.com",
     "aliali@gmail.com"
   ];
 

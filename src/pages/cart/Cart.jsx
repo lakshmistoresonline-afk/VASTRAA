@@ -120,7 +120,7 @@ function Cart() {
       setLoading(true);
       await addDoc(collection(fireDB, 'enquiries'), enquiryInfo);
 
-      // Automated Email Alert Dispatch to lakshmistoresonline@gmail.com
+      // Automated Email Alert Dispatch to admin@vastraa.com
       await sendAutomatedOrderEmail({
         referenceId,
         customerName,

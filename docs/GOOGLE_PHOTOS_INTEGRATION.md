@@ -1,9 +1,9 @@
 # Google Photos API Integration Analysis & Technical Report
-**Lakshmi Stores, Round West, Thrissur, Kerala, India**
+**Vastraa, Thrissur, Kerala, India**
 
 ## 1. Executive Summary & Source of Truth
 
-Lakshmi Stores manages its active saree stock directly in Google Photos. Store owners continuously upload photos of newly arrived sarees and remove photos of sold sarees across nine designated Google Photos shared albums.
+The store manages its active saree stock directly in Google Photos. Store owners continuously upload photos of newly arrived sarees and remove photos of sold sarees across nine designated Google Photos shared albums.
 
 This application uses **Google Photos as the single source of truth for product availability**. No competing manual stock management system is created.
 

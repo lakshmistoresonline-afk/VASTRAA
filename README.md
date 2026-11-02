@@ -1,10 +1,10 @@
 # Vastraa — Traditional Weaves • Timeless Beauty
-**A Co-Brand of Lakshmi Stores | Round West, Thrissur, Kerala, India**
+**Thrissur, Kerala, India**
 
 ![Vastraa Banner](public/images/hero/hero-desktop.jpg)
 
 > **Tradition. Elegance. Trust.**  
-> An e-commerce web platform for Vastraa (A Co-Brand of Lakshmi Stores), Thrissur, Kerala. Stock availability is synchronized in real-time with official showroom inventory feeds.
+> An e-commerce web platform for Vastraa, Thrissur, Kerala. Stock availability is synchronized in real-time with official showroom inventory feeds.
 
 ---
 
@@ -92,9 +92,7 @@ npm run build
 
 * **URL**: `/dashboard`
 * **Authorized Administrator Emails**:
-  * `lakshmistoresonline@gmail.com`
   * `admin@vastraa.com`
-  * `admin@lakshmistores.com`
 
 ---
 
@@ -106,4 +104,4 @@ npm run build
 
 ---
 
-© 2026 Vastraa — A Co-Brand of Lakshmi Stores, Round West, Thrissur, Kerala, India.
+© 2026 Vastraa — Thrissur, Kerala, India.
