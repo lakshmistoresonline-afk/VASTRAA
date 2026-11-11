@@ -2,8 +2,8 @@
  * Google Photos Integration Service
  * Vastraa, Thrissur, Kerala
  *
- * Serves Genuine Saree Catalogues A through I with guaranteed permanent high-res saree fabric & weave images.
- * Zero models, zero expired tokens, zero blank placeholders.
+ * Serves Genuine Saree Catalogues A through I.
+ * Strict Policy: No fallback/dummy images. Known broken or missing source images are omitted from the dashboard entirely.
  */
 
 import extractedData from '../data/extractedSarees.json';
@@ -14,7 +14,24 @@ export function getSafeSareeImage(idString, failedUrl = '') {
   return '';
 }
 
-const BROKEN_IDS = new Set();
+// Known expired or broken Google Photos IDs across catalogues that should be omitted from display
+const BROKEN_IDS = new Set([
+  "gphoto_A_013",
+  "gphoto_A_015",
+  "gphoto_A_017",
+  "gphoto_A_018",
+  "gphoto_A_019",
+  "gphoto_A_020",
+  "gphoto_A_021",
+  "gphoto_A_022",
+  "gphoto_A_023",
+  "gphoto_A_033",
+  "gphoto_A_035",
+  "gphoto_A_036",
+  "gphoto_A_053",
+  "gphoto_A_055",
+  "gphoto_A_056"
+]);
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
 const ALBUM_B_PHOTOS = extractedData.B || [];
@@ -28,7 +45,7 @@ const ALBUM_I_PHOTOS = extractedData.I || [];
 
 /**
  * Fetch and resolve photos from shared album URL.
- * All items in extractedSarees.json have been pre-populated with permanent working saree fabric image URLs.
+ * Strictly omits any item whose source image is missing, invalid, or in BROKEN_IDS.
  */
 export async function resolveAlbumPhotos(albumUrl, options = {}) {
   const { forceError = false, mockRemovedIds = [], catalogueCode = null } = options;
@@ -79,8 +96,15 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     throw new Error(`Diagnostic Error: Unrecognized album URL mapping [${albumUrl}]`);
   }
 
+  // Strict check: Omit any broken or invalid items
   return items
-    .filter(item => item && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED'))
+    .filter(item => {
+      if (!item || !item.id || BROKEN_IDS.has(item.id)) return false;
+      if (!item.imageUrl || typeof item.imageUrl !== 'string') return false;
+      const url = item.imageUrl.trim();
+      if (url === '' || url.includes('EXPIRED')) return false;
+      return true;
+    })
     .map(item => ({
       ...item,
       albumUrl,

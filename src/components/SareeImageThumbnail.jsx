@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function SareeImageThumbnail({ src, alt, id, className, onClick, style, title }) {
+function SareeImageThumbnail({ src, alt, id, className, onClick, style, title, onError }) {
   const [imgSrc, setImgSrc] = useState(src || '');
   const [hasError, setHasError] = useState(false);
 
@@ -9,8 +9,13 @@ function SareeImageThumbnail({ src, alt, id, className, onClick, style, title })
     setHasError(false);
   }, [src]);
 
+  const handleImgError = () => {
+    setHasError(true);
+    if (onError) onError();
+  };
+
   if (hasError || !imgSrc) {
-    return null; // Omit card if image is missing or fails to load
+    return null;
   }
 
   return (
@@ -20,7 +25,7 @@ function SareeImageThumbnail({ src, alt, id, className, onClick, style, title })
       title={title}
       onClick={onClick}
       style={style}
-      onError={() => setHasError(true)}
+      onError={handleImgError}
       className={className}
       loading="lazy"
     />
