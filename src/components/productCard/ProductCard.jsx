@@ -17,11 +17,6 @@ function SingleProductCard({ item }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Strict Policy: If source image is missing or fails to load, omit this card entirely from the dashboard
-  if (!imageUrl || imageError) {
-    return null;
-  }
-
   const handleImageError = useCallback(() => {
     setImageError(true);
   }, []);
@@ -30,6 +25,14 @@ function SingleProductCard({ item }) {
     const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
     setIsWishlisted(list.some(p => p.id === id));
   }, [id]);
+
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart);
+
+  // Strict Policy: If source image is missing or fails to load, omit this card entirely from the dashboard
+  if (!imageUrl || imageError) {
+    return null;
+  }
 
   const toggleWishlist = (e) => {
     e.stopPropagation();
@@ -47,8 +50,6 @@ function SingleProductCard({ item }) {
     }
   };
 
-  const dispatch = useDispatch();
-  const cartItems = useSelector((state) => state.cart);
   const isInCart = cartItems.some(p => p.id === id);
 
   const addCart = (sareeItem) => {
