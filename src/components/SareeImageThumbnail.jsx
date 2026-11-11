@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { getSafeSareeImage } from '../services/googlePhotosService';
 
-function SareeImageThumbnail({ src, alt, id, className, onClick, style, title, onError }) {
-  const [imgSrc, setImgSrc] = useState(src || '');
+function SareeImageThumbnail({ src, alt, id, className, onClick, style, title }) {
+  const [imgSrc, setImgSrc] = useState(src || getSafeSareeImage(id));
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    setImgSrc(src || '');
+    setImgSrc(src || getSafeSareeImage(id));
     setHasError(false);
-  }, [src]);
+  }, [src, id]);
 
-  const handleImgError = () => {
-    setHasError(true);
-    if (onError) onError();
+  const handleError = () => {
+    const fallback = getSafeSareeImage(id, imgSrc);
+    if (fallback && fallback !== imgSrc) {
+      setImgSrc(fallback);
+    } else {
+      setHasError(true);
+    }
   };
 
   if (hasError || !imgSrc) {
@@ -25,7 +30,7 @@ function SareeImageThumbnail({ src, alt, id, className, onClick, style, title, o
       title={title}
       onClick={onClick}
       style={style}
-      onError={handleImgError}
+      onError={handleError}
       className={className}
       loading="lazy"
     />

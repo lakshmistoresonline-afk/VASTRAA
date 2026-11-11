@@ -3,7 +3,8 @@
  * Vastraa, Thrissur, Kerala
  *
  * Serves Genuine Saree Catalogues A through I.
- * Strict Policy: No fallback/dummy images. Known broken or missing source images are omitted from the dashboard entirely.
+ * Fallback Policy: If an image fails to load, gracefully falls back to a working genuine saree image from the same catalogue.
+ * Price Consistency: Prices are strictly bound to saree ID and remain invariant.
  */
 
 import extractedData from '../data/extractedSarees.json';
@@ -11,27 +12,27 @@ import extractedData from '../data/extractedSarees.json';
 export const SAFE_SAREE_IMAGES = [];
 
 export function getSafeSareeImage(idString, failedUrl = '') {
-  return '';
+  if (!idString) return '';
+  const match = idString.match(/^gphoto_([A-I])_(\d+)$/i);
+  if (!match) return '';
+
+  const cat = match[1].toUpperCase();
+  const list = extractedData[cat] || [];
+  if (list.length === 0) return '';
+
+  // Filter working items in the same catalogue
+  const workingItems = list.filter(item => item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED') && item.imageUrl !== failedUrl);
+  if (workingItems.length === 0) return list[0]?.imageUrl || '';
+
+  let num = 0;
+  for (let i = 0; i < idString.length; i++) {
+    num = (num * 31 + idString.charCodeAt(i)) >>> 0;
+  }
+
+  return workingItems[num % workingItems.length].imageUrl;
 }
 
-// Known expired or broken Google Photos IDs across catalogues that should be omitted from display
-const BROKEN_IDS = new Set([
-  "gphoto_A_013",
-  "gphoto_A_015",
-  "gphoto_A_017",
-  "gphoto_A_018",
-  "gphoto_A_019",
-  "gphoto_A_020",
-  "gphoto_A_021",
-  "gphoto_A_022",
-  "gphoto_A_023",
-  "gphoto_A_033",
-  "gphoto_A_035",
-  "gphoto_A_036",
-  "gphoto_A_053",
-  "gphoto_A_055",
-  "gphoto_A_056"
-]);
+const BROKEN_IDS = new Set();
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
 const ALBUM_B_PHOTOS = extractedData.B || [];
@@ -45,7 +46,6 @@ const ALBUM_I_PHOTOS = extractedData.I || [];
 
 /**
  * Fetch and resolve photos from shared album URL.
- * Strictly omits any item whose source image is missing, invalid, or in BROKEN_IDS.
  */
 export async function resolveAlbumPhotos(albumUrl, options = {}) {
   const { forceError = false, mockRemovedIds = [], catalogueCode = null } = options;
@@ -96,17 +96,11 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     throw new Error(`Diagnostic Error: Unrecognized album URL mapping [${albumUrl}]`);
   }
 
-  // Strict check: Omit any broken or invalid items
   return items
-    .filter(item => {
-      if (!item || !item.id || BROKEN_IDS.has(item.id)) return false;
-      if (!item.imageUrl || typeof item.imageUrl !== 'string') return false;
-      const url = item.imageUrl.trim();
-      if (url === '' || url.includes('EXPIRED')) return false;
-      return true;
-    })
+    .filter(item => item && typeof item.id === 'string')
     .map(item => ({
       ...item,
+      imageUrl: item.imageUrl && !item.imageUrl.includes('EXPIRED') ? item.imageUrl : getSafeSareeImage(item.id),
       albumUrl,
       stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
     }));

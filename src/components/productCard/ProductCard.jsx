@@ -15,11 +15,6 @@ function SingleProductCard({ item }) {
   const { currentUser } = useAuth();
 
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageError = useCallback(() => {
-    setImageError(true);
-  }, []);
 
   useEffect(() => {
     const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
@@ -80,7 +75,6 @@ function SingleProductCard({ item }) {
           src={imageUrl}
           alt={title}
           onClick={() => navigate(`/productinfo/${id}`)}
-          onError={handleImageError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
         />
 
