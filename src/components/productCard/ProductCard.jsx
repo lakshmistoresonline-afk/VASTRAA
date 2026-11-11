@@ -24,8 +24,8 @@ function SingleProductCard({ item }) {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
 
-  // Strict Policy: If source image is missing or fails to load, omit this card entirely from the dashboard
-  if (!imageUrl || imageError) {
+  // Strict Policy: If source image is missing, do not show that item in the dashboard at all
+  if (!imageUrl) {
     return null;
   }
 
