@@ -15,10 +15,9 @@ function SingleProductCard({ item }) {
   const { currentUser } = useAuth();
 
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [imageError, setImageError] = useState(false);
 
-  // Strict Policy: If source image is missing or fails to load, do not show that item in the dashboard at all
-  if (!imageUrl || imageError) {
+  // Strict Policy: If source image is missing, do not show that item in the dashboard at all
+  if (!imageUrl) {
     return null;
   }
 
@@ -75,7 +74,6 @@ function SingleProductCard({ item }) {
           src={imageUrl}
           alt={title}
           onClick={() => navigate(`/productinfo/${id}`)}
-          onError={() => setImageError(true)}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
         />
 
