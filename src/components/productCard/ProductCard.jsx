@@ -186,8 +186,11 @@ function ProductCard(props) {
     return <SingleProductCard item={props.item} />;
   }
 
+  // Filter out any products with missing, empty, or blank image URLs
+  const validProducts = product ? product.filter(obj => obj && obj.imageUrl && typeof obj.imageUrl === 'string' && obj.imageUrl.trim() !== '' && !obj.imageUrl.includes('EXPIRED')) : [];
+
   // Item B: Multi-Attribute Saree Search (Color, Fabric, Category, ID, Title, Description)
-  const filteredProducts = product ? product.filter((obj) => {
+  const filteredProducts = validProducts.filter((obj) => {
     if (!searchKey) return true;
     const term = searchKey.toLowerCase().trim();
     return (obj.title?.toLowerCase() || '').includes(term) ||
@@ -208,7 +211,7 @@ function ProductCard(props) {
     if (filterPrice === '15000_20000') return p > 15000 && p <= 20000;
     if (filterPrice === 'above_20000') return p > 20000;
     return true;
-  }) : [];
+  });
 
   if (sortPrice === 'asc') {
     filteredProducts.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));

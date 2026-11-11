@@ -118,7 +118,7 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
 }
 
 export async function checkImageUrlValidity(imageUrl) {
-  if (!imageUrl) return false;
-  if (imageUrl.includes("EXPIRED")) return false;
+  if (!imageUrl || typeof imageUrl !== 'string') return false;
+  if (imageUrl.includes("EXPIRED") || imageUrl.trim() === '') return false;
   return true;
 }
