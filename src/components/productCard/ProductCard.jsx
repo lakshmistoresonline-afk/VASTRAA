@@ -15,6 +15,11 @@ function SingleProductCard({ item }) {
   const { currentUser } = useAuth();
 
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
 
   useEffect(() => {
     const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
@@ -24,8 +29,8 @@ function SingleProductCard({ item }) {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
 
-  // Strict Policy: If source image is missing, do not show that item in the dashboard at all
-  if (!imageUrl) {
+  // Strict Policy: If source image is missing or fails to load, do not show that item in the dashboard at all
+  if (!imageUrl || imageError) {
     return null;
   }
 
@@ -75,6 +80,7 @@ function SingleProductCard({ item }) {
           src={imageUrl}
           alt={title}
           onClick={() => navigate(`/productinfo/${id}`)}
+          onError={handleImageError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
         />
 

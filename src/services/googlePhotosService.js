@@ -3,8 +3,7 @@
  * Vastraa, Thrissur, Kerala
  *
  * Serves Genuine Saree Catalogues A through I.
- * Fallback Policy: If an image fails to load, gracefully falls back to a working genuine saree image from the same catalogue.
- * Price Consistency: Prices are strictly bound to saree ID and remain invariant.
+ * Fallback Policy: If a Google Photos CDN token expires (403), SareeImageThumbnail instantly switches to a working genuine saree photo from the exact same catalogue with invariant pricing.
  */
 
 import extractedData from '../data/extractedSarees.json';
@@ -31,8 +30,6 @@ export function getSafeSareeImage(idString, failedUrl = '') {
 
   return workingItems[num % workingItems.length].imageUrl;
 }
-
-const BROKEN_IDS = new Set();
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
 const ALBUM_B_PHOTOS = extractedData.B || [];
