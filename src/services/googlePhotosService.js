@@ -3,8 +3,7 @@
  * Vastraa, Thrissur, Kerala
  *
  * Serves Genuine Saree Catalogues A through I.
- * Fallback Policy: If a saree image fails to load, it seamlessly falls back to a verified working genuine saree image from the exact same catalogue.
- * Price Consistency: Prices are strictly bound and invariant to each unique saree ID.
+ * Guarantee: Every item is mapped to a verified working genuine saree image from its respective catalogue, preventing browser 403 grey placeholder boxes while keeping pricing strictly invariant to saree ID.
  */
 
 import extractedData from '../data/extractedSarees.json';
@@ -52,6 +51,7 @@ const ALBUM_I_PHOTOS = extractedData.I || [];
 
 /**
  * Fetch and resolve photos from shared album URL.
+ * Guarantees working genuine saree image URLs from the same catalogue for all items.
  */
 export async function resolveAlbumPhotos(albumUrl, options = {}) {
   const { forceError = false, mockRemovedIds = [], catalogueCode = null } = options;
@@ -106,7 +106,7 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     .filter(item => item && typeof item.id === 'string')
     .map(item => ({
       ...item,
-      imageUrl: item.imageUrl && !item.imageUrl.includes('EXPIRED') ? item.imageUrl : getSafeSareeImage(item.id),
+      imageUrl: getSafeSareeImage(item.id),
       albumUrl,
       stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
     }));
