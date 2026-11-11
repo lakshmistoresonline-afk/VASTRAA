@@ -75,8 +75,9 @@ export async function syncShowroomCatalogues(options = {}) {
         });
 
         for (const photo of albumPhotos) {
-          if (!photo.imageUrl || typeof photo.imageUrl !== 'string' || photo.imageUrl.trim() === '' || photo.imageUrl.includes('EXPIRED')) {
-            continue; // Automatically skip blank or invalid photos during Google Photos refresh
+          const isValid = await checkImageUrlValidity(photo.imageUrl);
+          if (!isValid) {
+            continue; // Strictly omit any item whose source image fails liveness validation check
           }
 
           const isRemoved = mockRemovedIds.includes(photo.id);
