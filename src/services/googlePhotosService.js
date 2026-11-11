@@ -2,52 +2,16 @@
  * Google Photos Integration Service
  * Vastraa, Thrissur, Kerala
  *
- * Serves Genuine Saree Catalogues A through I extracted directly from
- * Google Photos Shared Albums. ZERO models, pure saree fabric & traditional weaves only.
+ * Serves Genuine Saree Catalogues A through I.
+ * Strict Policy: No fallback/dummy images. If a source image is not present or invalid, the item is omitted from the dashboard entirely.
  */
 
 import extractedData from '../data/extractedSarees.json';
 
-export const SAFE_SAREE_IMAGES = [
-  extractedData.A?.[0]?.imageUrl,
-  extractedData.A?.[1]?.imageUrl,
-  extractedData.A?.[2]?.imageUrl,
-  extractedData.A?.[3]?.imageUrl,
-  extractedData.A?.[4]?.imageUrl,
-  extractedData.B?.[0]?.imageUrl,
-  extractedData.B?.[1]?.imageUrl,
-  extractedData.C?.[0]?.imageUrl,
-  extractedData.D?.[0]?.imageUrl,
-  extractedData.E?.[0]?.imageUrl,
-  extractedData.F?.[0]?.imageUrl,
-  extractedData.G?.[0]?.imageUrl,
-  extractedData.H?.[0]?.imageUrl,
-  extractedData.I?.[0]?.imageUrl
-].filter(Boolean);
+export const SAFE_SAREE_IMAGES = [];
 
 export function getSafeSareeImage(idString, failedUrl = '') {
-  let num = 0;
-  if (idString) {
-    for (let i = 0; i < idString.length; i++) {
-      num = (num * 31 + idString.charCodeAt(i)) >>> 0;
-    }
-  }
-
-  // Match item's exact category code and index to guarantee unique genuine saree image fallback
-  const match = idString?.match(/^gphoto_([A-I])_(\d+)$/i);
-  if (match) {
-    const cat = match[1].toUpperCase();
-    const idx = parseInt(match[2], 10) - 1;
-    if (extractedData[cat] && extractedData[cat][idx] && extractedData[cat][idx].imageUrl) {
-      const primaryUrl = extractedData[cat][idx].imageUrl;
-      if (failedUrl && primaryUrl === failedUrl) {
-        return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
-      }
-      return primaryUrl;
-    }
-  }
-
-  return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
+  return '';
 }
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
@@ -61,7 +25,8 @@ const ALBUM_H_PHOTOS = extractedData.H || [];
 const ALBUM_I_PHOTOS = extractedData.I || [];
 
 /**
- * Fetch and resolve photos from shared album URL
+ * Fetch and resolve photos from shared album URL.
+ * Strictly filters out any item whose source image is missing or invalid (no fallbacks).
  */
 export async function resolveAlbumPhotos(albumUrl, options = {}) {
   const { forceError = false, mockRemovedIds = [], catalogueCode = null } = options;
@@ -112,12 +77,14 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     throw new Error(`Diagnostic Error: Unrecognized album URL mapping [${albumUrl}]`);
   }
 
-  return items.map(item => ({
-    ...item,
-    imageUrl: item.imageUrl || getSafeSareeImage(item.id),
-    albumUrl,
-    stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
-  }));
+  // Strict check: Only include items that have a genuine, valid source image URL
+  return items
+    .filter(item => item && typeof item.imageUrl === 'string' && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED'))
+    .map(item => ({
+      ...item,
+      albumUrl,
+      stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
+    }));
 }
 
 export async function checkImageUrlValidity(imageUrl) {
