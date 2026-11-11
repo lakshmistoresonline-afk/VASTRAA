@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function SareeImageThumbnail({ src, alt, id, className, onClick, style, title }) {
+function SareeImageThumbnail({ src, alt, id, className, onClick, style, title, onError }) {
   const [imgSrc, setImgSrc] = useState(src || '');
   const [hasError, setHasError] = useState(false);
 
@@ -11,17 +11,11 @@ function SareeImageThumbnail({ src, alt, id, className, onClick, style, title })
 
   const handleError = () => {
     setHasError(true);
+    if (onError) onError();
   };
 
   if (hasError || !imgSrc) {
-    return (
-      <div
-        onClick={onClick}
-        className={`${className} flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-semibold p-4 text-center`}
-      >
-        <span>Image Not Available</span>
-      </div>
-    );
+    return null; // Strictly omit card when image is not present or fails to load
   }
 
   return (
