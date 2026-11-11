@@ -2,24 +2,28 @@
  * Google Photos Integration Service
  * Vastraa, Thrissur, Kerala
  *
- * Serves Genuine Saree Catalogues A through I with guaranteed permanent high-res image URLs.
- * ZERO blank placeholders or broken image errors.
+ * Serves Genuine Saree Catalogues A through I extracted directly from
+ * Google Photos Shared Albums. ZERO models, pure saree fabric & traditional weaves only.
  */
 
 import extractedData from '../data/extractedSarees.json';
 
 export const SAFE_SAREE_IMAGES = [
-  "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1617627143415-373359d95f26?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=1024&q=80",
-  "https://images.unsplash.com/photo-1610030474684-25e9dd994cb9?auto=format&fit=crop&w=1024&q=80"
-];
+  extractedData.A?.[0]?.imageUrl,
+  extractedData.A?.[1]?.imageUrl,
+  extractedData.A?.[2]?.imageUrl,
+  extractedData.A?.[3]?.imageUrl,
+  extractedData.A?.[4]?.imageUrl,
+  extractedData.B?.[0]?.imageUrl,
+  extractedData.B?.[1]?.imageUrl,
+  extractedData.C?.[0]?.imageUrl,
+  extractedData.D?.[0]?.imageUrl,
+  extractedData.E?.[0]?.imageUrl,
+  extractedData.F?.[0]?.imageUrl,
+  extractedData.G?.[0]?.imageUrl,
+  extractedData.H?.[0]?.imageUrl,
+  extractedData.I?.[0]?.imageUrl
+].filter(Boolean);
 
 export function getSafeSareeImage(idString, failedUrl = '') {
   let num = 0;
@@ -28,6 +32,21 @@ export function getSafeSareeImage(idString, failedUrl = '') {
       num = (num * 31 + idString.charCodeAt(i)) >>> 0;
     }
   }
+
+  // Match item's exact category code and index to guarantee unique genuine saree image fallback
+  const match = idString?.match(/^gphoto_([A-I])_(\d+)$/i);
+  if (match) {
+    const cat = match[1].toUpperCase();
+    const idx = parseInt(match[2], 10) - 1;
+    if (extractedData[cat] && extractedData[cat][idx] && extractedData[cat][idx].imageUrl) {
+      const primaryUrl = extractedData[cat][idx].imageUrl;
+      if (failedUrl && primaryUrl === failedUrl) {
+        return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
+      }
+      return primaryUrl;
+    }
+  }
+
   return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
 }
 
@@ -42,7 +61,7 @@ const ALBUM_H_PHOTOS = extractedData.H || [];
 const ALBUM_I_PHOTOS = extractedData.I || [];
 
 /**
- * Fetch and resolve photos from shared album URL with guaranteed permanent image URLs
+ * Fetch and resolve photos from shared album URL
  */
 export async function resolveAlbumPhotos(albumUrl, options = {}) {
   const { forceError = false, mockRemovedIds = [], catalogueCode = null } = options;
@@ -95,7 +114,7 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
 
   return items.map(item => ({
     ...item,
-    imageUrl: getSafeSareeImage(item.id),
+    imageUrl: item.imageUrl || getSafeSareeImage(item.id),
     albumUrl,
     stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
   }));
