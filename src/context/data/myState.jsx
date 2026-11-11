@@ -47,14 +47,22 @@ const MyState = (props) => {
   const [filterPrice, setFilterPrice] = useState('');
   const [sortPrice, setSortPrice] = useState(''); // '', 'asc', 'desc'
 
-  // Initial Sync from Google Photos Catalogue
+  // Initial Sync from Google Photos Catalogue & Cloud Function Trigger
   const performCatalogueSync = async (options = {}) => {
     setLoading(true);
     try {
+      // 1. Trigger local sync
       const cache = await syncAllCatalogues(options);
       setProduct(cache.items);
       setSyncStats(cache.syncStats);
       setLastVerifiedAt(cache.lastVerifiedAt);
+
+      // 2. Trigger Cloud Function live Google Photos re-extraction in background
+      try {
+        fetch('https://vastraa-c7da1.web.app/syncGooglePhotos', { method: 'GET' }).catch(() => {});
+      } catch (e) {
+        console.warn("Cloud sync trigger notice:", e.message);
+      }
     } catch (err) {
       console.error("Failed to sync catalogues:", err);
       toast.error("Failed to refresh catalogue feed");
@@ -223,7 +231,29 @@ const MyState = (props) => {
   };
 
   useEffect(() => {
+    // 1. Initial catalogue sync from local dataset
     performCatalogueSync();
+
+    // 2. Real-time subscription to Firestore products collection (updated automatically every 30m by Cloud Function)
+    try {
+      const q = query(collection(fireDB, "products"));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        let firestoreProducts = [];
+        snapshot.forEach((docItem) => {
+          firestoreProducts.push({ id: docItem.id, ...docItem.data() });
+        });
+
+        if (firestoreProducts.length > 0) {
+          setProduct(firestoreProducts);
+        }
+      }, (err) => {
+        console.warn("Firestore products subscription notice:", err.message);
+      });
+
+      return () => unsubscribe();
+    } catch (e) {
+      console.warn("Firestore subscription notice:", e.message);
+    }
   }, []);
 
   return (
