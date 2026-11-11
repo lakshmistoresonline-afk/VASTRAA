@@ -24,7 +24,13 @@ const BROKEN_IDS = new Set([
   "gphoto_A_020",
   "gphoto_A_021",
   "gphoto_A_022",
-  "gphoto_A_023"
+  "gphoto_A_023",
+  "gphoto_A_033",
+  "gphoto_A_035",
+  "gphoto_A_036",
+  "gphoto_A_053",
+  "gphoto_A_055",
+  "gphoto_A_056"
 ]);
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
