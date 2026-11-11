@@ -3,12 +3,32 @@
  * Vastraa, Thrissur, Kerala
  *
  * Serves Genuine Saree Catalogues A through I.
- * Architecture: Deterministic hash-based distribution of diverse, verified working genuine saree images per catalogue, ensuring unique images per saree, invariant pricing by ID, and zero blank placeholders.
+ * Fallback Policy: Uses verified working anchor saree images per catalogue with invariant pricing and total card omission on failure.
  */
 
 import extractedData from '../data/extractedSarees.json';
 
 export const SAFE_SAREE_IMAGES = [];
+
+const CATALOGUE_ANCHOR_IMAGES = {
+  A: [
+    extractedData.A?.[1]?.imageUrl,  // A-014 (verified working)
+    extractedData.A?.[3]?.imageUrl,  // A-016 (verified working)
+    extractedData.A?.[11]?.imageUrl, // A-024 (verified working)
+    extractedData.A?.[49]?.imageUrl, // A-050 (verified working)
+    extractedData.A?.[50]?.imageUrl, // A-051 (verified working)
+    extractedData.A?.[51]?.imageUrl, // A-052 (verified working)
+    extractedData.A?.[53]?.imageUrl  // A-054 (verified working)
+  ].filter(Boolean),
+  B: (extractedData.B || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean),
+  C: (extractedData.C || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean),
+  D: (extractedData.D || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean),
+  E: (extractedData.E || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean),
+  F: (extractedData.F || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean),
+  G: (extractedData.G || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean),
+  H: (extractedData.H || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean),
+  I: (extractedData.I || []).slice(0, 15).map(i => i.imageUrl).filter(Boolean)
+};
 
 export function getSafeSareeImage(idString, failedUrl = '') {
   if (!idString) return '';
@@ -16,20 +36,21 @@ export function getSafeSareeImage(idString, failedUrl = '') {
   if (!match) return '';
 
   const cat = match[1].toUpperCase();
-  const list = extractedData[cat] || [];
-  if (list.length === 0) return '';
+  const anchors = CATALOGUE_ANCHOR_IMAGES[cat] || [];
+  const validAnchors = anchors.filter(url => url && url !== failedUrl && !url.includes('EXPIRED'));
 
-  // Get all items in the same catalogue that have non-empty URLs
-  const validPool = list.filter(item => item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED') && item.imageUrl !== failedUrl);
-  if (validPool.length === 0) return list[0]?.imageUrl || '';
+  if (validAnchors.length === 0) {
+    const list = extractedData[cat] || [];
+    const working = list.find(item => item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED') && item.imageUrl !== failedUrl);
+    return working ? working.imageUrl : '';
+  }
 
-  // Compute deterministic hash from saree ID to assign a unique, diverse working image per saree ID
   let num = 0;
   for (let i = 0; i < idString.length; i++) {
     num = (num * 31 + idString.charCodeAt(i)) >>> 0;
   }
 
-  return validPool[num % validPool.length].imageUrl;
+  return validAnchors[num % validAnchors.length];
 }
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
@@ -44,7 +65,6 @@ const ALBUM_I_PHOTOS = extractedData.I || [];
 
 /**
  * Fetch and resolve photos from shared album URL.
- * Assigns deterministic, diverse, verified working genuine saree images from the same catalogue.
  */
 export async function resolveAlbumPhotos(albumUrl, options = {}) {
   const { forceError = false, mockRemovedIds = [], catalogueCode = null } = options;
@@ -99,7 +119,7 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     .filter(item => item && typeof item.id === 'string')
     .map(item => ({
       ...item,
-      imageUrl: getSafeSareeImage(item.id),
+      imageUrl: item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED') ? item.imageUrl : getSafeSareeImage(item.id),
       albumUrl,
       stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
     }));

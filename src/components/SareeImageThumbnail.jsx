@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getSafeSareeImage } from '../services/googlePhotosService';
 
-function SareeImageThumbnail({ src, alt, id, className, onClick, style, title }) {
+function SareeImageThumbnail({ src, alt, id, className, onClick, style, title, onError }) {
   const [imgSrc, setImgSrc] = useState(src || getSafeSareeImage(id));
   const [hasError, setHasError] = useState(false);
 
@@ -16,6 +16,7 @@ function SareeImageThumbnail({ src, alt, id, className, onClick, style, title })
       setImgSrc(fallback);
     } else {
       setHasError(true);
+      if (onError) onError();
     }
   };
 
