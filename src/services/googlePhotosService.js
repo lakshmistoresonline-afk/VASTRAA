@@ -3,24 +3,13 @@
  * Vastraa, Thrissur, Kerala
  *
  * Serves Genuine Saree Catalogues A through I.
- * Guarantee: Every item is mapped to a verified working genuine saree image from its respective catalogue, preventing browser 403 grey placeholder boxes while keeping pricing strictly invariant to saree ID.
+ * Fallback Policy: Uses each saree's original unique image when present; if missing/expired, gracefully falls back to a diverse working genuine saree image from the exact same catalogue.
+ * Price Consistency: Prices are strictly bound and invariant to each unique saree ID.
  */
 
 import extractedData from '../data/extractedSarees.json';
 
 export const SAFE_SAREE_IMAGES = [];
-
-const CATALOGUE_ANCHOR_IMAGES = {
-  A: extractedData.A?.[1]?.imageUrl || extractedData.A?.[0]?.imageUrl, // Verified working Kanchipuram wedding silk saree
-  B: extractedData.B?.[0]?.imageUrl,
-  C: extractedData.C?.[0]?.imageUrl,
-  D: extractedData.D?.[0]?.imageUrl,
-  E: extractedData.E?.[0]?.imageUrl,
-  F: extractedData.F?.[0]?.imageUrl,
-  G: extractedData.G?.[0]?.imageUrl,
-  H: extractedData.H?.[0]?.imageUrl,
-  I: extractedData.I?.[0]?.imageUrl
-};
 
 export function getSafeSareeImage(idString, failedUrl = '') {
   if (!idString) return '';
@@ -28,15 +17,19 @@ export function getSafeSareeImage(idString, failedUrl = '') {
   if (!match) return '';
 
   const cat = match[1].toUpperCase();
-  const anchor = CATALOGUE_ANCHOR_IMAGES[cat];
-  if (anchor && anchor !== failedUrl && !anchor.includes('EXPIRED')) {
-    return anchor;
+  const list = extractedData[cat] || [];
+  if (list.length === 0) return '';
+
+  // Filter diverse working items in the same catalogue (excluding failedUrl)
+  const workingItems = list.filter(item => item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED') && item.imageUrl !== failedUrl);
+  if (workingItems.length === 0) return list[0]?.imageUrl || '';
+
+  let num = 0;
+  for (let i = 0; i < idString.length; i++) {
+    num = (num * 31 + idString.charCodeAt(i)) >>> 0;
   }
 
-  // Fallback to any working item in the same catalogue
-  const list = extractedData[cat] || [];
-  const working = list.find(item => item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED') && item.imageUrl !== failedUrl);
-  return working ? working.imageUrl : (list[0]?.imageUrl || '');
+  return workingItems[num % workingItems.length].imageUrl;
 }
 
 const ALBUM_A_PHOTOS = extractedData.A || [];
@@ -51,7 +44,7 @@ const ALBUM_I_PHOTOS = extractedData.I || [];
 
 /**
  * Fetch and resolve photos from shared album URL.
- * Guarantees working genuine saree image URLs from the same catalogue for all items.
+ * Preserves each saree's original unique image when valid; falls back to intra-catalogue working saree photo only when necessary.
  */
 export async function resolveAlbumPhotos(albumUrl, options = {}) {
   const { forceError = false, mockRemovedIds = [], catalogueCode = null } = options;
@@ -106,7 +99,7 @@ export async function resolveAlbumPhotos(albumUrl, options = {}) {
     .filter(item => item && typeof item.id === 'string')
     .map(item => ({
       ...item,
-      imageUrl: getSafeSareeImage(item.id),
+      imageUrl: item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.includes('EXPIRED') ? item.imageUrl : getSafeSareeImage(item.id),
       albumUrl,
       stockStatus: mockRemovedIds.includes(item.id) ? 'UNAVAILABLE' : 'CONFIRMED_AVAILABLE'
     }));
