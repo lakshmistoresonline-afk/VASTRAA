@@ -10,37 +10,35 @@
 import extractedData from '../data/extractedSarees.json';
 
 export const SAFE_SAREE_IMAGES = [
+  "https://images.unsplash.com/photo-1610030469883-98e550d6193c?auto=format&fit=crop&w=1024&q=80",
+  "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1024&q=80",
+  "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1024&q=80",
+  "https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=1024&q=80",
+  "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=1024&q=80",
   extractedData.A?.[0]?.imageUrl,
-  extractedData.B?.[0]?.imageUrl,
-  extractedData.C?.[0]?.imageUrl,
-  extractedData.D?.[0]?.imageUrl,
-  extractedData.E?.[0]?.imageUrl,
-  extractedData.F?.[0]?.imageUrl,
-  extractedData.G?.[0]?.imageUrl,
-  extractedData.H?.[0]?.imageUrl,
-  extractedData.I?.[0]?.imageUrl
+  extractedData.B?.[0]?.imageUrl
 ].filter(Boolean);
 
 export function getSafeSareeImage(idString, failedUrl = '') {
-  if (!idString) return SAFE_SAREE_IMAGES[0] || "";
-
   let num = 0;
-  for (let i = 0; i < idString.length; i++) {
-    num = (num * 31 + idString.charCodeAt(i)) >>> 0;
+  if (idString) {
+    for (let i = 0; i < idString.length; i++) {
+      num = (num * 31 + idString.charCodeAt(i)) >>> 0;
+    }
+  }
+
+  // If a URL failed to load, immediately return a guaranteed permanent Unsplash saree image to prevent blank placeholder
+  if (failedUrl) {
+    return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
   }
 
   // Match item's exact category code and index to guarantee unique saree image fallback
-  const match = idString.match(/^gphoto_([A-I])_(\d+)$/i);
+  const match = idString?.match(/^gphoto_([A-I])_(\d+)$/i);
   if (match) {
     const cat = match[1].toUpperCase();
     const idx = parseInt(match[2], 10) - 1;
     if (extractedData[cat] && extractedData[cat][idx] && extractedData[cat][idx].imageUrl) {
-      const primaryUrl = extractedData[cat][idx].imageUrl;
-      // If primaryUrl failed, fall back to safe pool to prevent infinite loop on broken URL!
-      if (failedUrl && primaryUrl === failedUrl) {
-        return SAFE_SAREE_IMAGES[num % SAFE_SAREE_IMAGES.length] || SAFE_SAREE_IMAGES[0];
-      }
-      return primaryUrl;
+      return extractedData[cat][idx].imageUrl;
     }
   }
 
